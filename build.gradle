@@ -1,0 +1,255 @@
+import org.gradle.internal.os.OperatingSystem
+
+import java.nio.file.Files
+import java.nio.file.Paths;
+
+apply plugin: 'java'
+
+apply from: 'config.gradle'
+
+def date = new Date()
+def formattedDate = date.format('yyMMdd')
+ext.version = "3.4.3"
+ext.libVersion = "${ext.version.replace(".", "")}"
+
+ext.licenseFile = file("$rootDir/opencv/LICENSE")
+
+def outputsFolder = file("$buildDir/allOutputs")
+
+task copyAllOutputs(type: Copy) {
+    destinationDir outputsFolder
+}
+
+build.dependsOn copyAllOutputs
+
+ext.addTaskToCopyAllOutputs = { task ->
+    copyAllOutputs.dependsOn task
+    copyAllOutputs.inputs.file task.archivePath
+    copyAllOutputs.from task.archivePath
+}
+
+ext {
+    defaultCmakeArgs = [
+            '-DWITH_CUDA=OFF',
+            '-DWITH_IPP=OFF',
+            '-DWITH_OPENCL=OFF',
+            '-DWITH_FFMPEG=OFF',
+            '-DWITH_OPENEXR=OFF',
+            '-DWITH_GSTREAMER=OFF',
+            '-DWITH_GTK=OFF',
+            '-DWITH_1394=OFF',
+            '-DWITH_JASPER=OFF',
+            '-DWITH_TIFF=OFF',
+            '-DBUILD_JPEG=ON',
+            '-DBUILD_PNG=ON',
+            '-DBUILD_ZLIB=ON',
+            '-DBUILD_TESTS=OFF',
+            '-DPython_ADDITIONAL_VERSIONS=3.5',
+            '-DWITH_WEBP=OFF',
+            '-DBUILD_JAVA=ON',
+    ]
+}
+
+def getPlatform() {
+    def platform
+    def os_name = System.getProperty("os.name")
+    def os_arch = System.getProperty("os.arch")
+
+    if (os_arch == 'amd64') {
+        os_arch = 'x86_64'
+    } else if (os_arch == 'i386') {
+        os_arch = 'x86'
+    }
+
+    if (OperatingSystem.current().isWindows()) {
+        platform = "windows-${os_arch}"
+    } else if (OperatingSystem.current().isLinux()) {
+        platform = "linux-${os_arch}"
+    } else if (OperatingSystem.current().isMacOsX()) {
+        platform = "osx-${os_arch}"
+    } else {
+        platform = "${os_name}-${os_arch}"
+    }
+    return platform
+}
+
+def getOutputFormat(platform) {
+    if (platform == "linux-athena") {
+        return "elf32-littlearm"
+    } else if (platform == "linux-x86") {
+        return "elf32-i386"
+    } else if (platform == "linux-x86_64") {
+        return "elf64-x86-64"
+    } else if (platform == "osx-x86") {
+        return ""
+    } else if (platform == "osx-x86_64") {
+        return ""
+    } else if (platform == "windows-x86") {
+        return "pe-i386"
+    } else if (platform == "windows-x86_64") {
+        return "pe-x86-64"
+    } else {
+        return ""
+    }
+}
+
+def getPlatformPath(platform) {
+    if (platform == "linux-athena") {
+        return "linux/athena"
+    } else if (platform == "linux-x86") {
+        return "linux/x86"
+    } else if (platform == "linux-x86_64") {
+        return "linux/x86-64"
+    } else if (platform == "osx-x86") {
+        return "osx/x86"
+    } else if (platform == "osx-x86_64") {
+        return "osx/x86-64"
+    } else if (platform == "windows-x86") {
+        return "windows/x86"
+    } else if (platform == "windows-x86_64") {
+        return "windows/x86-64"
+    } else {
+        return ""
+    }
+}
+
+// Determine what repo to publish to. Default is development. Valid options are development, beta, stable, and release
+if (!project.hasProperty('repo')) {
+    allprojects {
+        ext.repo = 'development'
+    }
+}
+
+if (!project.hasProperty('platform')) {
+    println "No 'platform' property specified; using the build system's platform"
+    ext.platform = getPlatform()
+}
+ext.platformPath = getPlatformPath(project.platform)
+
+if (!project.hasProperty('cmakePath')) {
+    ext.cmakePath = "cmake"
+}
+
+println "Building for platform ${project.platform}"
+
+ext.rootPath = Paths.get(projectDir.canonicalPath).resolve('opencv')
+ext.cmakeBuildDirectory = Paths.get(projectDir.canonicalPath).resolve('build').resolve(project.platform)
+ext.cmakeBuildSharedDirectory = Paths.get(projectDir.canonicalPath).resolve('buildShared').resolve(project.platform)
+ext.jarName = "opencv-${project.libVersion}.jar"
+ext.pathToOpenCVJar = ext.cmakeBuildDirectory.resolve("bin").resolve(ext.jarName)
+
+if (project.platform.startsWith('windows')) {
+    def gen = "Visual Studio 15 2017"
+    if (project.platform == "windows-x86_64") {
+        gen += " Win64"
+    }
+    ext.cmakeGenerator = gen
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+['': project.cmakeBuildDirectory,
+ 'Shared': project.cmakeBuildSharedDirectory
+].each{ buildType, buildDirectory ->
+    project.tasks.create('cmake' + buildType, Exec) {
+        inputs.dir 'opencv'
+
+        if (!Files.exists(buildDirectory)) {
+            Files.createDirectories(buildDirectory)
+        }
+
+        def cmakeArgs = {
+            def toolchain = null
+            def args = defaultCmakeArgs
+            if (buildType == "Shared") {
+                args = args + '-DBUILD_SHARED_LIBS=ON'
+            } else {
+                args = args + '-DBUILD_SHARED_LIBS=OFF'
+            }
+            if (hasProperty('toolchain')) {
+                toolchain = project.toolchain
+            }
+            if (project.platform == "linux-athena") {
+                toolchain = projectDir.canonicalPath + "/arm-frc-gnueabi.toolchain.cmake"
+                println "Using toolchain '${toolchain}'"
+                return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
+                    '-DCMAKE_MAKE_PROGRAM=make' +
+                    '-DENABLE_NEON=ON' +
+                    '-DENABLE_VFPV3=ON' +
+                    "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
+            }
+            if (toolchain) {
+                println "Using toolchain '${toolchain}'"
+                return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}"
+            } else {
+                println "No toolchain specified"
+                return args
+            }
+        }
+
+        workingDir buildDirectory.toString()
+
+        if (project.platform.startsWith("windows")) {
+            executable project.cmakePath
+            args = cmakeArgs() + ['-G', '"' + project.cmakeGenerator + '"', project.rootPath]
+            outputs.file buildDirectory.resolve("OpenCV.sln").toFile()
+        } else {
+            executable project.cmakePath
+            args = cmakeArgs() + [project.rootPath]
+            outputs.file buildDirectory.resolve("Makefile").toFile()
+        }
+    }
+
+    project.tasks.create('make' + buildType, Exec) {
+        dependsOn 'cmake' + buildType
+        workingDir buildDirectory.toString()
+        def processors = Runtime.runtime.availableProcessors()
+
+        if (project.platform.startsWith("windows")) {
+            executable 'cmd'
+            args = ['/c', 'msbuild', '/m', 'OpenCV.sln', '/t:Build', '/p:Configuration=Release', '/v:m']
+            inputs.file buildDirectory.resolve("OpenCV.sln").toFile()
+        } else {
+            executable 'make'
+            args = ["-j${processors}"]
+            inputs.file buildDirectory.resolve("Makefile").toFile()
+        }
+
+        outputs.file buildDirectory.resolve("bin").resolve(project.jarName).toFile()
+    }
+
+    if (buildType != "Shared") {
+        if (project.platform.startsWith('windows')) {
+            project.tasks.create('nativeLibLinks' + buildType, Exec) {
+                dependsOn 'make' + buildType
+                workingDir buildDirectory.resolve("lib").resolve("Release").toString()
+                executable 'lib'
+                args = ["/OUT:opencv${project.libVersion}.lib", "opencv_calib3d${project.libVersion}.lib", "opencv_features2d${project.libVersion}.lib", "opencv_flann${project.libVersion}.lib", "opencv_highgui${project.libVersion}.lib", "opencv_imgcodecs${project.libVersion}.lib", "opencv_imgproc${project.libVersion}.lib", "opencv_ml${project.libVersion}.lib", "opencv_objdetect${project.libVersion}.lib", "opencv_photo${project.libVersion}.lib", "opencv_shape${project.libVersion}.lib", "opencv_stitching${project.libVersion}.lib", "opencv_superres${project.libVersion}.lib", "opencv_videoio${project.libVersion}.lib", "opencv_video${project.libVersion}.lib", "opencv_videostab${project.libVersion}.lib", "opencv_core${project.libVersion}.lib", "../../3rdparty/lib/Release/libjpeg.lib", "../../3rdparty/lib/Release/libpng.lib", "../../3rdparty/lib/Release/zlib.lib"]
+                inputs.file buildDirectory.resolve("lib").resolve("Release").resolve("opencv_core${project.libVersion}.lib").toFile()
+                outputs.file buildDirectory.resolve("lib").resolve("Release").resolve("opencv${project.libVersion}.lib").toFile()
+            }
+        } else {
+            project.tasks.create('nativeLibLinks' + buildType, Exec) {
+                dependsOn 'make' + buildType
+                workingDir buildDirectory.resolve("lib").toString()
+                executable 'ar'
+                args = ['-M']
+                standardInput = new ByteArrayInputStream("create libopencv${project.libVersion}.a\naddlib libopencv_calib3d.a\naddlib libopencv_features2d.a\naddlib libopencv_flann.a\naddlib libopencv_highgui.a\naddlib libopencv_imgcodecs.a\naddlib libopencv_imgproc.a\naddlib libopencv_ml.a\naddlib libopencv_objdetect.a\naddlib libopencv_photo.a\naddlib libopencv_shape.a\naddlib libopencv_stitching.a\naddlib libopencv_superres.a\naddlib libopencv_videoio.a\naddlib libopencv_video.a\naddlib libopencv_videostab.a\naddlib libopencv_core.a\naddlib ../3rdparty/lib/liblibjpeg-turbo.a\naddlib ../3rdparty/lib/liblibpng.a\naddlib ../3rdparty/lib/libzlib.a\nsave\nend\n".getBytes())
+                inputs.file buildDirectory.resolve("lib").resolve("libopencv_core.a").toFile()
+                outputs.file buildDirectory.resolve("lib").resolve("libopencv${project.libVersion}.lib").toFile()
+            }
+        }
+    }
+}
+
+build.dependsOn make
+build.dependsOn makeShared
+
+apply from: 'publish.gradle'
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.9'
+}

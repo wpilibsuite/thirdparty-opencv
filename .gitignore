@@ -1,0 +1,6 @@
+*~
+.*.sw[a-z]
+build/
+buildShared/
+.gradle/
+gradleDir/

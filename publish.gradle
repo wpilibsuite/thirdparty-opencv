@@ -1,0 +1,304 @@
+apply plugin: 'maven-publish'
+
+publishing {
+    repositories {
+        maven {
+            url "${System.getProperty('user.home')}/releases/maven/development"
+        }
+        maven {
+            url "${System.getProperty('user.home')}/releases/maven/release"
+        }
+    }
+}
+
+def pubVersion = project.version
+
+def outputsFolder = file("$project.buildDir/outputs")
+
+def baseArtifactId = 'opencv'
+def artifactGroupId = 'edu.wpi.first.thirdparty.frc2019.opencv'
+def zipBaseName = '_GROUP_edu_wpi_first_thirdparty_frc2019_opencv_ID_opencv-cpp_CLS'
+def jniBaseName = "_GROUP_edu_wpi_first_thirdparty_frc2019_opencv_ID_opencv-jni_CLS"
+def javaBaseName = "_GROUP_edu_wpi_first_thirdparty_frc2019_opencv_ID_opencv-java_CLS"
+
+def versionFile = file("$outputsFolder/version.txt")
+
+task outputVersions() {
+    description = 'Prints the versions of this to a file for use by the downstream packaging project'
+    group = 'Build'
+    outputs.files(versionFile)
+
+    doFirst {
+        buildDir.mkdir()
+        outputsFolder.mkdir()
+    }
+
+    doLast {
+        versionFile.write pubVersion
+    }
+}
+
+build.dependsOn outputVersions
+copyAllOutputs.dependsOn outputVersions
+copyAllOutputs.inputs.file versionFile
+copyAllOutputs.from versionFile
+
+task cppSourcesZip(type: Zip, dependsOn: make) {
+    destinationDir = outputsFolder
+    baseName = zipBaseName
+    classifier = "sources"
+
+    from(licenseFile) {
+        into '/'
+    }
+
+    from('opencv/3rdparty') {
+        into '/3rdparty'
+        include '**/*.cpp', '**/*.h*'
+    }
+
+    from('opencv/modules') {
+        into '/modules'
+        include '**/*.cpp', '**/*.h*'
+    }
+
+    from(project.cmakeBuildDirectory.resolve('modules')) {
+        into '/modules'
+        include '**/*.cpp', '**/*.h*'
+    }
+
+    includeEmptyDirs = false
+}
+
+task cppHeadersZip(type: Zip) {
+    destinationDir = outputsFolder
+    baseName = zipBaseName
+    classifier = "headers"
+
+    from(licenseFile) {
+        into '/'
+    }
+
+    from('opencv/include') {
+        into '/'
+        exclude '**/CMakeLists.txt'
+    }
+}
+
+task cppLibsZip(type: Zip, dependsOn: [nativeLibLinks, makeShared]) {
+    destinationDir = outputsFolder
+    classifier = "${project.platform}"
+    baseName = zipBaseName
+    duplicatesStrategy = 'exclude'
+
+    manifest {
+        attributes(
+                "Created-By": "WPILib Gradle Build Script",
+                "Implementation-Title": "OpenCV Native Libraries, ${project.platform}",
+                "Implementation-Version": project.version,
+                "Implementation-Vendor": "Itseez",
+
+                "Bundle-Name": "${baseName}",
+                "Bundle-Version": project.version,
+                "Bundle-License": "https://opensource.org/licenses/BSD-3-Clause",
+                "Bundle-Vendor": "WPILib")
+    }
+
+    from(licenseFile) {
+        into '/'
+    }
+
+    if (!project.platform.startsWith("windows")) {
+        from(project.cmakeBuildDirectory.resolve("lib").toFile()) {
+            into project.platformPath + '/static'
+            include 'libopencv*.a'
+            exclude 'libopencv_*.a'
+        }
+        from(project.cmakeBuildSharedDirectory.resolve("lib").toFile()) {
+            into project.platformPath + '/shared'
+            include '*.so.*.*.*'
+            include 'libopencv_java*.so'
+            exclude 'cv2.so'
+            exclude '**/*dephelp*'
+        }
+        from(project.cmakeBuildSharedDirectory.resolve("3rdparty").resolve("lib").toFile()) {
+            into project.platformPath + '/shared'
+            include '*.so'
+        }
+    } else {
+        from(project.cmakeBuildDirectory.resolve("lib").resolve("Release").toFile()) {
+            into project.platformPath + '/static'
+            include 'opencv*.lib'
+            exclude 'opencv_*.lib'
+        }
+        from(project.cmakeBuildSharedDirectory.resolve("lib").resolve("Release").toFile()) {
+            into project.platformPath + '/shared'
+            include '*.lib'  // import library
+            include '*.dll'
+        }
+        from(project.cmakeBuildSharedDirectory.resolve("3rdparty").resolve("lib").toFile()) {
+            into project.platformPath + '/shared'
+            include '*.dll'
+        }
+    }
+}
+
+task jniJar(type: Jar, dependsOn: make) {
+    destinationDir = outputsFolder
+    classifier = "${project.platform}"
+    baseName = jniBaseName
+    duplicatesStrategy = 'exclude'
+
+    manifest {
+        attributes(
+                "Created-By": "WPILib Gradle Build Script",
+                "Implementation-Title": "OpenCV JNI Library, ${project.platform}",
+                "Implementation-Version": project.version,
+                "Implementation-Vendor": "Itseez",
+
+                "Bundle-Name": "${baseName}",
+                "Bundle-Version": project.version,
+                "Bundle-License": "https://opensource.org/licenses/BSD-3-Clause",
+                "Bundle-Vendor": "WPILib")
+    }
+
+    from(licenseFile) {
+        into '/'
+    }
+
+    if (!project.platform.startsWith("windows")) {
+        from(project.cmakeBuildDirectory.resolve("lib").toFile()) {
+            into project.platformPath
+            include '*java*.so'
+            include '*java*.dylib'
+        }
+    } else {
+        from(project.cmakeBuildDirectory.resolve("bin").resolve("Release").toFile()) {
+            into project.platformPath
+            include '*java*.dll'
+        }
+    }
+}
+
+task outputJar(type: Jar, dependsOn: make) {
+    baseName = javaBaseName
+    destinationDir = outputsFolder
+    manifest {
+        attributes(
+                "Created-By": "WPILib Gradle Build Script",
+                "Implementation-Title": "OpenCV",
+                "Implementation-Version": project.version,
+                "Implementation-Vendor": "Itseez",
+
+                "Bundle-Name": project.name,
+                "Bundle-Version": project.version,
+                "Bundle-License": "https://opensource.org/licenses/BSD-3-Clause",
+                "Bundle-Vendor": "WPILib")
+    }
+
+    from { zipTree(project.pathToOpenCVJar.toFile()) } {
+        exclude 'META-INF/*'
+        exclude 'META-INF'
+        exclude '**/*.java'
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: make) {
+    baseName = javaBaseName
+    destinationDir = outputsFolder
+    classifier = 'sources'
+    manifest {
+        attributes(
+                "Created-By": "WPILib Gradle Build Script",
+                "Implementation-Title": "OpenCV Java Sources",
+                "Implementation-Version": project.version,
+                "Implementation-Vendor": "Itseez",
+
+                "Bundle-Name": "${project.name}-sources",
+                "Bundle-Version": project.version,
+                "Bundle-License": "https://opensource.org/licenses/BSD-3-Clause",
+                "Bundle-Vendor": "WPILib")
+    }
+
+    from(project.cmakeBuildDirectory.resolve("modules").resolve("java").resolve("jar").resolve("opencv").resolve("java").toFile()) {
+        include '**/*.java'
+    }
+}
+
+build.dependsOn cppHeadersZip
+build.dependsOn cppSourcesZip
+build.dependsOn cppLibsZip
+build.dependsOn jniJar
+build.dependsOn outputJar
+build.dependsOn sourcesJar
+
+artifacts {
+    archives cppHeadersZip
+    archives cppSourcesZip
+    archives cppLibsZip
+    archives jniJar
+    archives outputJar
+    archives sourcesJar
+}
+
+addTaskToCopyAllOutputs(cppSourcesZip)
+addTaskToCopyAllOutputs(cppHeadersZip)
+addTaskToCopyAllOutputs(cppLibsZip)
+addTaskToCopyAllOutputs(jniJar)
+addTaskToCopyAllOutputs(outputJar)
+addTaskToCopyAllOutputs(sourcesJar)
+
+model {
+    publishing {
+        def allTask
+        if (!project.hasProperty('jenkinsBuild')) {
+            allTask = createAllCombined([cppLibsZip], 'opencv', zipBaseName, Zip, project)
+        }
+
+        def allJniTask
+        if (!project.hasProperty('jenkinsBuild')) {
+            allJniTask = createAllCombined([jniJar], "opencvJNI", jniBaseName, Jar, project)
+        }
+
+        publications {
+            java(MavenPublication) {
+                artifact outputJar
+                artifact sourcesJar {
+                }
+
+                artifactId = "${baseArtifactId}-java"
+                groupId artifactGroupId
+                version pubVersion
+            }
+            jni(MavenPublication) {
+                artifact jniJar
+
+                if (!project.hasProperty('jenkinsBuild')) {
+                    artifact allJniTask
+                }
+
+                artifactId = "${baseArtifactId}-jni"
+                groupId artifactGroupId
+                version pubVersion
+            }
+            cpp(MavenPublication) {
+                artifact cppHeadersZip
+                artifact cppSourcesZip
+                artifact cppLibsZip
+
+                if (!project.hasProperty('jenkinsBuild')) {
+                    artifact allTask
+                }
+
+                artifactId = "${baseArtifactId}-cpp"
+                groupId artifactGroupId
+                version pubVersion
+            }
+        }
+        repositories {
+            maven {
+                url "${System.getProperty('user.home')}/releases/maven/${project.repo}"
+            }
+        }
+    }
+}
