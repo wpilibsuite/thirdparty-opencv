@@ -118,10 +118,8 @@ jobs:
     - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
       submodules: true
     - script: |
-        mkdir build
-        wget "https://download.java.net/java/ga/jdk11/openjdk-11_osx-x64_bin.tar.gz" -O "build/jdk.tar.gz"
-        sudo tar xvzf build/jdk.tar.gz -C /Library/Java/JavaVirtualMachines/
-        export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-11.jdk/Contents/Home/
+        brew install java11
+        brew install ant
       displayName: 'Setup JDK'
     - task: Gradle@2
       inputs:
