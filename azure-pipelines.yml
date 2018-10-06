@@ -15,13 +15,7 @@ jobs:
     - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
       submodules: true
     - script: |
-        mkdir antstore
-        cd antstore
-        wget http://www-us.apache.org/dist//ant/binaries/apache-ant-1.10.5-bin.tar.gz
-        tar -xzf apache-ant-1.10.5-bin.tar.gz
-        cd apache-ant-1.10.5/bin
-        export PATH=$PATH:`pwd`
-        cd ../../..
+        apt-get update && apt-get install ant && rm -rf /var/lib/apt/lists/*
       displayName: 'Install Ant'
     - task: Gradle@2
       inputs:
