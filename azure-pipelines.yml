@@ -1,11 +1,15 @@
+resources:
+  containers:
+  - container: wpilib2019
+    image: wpilib/roborio-cross-ubuntu:2019-18.04
+
+
 jobs:
  - job: Linux
    pool:
     vmImage: 'Ubuntu 16.04'
 
    container: wpilib2019
-   
-
 
    steps:
     - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
