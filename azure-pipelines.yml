@@ -42,6 +42,7 @@ jobs:
     - powershell: |
         mkdir build
         wget "https://download.java.net/java/ga/jdk11/openjdk-11_windows-x64_bin.zip" -O "build\jdk.zip"
+        $env:ANT_EXECUTABLE=$env:ANT_HOME
       displayName: 'Download JDK'
     - task: JavaToolInstaller@0
       inputs:
@@ -77,6 +78,7 @@ jobs:
     - powershell: |
         mkdir build
         wget "https://github.com/wpilibsuite/frc-openjdk-windows/releases/download/v11.0.0u28-1/jdk-x86-11.0.0u28-1.zip" -O "build\jdk.zip"
+        $env:ANT_EXECUTABLE=$env:ANT_HOME
       displayName: 'Download JDK'
     - task: JavaToolInstaller@0
       inputs:
