@@ -118,7 +118,7 @@ jobs:
     - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
       submodules: true
     - script: |
-        brew install java11
+        brew install adoptopenjdk-openjdk11
         brew install ant
       displayName: 'Setup JDK'
     - task: Gradle@2
