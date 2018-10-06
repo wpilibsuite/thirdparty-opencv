@@ -15,8 +15,13 @@ jobs:
     - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
       submodules: true
     - script: |
-        su root -c apt-get update
-        su root -c apt-get install ant
+        mkdir antstore
+        cd antstore
+        wget http://www-us.apache.org/dist//ant/binaries/apache-ant-1.10.5-bin.tar.gz
+        tar -xzf apache-ant-1.10.5-bin.tar.gz
+        cd apache-ant-1.10.5\bin
+        export PATH=$PATH:`pwd`
+        cd ../../..
       displayName: 'Install Ant'
     - task: Gradle@2
       inputs:
@@ -47,6 +52,8 @@ jobs:
         mkdir build
         wget "https://download.java.net/java/ga/jdk11/openjdk-11_windows-x64_bin.zip" -O "build\jdk.zip"
         $env:ANT_EXECUTABLE=$env:ANT_HOME
+        cd $env:ANT_HOME
+        ls
       displayName: 'Download JDK'
     - task: JavaToolInstaller@0
       inputs:
