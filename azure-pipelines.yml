@@ -19,7 +19,7 @@ jobs:
         cd antstore
         wget http://www-us.apache.org/dist//ant/binaries/apache-ant-1.10.5-bin.tar.gz
         tar -xzf apache-ant-1.10.5-bin.tar.gz
-        cd apache-ant-1.10.5\bin
+        cd apache-ant-1.10.5/bin
         export PATH=$PATH:`pwd`
         cd ../../..
       displayName: 'Install Ant'
