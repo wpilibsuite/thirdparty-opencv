@@ -45,6 +45,10 @@ jobs:
         jdkFile: 'build/jdk.zip'
         jdkDestinationDirectory: 'build/jdkinst'
         jdkArchitectureOption: x64
+    - powershell: |
+        choco install ant
+        vcvarsall.bat
+      displayName: 'Install ant and vcvars'
     - task: Gradle@2
       inputs:
         workingDirectory: ''
@@ -80,6 +84,10 @@ jobs:
         jdkFile: 'build/jdk.zip'
         jdkDestinationDirectory: 'build/jdkinst'
         jdkArchitectureOption: x86
+    - powershell: |
+        choco install ant
+        vcvarsall.bat
+      displayName: 'Install ant and vcvars'
     - task: Gradle@2
       inputs:
         workingDirectory: ''
