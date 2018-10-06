@@ -49,10 +49,6 @@ jobs:
         jdkFile: 'build/jdk.zip'
         jdkDestinationDirectory: 'build/jdkinst'
         jdkArchitectureOption: x64
-    - powershell: |
-        choco install ant
-        vcvarsall.bat
-      displayName: 'Install ant and vcvars'
     - task: Gradle@2
       inputs:
         workingDirectory: ''
@@ -88,10 +84,6 @@ jobs:
         jdkFile: 'build/jdk.zip'
         jdkDestinationDirectory: 'build/jdkinst'
         jdkArchitectureOption: x86
-    - powershell: |
-        choco install ant
-        vcvarsall.bat
-      displayName: 'Install ant and vcvars'
     - task: Gradle@2
       inputs:
         workingDirectory: ''
@@ -118,10 +110,12 @@ jobs:
     - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
       submodules: true
     - script: |
-        brew tap AdoptOpenJDK/openjdk
-        brew install adoptopenjdk-openjdk11
+        mkdir build
+        wget "https://download.java.net/java/ga/jdk11/openjdk-11_osx-x64_bin.tar.gz" -O "build/jdk.tar.gz"
+        sudo tar xvzf build/jdk.tar.gz -C /Library/Java/JavaVirtualMachines/
+        export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-11.jdk/Contents/Home/
         brew install ant
-      displayName: 'Setup JDK'
+      displayName: 'Setup JDK and Ant'
     - task: Gradle@2
       inputs:
         workingDirectory: ''
