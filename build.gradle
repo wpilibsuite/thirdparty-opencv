@@ -209,8 +209,8 @@ repositories {
         def processors = Runtime.runtime.availableProcessors()
 
         if (project.platform.startsWith("windows")) {
-            executable 'cmd'
-            args = ['/c', 'msbuild', '/m', 'OpenCV.sln', '/t:Build', '/p:Configuration=Release', '/v:m']
+            executable project.cmakePath
+            args = ['--build', buildDirectory.toString(), '-config Release','--','/v:m']
             inputs.file buildDirectory.resolve("OpenCV.sln").toFile()
         } else {
             executable 'make'
