@@ -210,7 +210,7 @@ repositories {
 
         if (project.platform.startsWith("windows")) {
             executable project.cmakePath
-            args = ['--build', buildDirectory.toString(), '--config Release','--','/v:m']
+            args = ['--build', buildDirectory.toString(), '--config', 'Release', '--','/v:m']
             inputs.file buildDirectory.resolve("OpenCV.sln").toFile()
         } else {
             executable 'make'
