@@ -15,8 +15,8 @@ jobs:
     - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
       submodules: true
     - script: |
-        apt-get update
-        apt-get install ant
+        sudo apt-get update
+        sudo apt-get install ant
       displayName: 'Install Ant'
     - task: Gradle@2
       inputs:
