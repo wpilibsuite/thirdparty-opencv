@@ -210,7 +210,7 @@ repositories {
 
         if (project.platform.startsWith("windows")) {
             executable 'cmd'
-            args = ['/c', 'msbuild', '/m', 'OpenCV.sln', '/t:Build', '/p:Configuration=Release', '/v:m']
+            args = ['/c', 'msbuild', '/m', 'OpenCV.sln', '/t:Build', '/p:Configuration=Release', '/v:m', project.platform == "windows-x86" ? '/p:Platform=win32' : '']
             inputs.file buildDirectory.resolve("OpenCV.sln").toFile()
         } else {
             executable 'make'
@@ -235,7 +235,7 @@ repositories {
             project.tasks.create('nativeLibLinks' + buildType, Exec) {
                 dependsOn 'make' + buildType
                 workingDir buildDirectory.resolve("lib").toString()
-                executable 'ar'
+                executable platform == "osx-x86_64" ? 'gar' : 'ar'
                 args = ['-M']
                 standardInput = new ByteArrayInputStream("create libopencv${project.libVersion}.a\naddlib libopencv_calib3d.a\naddlib libopencv_features2d.a\naddlib libopencv_flann.a\naddlib libopencv_highgui.a\naddlib libopencv_imgcodecs.a\naddlib libopencv_imgproc.a\naddlib libopencv_ml.a\naddlib libopencv_objdetect.a\naddlib libopencv_photo.a\naddlib libopencv_shape.a\naddlib libopencv_stitching.a\naddlib libopencv_superres.a\naddlib libopencv_videoio.a\naddlib libopencv_video.a\naddlib libopencv_videostab.a\naddlib libopencv_core.a\naddlib ../3rdparty/lib/liblibjpeg-turbo.a\naddlib ../3rdparty/lib/liblibpng.a\naddlib ../3rdparty/lib/libzlib.a\nsave\nend\n".getBytes())
                 inputs.file buildDirectory.resolve("lib").resolve("libopencv_core.a").toFile()
