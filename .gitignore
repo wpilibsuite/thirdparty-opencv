@@ -4,3 +4,6 @@ build/
 buildShared/
 .gradle/
 gradleDir/
+.settings/
+.classpath
+.project

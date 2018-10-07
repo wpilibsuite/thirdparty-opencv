@@ -45,9 +45,6 @@ jobs:
     - powershell: |
         mkdir build
         wget "https://download.java.net/java/ga/jdk11/openjdk-11_windows-x64_bin.zip" -O "build\jdk.zip"
-        $env:ANT_EXECUTABLE=$env:ANT_HOME
-        cd $env:ANT_HOME
-        ls
       displayName: 'Download JDK'
     - task: JavaToolInstaller@0
       inputs:
@@ -55,14 +52,11 @@ jobs:
         jdkFile: 'build/jdk.zip'
         jdkDestinationDirectory: 'build/jdkinst'
         jdkArchitectureOption: x64
-    - task: Gradle@2
-      inputs:
-        workingDirectory: ''
-        gradleWrapperFile: 'gradlew'
-        gradleOptions: '-Xmx3072m'
-        publishJUnitResults: false
-        testResultsFiles: '**/TEST-*.xml'
-        tasks: 'build'
+    - script: |
+        @call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
+        set PATH=%PATH%;%ANT_HOME%\bin
+        gradlew build
+      displayName: 'Gradle Build'
 
     # - task: CopyFiles@2
     #   inputs:
@@ -83,7 +77,6 @@ jobs:
     - powershell: |
         mkdir build
         wget "https://github.com/wpilibsuite/frc-openjdk-windows/releases/download/v11.0.0u28-1/jdk-x86-11.0.0u28-1.zip" -O "build\jdk.zip"
-        $env:ANT_EXECUTABLE=$env:ANT_HOME
       displayName: 'Download JDK'
     - task: JavaToolInstaller@0
       inputs:
@@ -91,14 +84,11 @@ jobs:
         jdkFile: 'build/jdk.zip'
         jdkDestinationDirectory: 'build/jdkinst'
         jdkArchitectureOption: x86
-    - task: Gradle@2
-      inputs:
-        workingDirectory: ''
-        gradleWrapperFile: 'gradlew'
-        gradleOptions: '-Xmx1024m'
-        publishJUnitResults: false
-        testResultsFiles: '**/TEST-*.xml'
-        tasks: 'build'
+    - script: |
+        @call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Auxiliary\\Build\\vcvars32.bat"
+        set PATH=%PATH%;%ANT_HOME%\bin
+        gradlew build
+      displayName: 'Gradle Build'
 
     # - task: CopyFiles@2
     #   inputs:
