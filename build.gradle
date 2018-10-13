@@ -10,6 +10,7 @@ apply from: 'config.gradle'
 def date = new Date()
 def formattedDate = date.format('yyMMdd')
 ext.version = "3.4.3"
+ext.soVersion = "3.4"
 ext.libVersion = "${ext.version.replace(".", "")}"
 
 ext.licenseFile = file("$rootDir/opencv/LICENSE")
@@ -32,6 +33,7 @@ ext {
     defaultCmakeArgs = [
             '-DWITH_CUDA=OFF',
             '-DWITH_IPP=OFF',
+            '-DWITH_ITT=OFF',
             '-DWITH_OPENCL=OFF',
             '-DWITH_FFMPEG=OFF',
             '-DWITH_OPENEXR=OFF',
