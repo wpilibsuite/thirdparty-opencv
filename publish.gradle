@@ -11,7 +11,7 @@ publishing {
     }
 }
 
-def pubVersion = "${project.ext.version}-1"
+def pubVersion = "${project.ext.version}-2"
 
 def outputsFolder = file("$project.buildDir/outputs")
 
@@ -70,13 +70,22 @@ task cppSourcesZip(type: Zip, dependsOn: make) {
     includeEmptyDirs = false
 }
 
-task cppHeadersZip(type: Zip) {
+task cppHeadersZip(type: Zip, dependsOn: make) {
     destinationDir = outputsFolder
     baseName = zipBaseName
     classifier = "headers"
 
     from(licenseFile) {
         into '/'
+    }
+
+    from ('opencv/include') {
+        into '/'
+        exclude '**/CMakeLists.txt'
+    }
+
+    from (project.cmakeBuildDirectory.resolve('opencv2').toFile()) {
+        into '/opencv2/'
     }
 
     from(rootPath.resolve('modules').toFile()) {
