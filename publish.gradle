@@ -21,7 +21,7 @@ def zipBaseName = '_GROUP_edu_wpi_first_thirdparty_frc2019_opencv_ID_opencv-cpp_
 def jniBaseName = "_GROUP_edu_wpi_first_thirdparty_frc2019_opencv_ID_opencv-jni_CLS"
 def javaBaseName = "_GROUP_edu_wpi_first_thirdparty_frc2019_opencv_ID_opencv-java_CLS"
 
-def versionFile = file("$outputsFolder/version.txt")
+def versionFile = file("$project.buildDir/allOutputs/version.txt")
 
 task outputVersions() {
     description = 'Prints the versions of this to a file for use by the downstream packaging project'
