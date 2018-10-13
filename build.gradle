@@ -235,11 +235,33 @@ repositories {
                 inputs.file buildDirectory.resolve("lib").resolve("Release").resolve("opencv_core${project.libVersion}.lib").toFile()
                 outputs.file buildDirectory.resolve("lib").resolve("Release").resolve("opencv${project.libVersion}.lib").toFile()
             }
+        } else if (project.platform.startsWith('osx')) {
+            project.tasks.create('nativeLibLinks' + buildType, Exec) {
+                dependsOn 'make' + buildType
+                executable 'libtool'
+                workingDir buildDirectory.resolve("lib").toString()
+                def libDirectory = buildDirectory.resolve("lib").toFile()
+                args '-static'
+                args '-o'
+                args "libopencv${project.libVersion}.a"
+                doFirst {
+
+                    libDirectory.eachFile() {
+                        if (!it.name.endsWith('.a') || it.name == "libopencv${project.libVersion}.a".toString()) {
+                            return
+                        }
+                        args it.name
+                    }
+
+                }
+                inputs.dir buildDirectory.resolve("lib").toFile()
+                outputs.file buildDirectory.resolve("lib").resolve("libopencv${project.libVersion}.a").toFile()
+            }
         } else {
             project.tasks.create('nativeLibLinks' + buildType, Exec) {
                 dependsOn 'make' + buildType
                 workingDir buildDirectory.resolve("lib").toString()
-                executable platform == "osx-x86_64" ? 'gar' : 'ar'
+                executable 'ar'
                 args = ['-M']
                 standardInput = new ByteArrayInputStream("create libopencv${project.libVersion}.a\naddlib libopencv_calib3d.a\naddlib libopencv_features2d.a\naddlib libopencv_flann.a\naddlib libopencv_highgui.a\naddlib libopencv_imgcodecs.a\naddlib libopencv_imgproc.a\naddlib libopencv_ml.a\naddlib libopencv_objdetect.a\naddlib libopencv_photo.a\naddlib libopencv_shape.a\naddlib libopencv_stitching.a\naddlib libopencv_superres.a\naddlib libopencv_videoio.a\naddlib libopencv_video.a\naddlib libopencv_videostab.a\naddlib libopencv_core.a\naddlib ../3rdparty/lib/liblibjpeg-turbo.a\naddlib ../3rdparty/lib/liblibpng.a\naddlib ../3rdparty/lib/libzlib.a\nsave\nend\n".getBytes())
                 inputs.file buildDirectory.resolve("lib").resolve("libopencv_core.a").toFile()
