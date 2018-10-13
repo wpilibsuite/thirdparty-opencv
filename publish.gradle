@@ -79,10 +79,16 @@ task cppHeadersZip(type: Zip) {
         into '/'
     }
 
-    from('opencv/include') {
-        into '/'
-        exclude '**/CMakeLists.txt'
+    from(rootPath.resolve('modules').toFile()) {
+        include '*/include/**/*.hpp'
+        include '*/include/**/*.h'
+        exclude 'java/**'
+        exclude 'python/**'
+        eachFile { FileCopyDetails fcp ->
+            fcp.relativePath = new RelativePath(!fcp.file.isDirectory(), fcp.relativePath.segments[2..-1] as String[])
+        }
     }
+    includeEmptyDirs = false
 }
 
 task cppLibsZip(type: Zip, dependsOn: [nativeLibLinks, makeShared]) {
