@@ -11,7 +11,7 @@ publishing {
     }
 }
 
-def pubVersion = ext.version
+def pubVersion = project.ext.version
 
 def outputsFolder = file("$project.buildDir/outputs")
 
@@ -95,11 +95,11 @@ task cppLibsZip(type: Zip, dependsOn: [nativeLibLinks, makeShared]) {
         attributes(
                 "Created-By": "WPILib Gradle Build Script",
                 "Implementation-Title": "OpenCV Native Libraries, ${project.platform}",
-                "Implementation-Version": ext.version,
+                "Implementation-Version": project.ext.version,
                 "Implementation-Vendor": "Itseez",
 
                 "Bundle-Name": "${baseName}",
-                "Bundle-Version": ext.version,
+                "Bundle-Version": project.ext.version,
                 "Bundle-License": "https://opensource.org/licenses/BSD-3-Clause",
                 "Bundle-Vendor": "WPILib")
     }
@@ -159,11 +159,11 @@ task jniJar(type: Jar, dependsOn: make) {
         attributes(
                 "Created-By": "WPILib Gradle Build Script",
                 "Implementation-Title": "OpenCV JNI Library, ${project.platform}",
-                "Implementation-Version": ext.version,
+                "Implementation-Version": project.ext.version,
                 "Implementation-Vendor": "Itseez",
 
                 "Bundle-Name": "${baseName}",
-                "Bundle-Version": ext.version,
+                "Bundle-Version": project.ext.version,
                 "Bundle-License": "https://opensource.org/licenses/BSD-3-Clause",
                 "Bundle-Vendor": "WPILib")
     }
@@ -193,11 +193,11 @@ task outputJar(type: Jar, dependsOn: make) {
         attributes(
                 "Created-By": "WPILib Gradle Build Script",
                 "Implementation-Title": "OpenCV",
-                "Implementation-Version": ext.version,
+                "Implementation-Version": project.ext.version,
                 "Implementation-Vendor": "Itseez",
 
                 "Bundle-Name": project.name,
-                "Bundle-Version": ext.version,
+                "Bundle-Version": project.ext.version,
                 "Bundle-License": "https://opensource.org/licenses/BSD-3-Clause",
                 "Bundle-Vendor": "WPILib")
     }
@@ -217,11 +217,11 @@ task sourcesJar(type: Jar, dependsOn: make) {
         attributes(
                 "Created-By": "WPILib Gradle Build Script",
                 "Implementation-Title": "OpenCV Java Sources",
-                "Implementation-Version": ext.version,
+                "Implementation-Version": project.ext.version,
                 "Implementation-Vendor": "Itseez",
 
                 "Bundle-Name": "${project.name}-sources",
-                "Bundle-Version": ext.version,
+                "Bundle-Version": project.ext.version,
                 "Bundle-License": "https://opensource.org/licenses/BSD-3-Clause",
                 "Bundle-Vendor": "WPILib")
     }
