@@ -132,6 +132,8 @@ if (!project.hasProperty('cmakePath')) {
 
 println "Building for platform ${project.platform}"
 
+ext.platformClassifier = project.platform.replaceFirst('-', '').replace('_', '-')
+
 ext.rootPath = Paths.get(projectDir.canonicalPath).resolve('opencv')
 ext.cmakeBuildDirectory = Paths.get(projectDir.canonicalPath).resolve('build').resolve(project.platform)
 ext.cmakeBuildSharedDirectory = Paths.get(projectDir.canonicalPath).resolve('buildShared').resolve(project.platform)
