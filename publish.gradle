@@ -11,7 +11,7 @@ publishing {
     }
 }
 
-def pubVersion = "${project.ext.version}-3"
+def pubVersion = "${project.ext.version}-4"
 
 def outputsFolder = file("$project.buildDir/outputs")
 
@@ -130,6 +130,7 @@ task cppLibsZip(type: Zip, dependsOn: [nativeLibLinks, makeShared]) {
             exclude 'libopencv_*.a'
         }
         from(project.cmakeBuildSharedDirectory.resolve("lib").toFile()) {
+            into project.platformPath + '/shared'
             include '*.so.*.*.*'
             exclude 'cv2.so'
             exclude '**/*dephelp*'
