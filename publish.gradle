@@ -179,7 +179,7 @@ task jniJar(type: Jar, dependsOn: make) {
             include '*java*.dylib'
         }
     } else {
-        from(project.cmakeBuildDirectory.resolve("bin").resolve("Release").toFile()) {
+        from(project.cmakeBuildDirectory.resolve("lib").resolve("Release").toFile()) {
             into project.platformPath
             include '*java*.dll'
         }
