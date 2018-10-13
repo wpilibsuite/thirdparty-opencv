@@ -118,6 +118,7 @@ task cppLibsZip(type: Zip, dependsOn: [nativeLibLinks, makeShared]) {
             into project.platformPath + '/shared'
             include '*.so.*.*.*'
             include 'libopencv_java*.so'
+            include '*.dylib'
             exclude 'cv2.so'
             exclude '**/*dephelp*'
         }
@@ -132,6 +133,11 @@ task cppLibsZip(type: Zip, dependsOn: [nativeLibLinks, makeShared]) {
             exclude 'opencv_*.lib'
         }
         from(project.cmakeBuildSharedDirectory.resolve("lib").resolve("Release").toFile()) {
+            into project.platformPath + '/shared'
+            include '*.lib'  // import library
+            include '*.dll'
+        }
+        from(project.cmakeBuildSharedDirectory.resolve("bin").resolve("Release").toFile()) {
             into project.platformPath + '/shared'
             include '*.lib'  // import library
             include '*.dll'
