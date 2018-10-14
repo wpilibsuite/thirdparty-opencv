@@ -241,20 +241,30 @@ repositories {
                 executable 'libtool'
                 workingDir buildDirectory.resolve("lib").toString()
                 def libDirectory = buildDirectory.resolve("lib").toFile()
+                def thirdPartyLib = buildDirectory.resolve("3rdParty").resolve("lib").toFile()
                 args '-static'
                 args '-o'
                 args "libopencv${project.libVersion}.a"
                 doFirst {
 
                     libDirectory.eachFile() {
-                        if (!it.name.endsWith('.a') || it.name == "libopencv${project.libVersion}.a".toString()) {
+                        if (!it.name.endsWith('.a') || it.name == "libopencv${project.libVersion}.a".toString()
+                                                    || it.name.contains('opencv_ts')) {
                             return
                         }
-                        args it.name
+                        args it.absolutePath
+                    }
+
+                    thirdPartyLib.eachFile() {
+                        if (!it.name.endsWith('.a')) {
+                            return
+                        }
+                        args it.absolutePath
                     }
 
                 }
                 inputs.dir buildDirectory.resolve("lib").toFile()
+                inputs.dir thirdPartyLib
                 outputs.file buildDirectory.resolve("lib").resolve("libopencv${project.libVersion}.a").toFile()
             }
         } else {
