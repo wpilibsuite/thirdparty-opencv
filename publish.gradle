@@ -99,10 +99,21 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
     }
     includeEmptyDirs = false
 }
+['', 'Debug' ].each{ buildType ->
 
-task cppLibsZip(type: Zip, dependsOn: [nativeLibLinks, makeShared]) {
+def staticBuildDir = buildType.contains('Debug') ? project.cmakeBuildDirectory : project.cmakeBuildDebugDirectory
+def sharedBuildDir = buildType.contains('Debug') ? project.cmakeBuildSharedDirectory : project.cmakeBuildSharedDebugDirectory
+
+def outputClassifier = project.ext.platformClassifier
+if (buildType.contains('Debug')) {
+    outputClassifier = outputClassifier + 'debug'
+}
+
+project.tasks.create('cppLibsZip' + buildType, Zip) {
+    dependsOn tasks.named('nativeLibLinks' + buildType)
+    dependsOn tasks.named('makeShared' + buildType)
     destinationDir = outputsFolder
-    classifier = "${project.ext.platformClassifier}"
+    classifier = outputClassifier
     baseName = zipBaseName
     duplicatesStrategy = 'exclude'
 
@@ -124,12 +135,12 @@ task cppLibsZip(type: Zip, dependsOn: [nativeLibLinks, makeShared]) {
     }
 
     if (!project.platform.startsWith("windows")) {
-        from(project.cmakeBuildDirectory.resolve("lib").toFile()) {
+        from(staticBuildDir.resolve("lib").toFile()) {
             into project.platformPath + '/static'
             include 'libopencv*.a'
             exclude 'libopencv_*.a'
         }
-        from(project.cmakeBuildSharedDirectory.resolve("lib").toFile()) {
+        from(sharedBuildDir.resolve("lib").toFile()) {
             into project.platformPath + '/shared'
             include '*.so.*.*.*'
             exclude 'cv2.so'
@@ -138,7 +149,7 @@ task cppLibsZip(type: Zip, dependsOn: [nativeLibLinks, makeShared]) {
                 f.name = f.name.replace("${project.ext.version}", "${project.ext.soVersion}")
             }
         }
-        from(project.cmakeBuildSharedDirectory.resolve("lib").toFile()) {
+        from(sharedBuildDir.resolve("lib").toFile()) {
             into project.platformPath + '/shared'
             include "*.${project.ext.version}.dylib".toString()
             eachFile { f->
@@ -147,7 +158,7 @@ task cppLibsZip(type: Zip, dependsOn: [nativeLibLinks, makeShared]) {
             exclude 'cv2.so'
             exclude '**/*dephelp*'
         }
-        from(project.cmakeBuildSharedDirectory.resolve("lib").toFile()) {
+        from(sharedBuildDir.resolve("lib").toFile()) {
             into project.platformPath + '/shared'
 
             include 'libopencv_java*.so'
@@ -155,38 +166,39 @@ task cppLibsZip(type: Zip, dependsOn: [nativeLibLinks, makeShared]) {
             exclude 'cv2.so'
             exclude '**/*dephelp*'
         }
-        from(project.cmakeBuildSharedDirectory.resolve("3rdparty").resolve("lib").toFile()) {
+        from(sharedBuildDir.resolve("3rdparty").resolve("lib").toFile()) {
             into project.platformPath + '/shared'
             include '*.so'
         }
     } else {
-        from(project.cmakeBuildDirectory.resolve("lib").resolve("Release").toFile()) {
+        from(staticBuildDir.resolve("lib").resolve("Release").toFile()) {
             into project.platformPath + '/static'
             include 'opencv*.lib'
             exclude 'opencv_*.lib'
         }
-        from(project.cmakeBuildSharedDirectory.resolve("lib").resolve("Release").toFile()) {
+        from(sharedBuildDir.resolve("lib").resolve("Release").toFile()) {
             into project.platformPath + '/shared'
             include '*.lib'  // import library
             include '*.dll'
             exclude 'opencv_ts*'
         }
-        from(project.cmakeBuildSharedDirectory.resolve("bin").resolve("Release").toFile()) {
+        from(sharedBuildDir.resolve("bin").resolve("Release").toFile()) {
             into project.platformPath + '/shared'
             include '*.lib'  // import library
             include '*.dll'
             exclude 'opencv_ts*'
         }
-        from(project.cmakeBuildSharedDirectory.resolve("3rdparty").resolve("lib").toFile()) {
+        from(sharedBuildDir.resolve("3rdparty").resolve("lib").toFile()) {
             into project.platformPath + '/shared'
             include '*.dll'
         }
     }
 }
 
-task jniJar(type: Jar, dependsOn: make) {
+project.tasks.create('jniJar' + buildType, Zip) {
+    dependsOn tasks.named('make' + buildType)
     destinationDir = outputsFolder
-    classifier = "${project.ext.platformClassifier}"
+    classifier = outputClassifier
     baseName = jniBaseName
     duplicatesStrategy = 'exclude'
 
@@ -208,17 +220,19 @@ task jniJar(type: Jar, dependsOn: make) {
     }
 
     if (!project.platform.startsWith("windows")) {
-        from(project.cmakeBuildDirectory.resolve("lib").toFile()) {
+        from(staticBuildDir.resolve("lib").toFile()) {
             into project.platformPath
             include '*java*.so'
             include '*java*.dylib'
         }
     } else {
-        from(project.cmakeBuildDirectory.resolve("lib").resolve("Release").toFile()) {
+        from(staticBuildDir.resolve("lib").resolve("Release").toFile()) {
             into project.platformPath
             include '*java*.dll'
         }
     }
+}
+
 }
 
 task outputJar(type: Jar, dependsOn: make) {
@@ -270,6 +284,8 @@ build.dependsOn cppHeadersZip
 build.dependsOn cppSourcesZip
 build.dependsOn cppLibsZip
 build.dependsOn jniJar
+build.dependsOn cppLibsZipDebug
+build.dependsOn jniJarDebug
 build.dependsOn outputJar
 build.dependsOn sourcesJar
 
@@ -278,6 +294,8 @@ artifacts {
     archives cppSourcesZip
     archives cppLibsZip
     archives jniJar
+    archives cppLibsZipDebug
+    archives jniJarDebug
     archives outputJar
     archives sourcesJar
 }
@@ -286,6 +304,8 @@ addTaskToCopyAllOutputs(cppSourcesZip)
 addTaskToCopyAllOutputs(cppHeadersZip)
 addTaskToCopyAllOutputs(cppLibsZip)
 addTaskToCopyAllOutputs(jniJar)
+addTaskToCopyAllOutputs(cppLibsZipDebug)
+addTaskToCopyAllOutputs(jniJarDebug)
 addTaskToCopyAllOutputs(outputJar)
 addTaskToCopyAllOutputs(sourcesJar)
 
@@ -301,6 +321,16 @@ model {
             allJniTask = createAllCombined([jniJar], "opencvJNI", jniBaseName, Jar, project)
         }
 
+        def allTaskDebug
+        if (!project.hasProperty('jenkinsBuild')) {
+            allTaskDebug = createAllCombinedDebug([cppLibsZipDebug], 'opencv', zipBaseName, Zip, project)
+        }
+
+        def allJniTaskDebug
+        if (!project.hasProperty('jenkinsBuild')) {
+            allJniTaskDebug = createAllCombinedDebug([jniJarDebug], "opencvJNI", jniBaseName, Jar, project)
+        }
+
         publications {
             java(MavenPublication) {
                 artifact outputJar
@@ -313,9 +343,11 @@ model {
             }
             jni(MavenPublication) {
                 artifact jniJar
+                artifact jniJarDebug
 
                 if (!project.hasProperty('jenkinsBuild')) {
                     artifact allJniTask
+                    artifact allJniTaskDebug
                 }
 
                 artifactId = "${baseArtifactId}-jni"
@@ -326,9 +358,11 @@ model {
                 artifact cppHeadersZip
                 artifact cppSourcesZip
                 artifact cppLibsZip
+                artifact cppLibsZipDebug
 
                 if (!project.hasProperty('jenkinsBuild')) {
                     artifact allTask
+                    artifact allTaskDebug
                 }
 
                 artifactId = "${baseArtifactId}-cpp"
