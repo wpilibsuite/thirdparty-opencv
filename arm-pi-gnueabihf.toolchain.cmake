@@ -13,7 +13,7 @@ else()
   #message("CMAKE_SYSTEM_PROCESSOR=${CMAKE_SYSTEM_PROCESSOR}")
 endif()
 
-include("${CMAKE_CURRENT_LIST_DIR}/gnu.toolchain.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/opencv/platforms/linux/gnu.toolchain.cmake")
 
 if(CMAKE_SYSTEM_PROCESSOR STREQUAL arm AND NOT ARM_IGNORE_FP)
   set(FLOAT_ABI_SUFFIX "")
