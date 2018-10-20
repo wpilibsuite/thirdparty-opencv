@@ -17,7 +17,6 @@ jobs:
     - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
       submodules: true
     - script: |
-        arm-raspbian9-linux-gnueabihf-gcc -v
         sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/*
       displayName: 'Install Ant'
     - task: Gradle@2

@@ -190,7 +190,7 @@ repositories {
                     '-DENABLE_VFPV3=ON' +
                     "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
             } else if (project.platform == "linux-raspbian") {
-                toolchain = projectDir.canonicalPath + "/arm-pi-gnueabi.toolchain.cmake"
+                toolchain = projectDir.canonicalPath + "/arm-pi-gnueabihf.toolchain.cmake"
                 println "Using toolchain '${toolchain}'"
                 return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
                     '-DCMAKE_MAKE_PROGRAM=make' +
