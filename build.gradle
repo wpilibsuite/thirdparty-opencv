@@ -79,6 +79,8 @@ def getPlatform() {
 def getOutputFormat(platform) {
     if (platform == "linux-athena") {
         return "elf32-littlearm"
+    } else if (platform == "linux-raspbian") {
+        return "elf32-littlearm"
     } else if (platform == "linux-x86") {
         return "elf32-i386"
     } else if (platform == "linux-x86_64") {
@@ -99,6 +101,8 @@ def getOutputFormat(platform) {
 def getPlatformPath(platform) {
     if (platform == "linux-athena") {
         return "linux/athena"
+    } else if (platform == "linux-raspbian") {
+        return "linux/raspbian"
     } else if (platform == "linux-x86") {
         return "linux/x86"
     } else if (platform == "linux-x86_64") {
@@ -179,6 +183,14 @@ repositories {
             }
             if (project.platform == "linux-athena") {
                 toolchain = projectDir.canonicalPath + "/arm-frc-gnueabi.toolchain.cmake"
+                println "Using toolchain '${toolchain}'"
+                return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
+                    '-DCMAKE_MAKE_PROGRAM=make' +
+                    '-DENABLE_NEON=ON' +
+                    '-DENABLE_VFPV3=ON' +
+                    "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
+            } else if (project.platform == "linux-raspbian") {
+                toolchain = projectDir.canonicalPath + "/arm-pi-gnueabi.toolchain.cmake"
                 println "Using toolchain '${toolchain}'"
                 return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
                     '-DCMAKE_MAKE_PROGRAM=make' +
