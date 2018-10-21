@@ -9,3 +9,4 @@ gradleDir/
 .settings/
 .classpath
 .project
+.vscode/

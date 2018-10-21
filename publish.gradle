@@ -11,7 +11,7 @@ publishing {
     }
 }
 
-def pubVersion = "${project.ext.version}-10"
+def pubVersion = "${project.ext.version}-11"
 
 def outputsFolder = file("$project.buildDir/outputs")
 
@@ -101,13 +101,15 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
 }
 ['', 'Debug' ].each{ buildType ->
 
-def staticBuildDir = buildType.contains('Debug') ? project.cmakeBuildDirectory : project.cmakeBuildDebugDirectory
-def sharedBuildDir = buildType.contains('Debug') ? project.cmakeBuildSharedDirectory : project.cmakeBuildSharedDebugDirectory
+def staticBuildDir = buildType.contains('Debug') ? project.cmakeBuildDebugDirectory : project.cmakeBuildDirectory
+def sharedBuildDir = buildType.contains('Debug') ? project.cmakeBuildSharedDebugDirectory : project.cmakeBuildSharedDirectory
 
 def outputClassifier = project.ext.platformClassifier
 if (buildType.contains('Debug')) {
     outputClassifier = outputClassifier + 'debug'
 }
+
+def buildTypeFolder = buildType.contains('Debug') ? 'Debug' : 'Release'
 
 project.tasks.create('cppLibsZip' + buildType, Zip) {
     dependsOn tasks.named('nativeLibLinks' + buildType)
@@ -171,18 +173,18 @@ project.tasks.create('cppLibsZip' + buildType, Zip) {
             include '*.so'
         }
     } else {
-        from(staticBuildDir.resolve("lib").resolve("Release").toFile()) {
+        from(staticBuildDir.resolve("lib").resolve(buildTypeFolder).toFile()) {
             into project.platformPath + '/static'
             include 'opencv*.lib'
             exclude 'opencv_*.lib'
         }
-        from(sharedBuildDir.resolve("lib").resolve("Release").toFile()) {
+        from(sharedBuildDir.resolve("lib").resolve(buildTypeFolder).toFile()) {
             into project.platformPath + '/shared'
             include '*.lib'  // import library
             include '*.dll'
             exclude 'opencv_ts*'
         }
-        from(sharedBuildDir.resolve("bin").resolve("Release").toFile()) {
+        from(sharedBuildDir.resolve("bin").resolve(buildTypeFolder).toFile()) {
             into project.platformPath + '/shared'
             include '*.lib'  // import library
             include '*.dll'
