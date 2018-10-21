@@ -49,7 +49,7 @@ ext {
             '-DBUILD_TESTS=OFF',
             '-DPython_ADDITIONAL_VERSIONS=3.5',
             '-DWITH_WEBP=OFF',
-            '-DBUILD_JAVA=ON',
+            '-DBUILD_JAVA=ON'
     ]
 }
 
@@ -144,6 +144,10 @@ ext.platformClassifier = project.platform.replaceFirst('-', '').replace('_', '-'
 ext.rootPath = Paths.get(projectDir.canonicalPath).resolve('opencv')
 ext.cmakeBuildDirectory = Paths.get(projectDir.canonicalPath).resolve('build').resolve(project.platform)
 ext.cmakeBuildSharedDirectory = Paths.get(projectDir.canonicalPath).resolve('buildShared').resolve(project.platform)
+
+ext.cmakeBuildDebugDirectory = Paths.get(projectDir.canonicalPath).resolve('buildDebug').resolve(project.platform)
+ext.cmakeBuildSharedDebugDirectory = Paths.get(projectDir.canonicalPath).resolve('buildSharedDebug').resolve(project.platform)
+
 ext.jarName = "opencv-${project.libVersion}.jar"
 ext.pathToOpenCVJar = ext.cmakeBuildDirectory.resolve("bin").resolve(ext.jarName)
 
@@ -161,7 +165,9 @@ repositories {
 }
 
 ['': project.cmakeBuildDirectory,
- 'Shared': project.cmakeBuildSharedDirectory
+ 'Shared': project.cmakeBuildSharedDirectory,
+ 'Debug': project.cmakeBuildDebugDirectory,
+ 'SharedDebug': project.cmakeBuildSharedDebugDirectory
 ].each{ buildType, buildDirectory ->
     project.tasks.create('cmake' + buildType, Exec) {
         inputs.dir 'opencv'
@@ -173,11 +179,18 @@ repositories {
         def cmakeArgs = {
             def toolchain = null
             def args = defaultCmakeArgs
-            if (buildType == "Shared") {
+            if (buildType.contains("Shared")) {
                 args = args + '-DBUILD_SHARED_LIBS=ON'
             } else {
                 args = args + '-DBUILD_SHARED_LIBS=OFF'
             }
+
+            if (buildType.contains('Debug')) {
+                args = args + '-DCMAKE_BUILD_TYPE=Debug'
+            } else {
+                args = args + '-DCMAKE_BUILD_TYPE=Release'
+            }
+
             if (hasProperty('toolchain')) {
                 toolchain = project.toolchain
             }
@@ -220,14 +233,18 @@ repositories {
         }
     }
 
+    def buildTypeFolder = buildType.contains('Debug') ? 'Debug' : 'Release'
+
     project.tasks.create('make' + buildType, Exec) {
         dependsOn 'cmake' + buildType
         workingDir buildDirectory.toString()
         def processors = Runtime.runtime.availableProcessors()
 
+
+
         if (project.platform.startsWith("windows")) {
             executable 'cmd'
-            args = ['/c', 'msbuild', '/m', 'OpenCV.sln', '/t:Build', '/p:Configuration=Release', '/v:m', project.platform == "windows-x86" ? '/p:Platform=win32' : '']
+            args = ['/c', 'msbuild', '/m', 'OpenCV.sln', '/t:Build', "/p:Configuration=${buildTypeFolder}".toString(), '/v:m', project.platform == "windows-x86" ? '/p:Platform=win32' : '']
             inputs.file buildDirectory.resolve("OpenCV.sln").toFile()
         } else {
             executable 'make'
@@ -241,12 +258,22 @@ repositories {
     if (buildType != "Shared") {
         if (project.platform.startsWith('windows')) {
             project.tasks.create('nativeLibLinks' + buildType, Exec) {
-                dependsOn 'make' + buildType
-                workingDir buildDirectory.resolve("lib").resolve("Release").toString()
+                //dependsOn 'make' + buildType
+                workingDir buildDirectory.resolve("lib").resolve(buildTypeFolder).toString()
                 executable 'lib'
-                args = ["/OUT:opencv${project.libVersion}.lib", "opencv_calib3d${project.libVersion}.lib", "opencv_features2d${project.libVersion}.lib", "opencv_flann${project.libVersion}.lib", "opencv_highgui${project.libVersion}.lib", "opencv_imgcodecs${project.libVersion}.lib", "opencv_imgproc${project.libVersion}.lib", "opencv_ml${project.libVersion}.lib", "opencv_objdetect${project.libVersion}.lib", "opencv_photo${project.libVersion}.lib", "opencv_shape${project.libVersion}.lib", "opencv_stitching${project.libVersion}.lib", "opencv_superres${project.libVersion}.lib", "opencv_videoio${project.libVersion}.lib", "opencv_video${project.libVersion}.lib", "opencv_videostab${project.libVersion}.lib", "opencv_core${project.libVersion}.lib", "../../3rdparty/lib/Release/libjpeg-turbo.lib", "../../3rdparty/lib/Release/libpng.lib", "../../3rdparty/lib/Release/zlib.lib"]
-                inputs.file buildDirectory.resolve("lib").resolve("Release").resolve("opencv_core${project.libVersion}.lib").toFile()
-                outputs.file buildDirectory.resolve("lib").resolve("Release").resolve("opencv${project.libVersion}.lib").toFile()
+                def inputFiles = ["opencv_calib3d${project.libVersion}", "opencv_features2d${project.libVersion}", "opencv_flann${project.libVersion}", "opencv_highgui${project.libVersion}", "opencv_imgcodecs${project.libVersion}", "opencv_imgproc${project.libVersion}", "opencv_ml${project.libVersion}", "opencv_objdetect${project.libVersion}", "opencv_photo${project.libVersion}", "opencv_shape${project.libVersion}", "opencv_stitching${project.libVersion}", "opencv_superres${project.libVersion}", "opencv_videoio${project.libVersion}", "opencv_video${project.libVersion}", "opencv_videostab${project.libVersion}", "opencv_core${project.libVersion}", "../../3rdparty/lib/${buildTypeFolder}/libjpeg-turbo", "../../3rdparty/lib/${buildTypeFolder}/libpng", "../../3rdparty/lib/${buildTypeFolder}/zlib"]
+                args = ["/OUT:opencv${project.libVersion}.lib"]
+                inputFiles.each {
+                    def inFile = it
+                    if (buildTypeFolder == 'Debug') {
+                        inFile = inFile + 'd.lib'
+                    } else {
+                        inFile = inFile + '.lib'
+                    }
+                    args << it
+                }
+                inputs.file buildDirectory.resolve("lib").resolve(buildTypeFolder).resolve("opencv_core${project.libVersion}.lib").toFile()
+                outputs.file buildDirectory.resolve("lib").resolve(buildTypeFolder).resolve("opencv${project.libVersion}.lib").toFile()
             }
         } else if (project.platform.startsWith('osx')) {
             project.tasks.create('nativeLibLinks' + buildType, Exec) {
@@ -296,6 +323,8 @@ repositories {
 
 build.dependsOn make
 build.dependsOn makeShared
+build.dependsOn makeDebug
+build.dependsOn makeSharedDebug
 
 apply from: 'publish.gradle'
 

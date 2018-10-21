@@ -44,6 +44,8 @@ jobs:
 
    container: wpilib2019
 
+   timeoutInMinutes: 0
+
    steps:
     - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
       submodules: true
@@ -76,6 +78,8 @@ jobs:
 
    container: wpilib2019
 
+   timeoutInMinutes: 0
+
    steps:
     - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
       submodules: true
@@ -103,6 +107,8 @@ jobs:
  - job: Windows_64_Bit
    pool:
     vmImage: 'vs2017-win2016'
+
+   timeoutInMinutes: 0
 
    steps:
     - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
@@ -137,6 +143,8 @@ jobs:
    pool:
     vmImage: 'vs2017-win2016'
 
+   timeoutInMinutes: 0
+
    steps:
     - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
       submodules: true
@@ -169,6 +177,8 @@ jobs:
  - job: Mac
    pool:
     vmImage: 'xcode9-macos10.13'
+
+   timeoutInMinutes: 0
 
    steps:
     - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
