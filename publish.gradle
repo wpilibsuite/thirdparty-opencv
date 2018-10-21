@@ -11,7 +11,7 @@ publishing {
     }
 }
 
-def pubVersion = "${project.ext.version}-7"
+def pubVersion = "${project.ext.version}-8"
 
 def outputsFolder = file("$project.buildDir/outputs")
 
@@ -169,11 +169,13 @@ task cppLibsZip(type: Zip, dependsOn: [nativeLibLinks, makeShared]) {
             into project.platformPath + '/shared'
             include '*.lib'  // import library
             include '*.dll'
+            exclude 'opencv_ts*'
         }
         from(project.cmakeBuildSharedDirectory.resolve("bin").resolve("Release").toFile()) {
             into project.platformPath + '/shared'
             include '*.lib'  // import library
             include '*.dll'
+            exclude 'opencv_ts*'
         }
         from(project.cmakeBuildSharedDirectory.resolve("3rdparty").resolve("lib").toFile()) {
             into project.platformPath + '/shared'
