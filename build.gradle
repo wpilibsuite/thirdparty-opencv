@@ -49,7 +49,7 @@ ext {
             '-DBUILD_TESTS=OFF',
             '-DPython_ADDITIONAL_VERSIONS=3.5',
             '-DWITH_WEBP=OFF',
-            '-DBUILD_JAVA=ON',
+            '-DBUILD_JAVA=ON'
     ]
 }
 
@@ -221,16 +221,18 @@ repositories {
         }
     }
 
+    def buildTypeFolder = buildType.contains('Debug') ? 'Debug' : 'Release'
+
     project.tasks.create('make' + buildType, Exec) {
         dependsOn 'cmake' + buildType
         workingDir buildDirectory.toString()
         def processors = Runtime.runtime.availableProcessors()
 
-        def debug = buildType.contains('Debug') ? 'Debug' : 'Release'
+
 
         if (project.platform.startsWith("windows")) {
             executable 'cmd'
-            args = ['/c', 'msbuild', '/m', 'OpenCV.sln', '/t:Build', "/p:Configuration=${debug}".toString(), '/v:m', project.platform == "windows-x86" ? '/p:Platform=win32' : '']
+            args = ['/c', 'msbuild', '/m', 'OpenCV.sln', '/t:Build', "/p:Configuration=${buildTypeFolder}".toString(), '/v:m', project.platform == "windows-x86" ? '/p:Platform=win32' : '']
             inputs.file buildDirectory.resolve("OpenCV.sln").toFile()
         } else {
             executable 'make'
@@ -244,12 +246,22 @@ repositories {
     if (buildType != "Shared") {
         if (project.platform.startsWith('windows')) {
             project.tasks.create('nativeLibLinks' + buildType, Exec) {
-                dependsOn 'make' + buildType
-                workingDir buildDirectory.resolve("lib").resolve("Release").toString()
+                //dependsOn 'make' + buildType
+                workingDir buildDirectory.resolve("lib").resolve(buildTypeFolder).toString()
                 executable 'lib'
-                args = ["/OUT:opencv${project.libVersion}.lib", "opencv_calib3d${project.libVersion}.lib", "opencv_features2d${project.libVersion}.lib", "opencv_flann${project.libVersion}.lib", "opencv_highgui${project.libVersion}.lib", "opencv_imgcodecs${project.libVersion}.lib", "opencv_imgproc${project.libVersion}.lib", "opencv_ml${project.libVersion}.lib", "opencv_objdetect${project.libVersion}.lib", "opencv_photo${project.libVersion}.lib", "opencv_shape${project.libVersion}.lib", "opencv_stitching${project.libVersion}.lib", "opencv_superres${project.libVersion}.lib", "opencv_videoio${project.libVersion}.lib", "opencv_video${project.libVersion}.lib", "opencv_videostab${project.libVersion}.lib", "opencv_core${project.libVersion}.lib", "../../3rdparty/lib/Release/libjpeg-turbo.lib", "../../3rdparty/lib/Release/libpng.lib", "../../3rdparty/lib/Release/zlib.lib"]
-                inputs.file buildDirectory.resolve("lib").resolve("Release").resolve("opencv_core${project.libVersion}.lib").toFile()
-                outputs.file buildDirectory.resolve("lib").resolve("Release").resolve("opencv${project.libVersion}.lib").toFile()
+                def inputFiles = ["opencv_calib3d${project.libVersion}", "opencv_features2d${project.libVersion}", "opencv_flann${project.libVersion}", "opencv_highgui${project.libVersion}", "opencv_imgcodecs${project.libVersion}", "opencv_imgproc${project.libVersion}", "opencv_ml${project.libVersion}", "opencv_objdetect${project.libVersion}", "opencv_photo${project.libVersion}", "opencv_shape${project.libVersion}", "opencv_stitching${project.libVersion}", "opencv_superres${project.libVersion}", "opencv_videoio${project.libVersion}", "opencv_video${project.libVersion}", "opencv_videostab${project.libVersion}", "opencv_core${project.libVersion}", "../../3rdparty/lib/${buildTypeFolder}/libjpeg-turbo", "../../3rdparty/lib/${buildTypeFolder}/libpng", "../../3rdparty/lib/${buildTypeFolder}/zlib"]
+                args = ["/OUT:opencv${project.libVersion}.lib"]
+                inputFiles.each {
+                    def inFile = it
+                    if (buildTypeFolder == 'Debug') {
+                        inFile = inFile + 'd.lib'
+                    } else {
+                        inFile = inFile + '.lib'
+                    }
+                    args << it
+                }
+                inputs.file buildDirectory.resolve("lib").resolve(buildTypeFolder).resolve("opencv_core${project.libVersion}.lib").toFile()
+                outputs.file buildDirectory.resolve("lib").resolve(buildTypeFolder).resolve("opencv${project.libVersion}.lib").toFile()
             }
         } else if (project.platform.startsWith('osx')) {
             project.tasks.create('nativeLibLinks' + buildType, Exec) {
