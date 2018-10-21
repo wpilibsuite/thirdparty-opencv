@@ -2,6 +2,8 @@
 .*.sw[a-z]
 build/
 buildShared/
+buildDebug/
+buildSharedDebug/
 .gradle/
 gradleDir/
 .settings/
