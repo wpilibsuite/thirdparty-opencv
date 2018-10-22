@@ -11,7 +11,7 @@ publishing {
     }
 }
 
-def pubVersion = "${project.ext.version}-11"
+def pubVersion = "${project.ext.version}-12"
 
 def outputsFolder = file("$project.buildDir/outputs")
 
@@ -142,35 +142,43 @@ project.tasks.create('cppLibsZip' + buildType, Zip) {
             include 'libopencv*.a'
             exclude 'libopencv_*.a'
         }
-        from(sharedBuildDir.resolve("lib").toFile()) {
-            into project.platformPath + '/shared'
-            include '*.so.*.*.*'
-            exclude 'cv2.so'
-            exclude '**/*dephelp*'
-            eachFile { f->
-                f.name = f.name.replace("${project.ext.version}", "${project.ext.soVersion}")
+        if (buildType.contains('Debug') && project.platform.startsWith('linux')) {
+            dependsOn 'stripLibsSharedDebug'
+            println "$buildDir/stripSharedDebug"
+            from("$buildDir/stripSharedDebug") {
+                into project.platformPath + '/shared'
             }
-        }
-        from(sharedBuildDir.resolve("lib").toFile()) {
-            into project.platformPath + '/shared'
-            include "*.${project.ext.version}.dylib".toString()
-            eachFile { f->
-                f.name = f.name.replace("${project.ext.version}", "${project.ext.soVersion}")
+        } else {
+            from(sharedBuildDir.resolve("lib").toFile()) {
+                into project.platformPath + '/shared'
+                include '*.so.*.*.*'
+                exclude 'cv2.so'
+                exclude '**/*dephelp*'
+                eachFile { f->
+                    f.name = f.name.replace("${project.ext.version}", "${project.ext.soVersion}")
+                }
             }
-            exclude 'cv2.so'
-            exclude '**/*dephelp*'
-        }
-        from(sharedBuildDir.resolve("lib").toFile()) {
-            into project.platformPath + '/shared'
+            from(sharedBuildDir.resolve("lib").toFile()) {
+                into project.platformPath + '/shared'
+                include "*.${project.ext.version}.dylib".toString()
+                eachFile { f->
+                    f.name = f.name.replace("${project.ext.version}", "${project.ext.soVersion}")
+                }
+                exclude 'cv2.so'
+                exclude '**/*dephelp*'
+            }
+            from(sharedBuildDir.resolve("lib").toFile()) {
+                into project.platformPath + '/shared'
 
-            include 'libopencv_java*.so'
-            include 'libopencv_java*.dylib'
-            exclude 'cv2.so'
-            exclude '**/*dephelp*'
-        }
-        from(sharedBuildDir.resolve("3rdparty").resolve("lib").toFile()) {
-            into project.platformPath + '/shared'
-            include '*.so'
+                include 'libopencv_java*.so'
+                include 'libopencv_java*.dylib'
+                exclude 'cv2.so'
+                exclude '**/*dephelp*'
+            }
+            from(sharedBuildDir.resolve("3rdparty").resolve("lib").toFile()) {
+                into project.platformPath + '/shared'
+                include '*.so'
+            }
         }
     } else {
         from(staticBuildDir.resolve("lib").resolve(buildTypeFolder).toFile()) {
@@ -182,12 +190,14 @@ project.tasks.create('cppLibsZip' + buildType, Zip) {
             into project.platformPath + '/shared'
             include '*.lib'  // import library
             include '*.dll'
+            include '*.pdb'
             exclude 'opencv_ts*'
         }
         from(sharedBuildDir.resolve("bin").resolve(buildTypeFolder).toFile()) {
             into project.platformPath + '/shared'
             include '*.lib'  // import library
             include '*.dll'
+            include '*.pdb'
             exclude 'opencv_ts*'
         }
         from(sharedBuildDir.resolve("3rdparty").resolve("lib").toFile()) {

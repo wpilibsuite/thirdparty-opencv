@@ -164,6 +164,17 @@ repositories {
     mavenCentral()
 }
 
+def stripExe = 'strip'
+def objCopyExe = 'objcopy'
+
+if (project.platform == "linux-athena") {
+    stripExe = 'arm-frc2019-linux-gnueabi-strip'
+    objCopyExe = 'arm-frc2019-linux-gnueabi-objcopy'
+} else if (project.platform == "linux-raspbian") {
+    stripExe = 'arm-raspbian9-linux-gnueabihf-strip'
+    objCopyExe = 'arm-raspbian-linux-gnueabihf-objcopy'
+}
+
 ['': project.cmakeBuildDirectory,
  'Shared': project.cmakeBuildSharedDirectory,
  'Debug': project.cmakeBuildDebugDirectory,
@@ -201,6 +212,7 @@ repositories {
                     '-DCMAKE_MAKE_PROGRAM=make' +
                     '-DENABLE_NEON=ON' +
                     '-DENABLE_VFPV3=ON' +
+                    '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
                     "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
             } else if (project.platform == "linux-raspbian") {
                 toolchain = projectDir.canonicalPath + "/arm-pi-gnueabihf.toolchain.cmake"
@@ -209,6 +221,7 @@ repositories {
                     '-DCMAKE_MAKE_PROGRAM=make' +
                     '-DENABLE_NEON=ON' +
                     '-DENABLE_VFPV3=ON' +
+                    '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
                     "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
             }
             if (toolchain) {
@@ -255,10 +268,10 @@ repositories {
         outputs.file buildDirectory.resolve("bin").resolve(project.jarName).toFile()
     }
 
-    if (buildType != "Shared") {
+    if (!buildType.contains("Shared")) {
         if (project.platform.startsWith('windows')) {
             project.tasks.create('nativeLibLinks' + buildType, Exec) {
-                //dependsOn 'make' + buildType
+                dependsOn 'make' + buildType
                 workingDir buildDirectory.resolve("lib").resolve(buildTypeFolder).toString()
                 executable 'lib'
                 def inputFiles = ["opencv_calib3d${project.libVersion}", "opencv_features2d${project.libVersion}", "opencv_flann${project.libVersion}", "opencv_highgui${project.libVersion}", "opencv_imgcodecs${project.libVersion}", "opencv_imgproc${project.libVersion}", "opencv_ml${project.libVersion}", "opencv_objdetect${project.libVersion}", "opencv_photo${project.libVersion}", "opencv_shape${project.libVersion}", "opencv_stitching${project.libVersion}", "opencv_superres${project.libVersion}", "opencv_videoio${project.libVersion}", "opencv_video${project.libVersion}", "opencv_videostab${project.libVersion}", "opencv_core${project.libVersion}", "../../3rdparty/lib/${buildTypeFolder}/libjpeg-turbo", "../../3rdparty/lib/${buildTypeFolder}/libpng", "../../3rdparty/lib/${buildTypeFolder}/zlib"]
@@ -316,6 +329,69 @@ repositories {
                 standardInput = new ByteArrayInputStream("create libopencv${project.libVersion}.a\naddlib libopencv_calib3d.a\naddlib libopencv_features2d.a\naddlib libopencv_flann.a\naddlib libopencv_highgui.a\naddlib libopencv_imgcodecs.a\naddlib libopencv_imgproc.a\naddlib libopencv_ml.a\naddlib libopencv_objdetect.a\naddlib libopencv_photo.a\naddlib libopencv_shape.a\naddlib libopencv_stitching.a\naddlib libopencv_superres.a\naddlib libopencv_videoio.a\naddlib libopencv_video.a\naddlib libopencv_videostab.a\naddlib libopencv_core.a\naddlib ../3rdparty/lib/liblibjpeg-turbo.a\naddlib ../3rdparty/lib/liblibpng.a\naddlib ../3rdparty/lib/libzlib.a\nsave\nend\n".getBytes())
                 inputs.file buildDirectory.resolve("lib").resolve("libopencv_core.a").toFile()
                 outputs.file buildDirectory.resolve("lib").resolve("libopencv${project.libVersion}.a").toFile()
+            }
+        }
+    } else if (project.platform.startsWith('linux') && buildType.contains('SharedDebug')) {
+        // linux shared Debug
+        def stripCopyDir = file("$buildDir/copy${buildType}")
+        def stripOutputDir = file("$buildDir/strip${buildType}")
+        project.tasks.create('copyLibs' + buildType, Copy) {
+            dependsOn 'make' + buildType
+            destinationDir stripCopyDir
+
+            from(buildDirectory.resolve("lib").toFile()) {
+                include '*.so.*.*.*'
+                exclude 'cv2.so'
+                exclude '**/*dephelp*'
+                eachFile { f->
+                    f.name = f.name.replace("${project.ext.version}", "${project.ext.soVersion}")
+                }
+            }
+            from(buildDirectory.resolve("lib").toFile()) {
+                include "*.${project.ext.version}.dylib".toString()
+                eachFile { f->
+                    f.name = f.name.replace("${project.ext.version}", "${project.ext.soVersion}")
+                }
+                exclude 'cv2.so'
+                exclude '**/*dephelp*'
+            }
+            from(buildDirectory.resolve("lib").toFile()) {
+
+                include 'libopencv_java*.so'
+                include 'libopencv_java*.dylib'
+                exclude 'cv2.so'
+                exclude '**/*dephelp*'
+            }
+            from(buildDirectory.resolve("3rdparty").resolve("lib").toFile()) {
+                include '*.so'
+            }
+        }
+        project.tasks.create('stripLibs' + buildType) {
+            inputs.dir stripCopyDir
+            outputs.dir stripOutputDir
+
+            dependsOn 'copyLibs' + buildType
+
+            doLast {
+                stripCopyDir.eachFile { File file->
+                    def name = file.name
+                    def mainFileStr = "${stripOutputDir.toString()}/${name}"
+                    def debugFile = "${mainFileStr}.debug"
+                    copy {
+                        into stripOutputDir
+                        from (file)
+                    }
+
+                    project.exec { ExecSpec ex ->
+                        ex.commandLine objCopyExe, '--only-keep-debug', mainFileStr, debugFile
+                    }
+                    project.exec { ExecSpec ex ->
+                        ex.commandLine stripExe, '-g', mainFileStr
+                    }
+                    project.exec { ExecSpec ex ->
+                        ex.commandLine objCopyExe, "--add-gnu-debuglink=$debugFile", mainFileStr
+                    }
+                }
             }
         }
     }
