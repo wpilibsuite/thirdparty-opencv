@@ -172,7 +172,7 @@ if (project.platform == "linux-athena") {
     objCopyExe = 'arm-frc2019-linux-gnueabi-objcopy'
 } else if (project.platform == "linux-raspbian") {
     stripExe = 'arm-raspbian9-linux-gnueabihf-strip'
-    objCopyExe = 'arm-raspbian-linux-gnueabihf-objcopy'
+    objCopyExe = 'arm-raspbian9-linux-gnueabihf-objcopy'
 }
 
 ['': project.cmakeBuildDirectory,
