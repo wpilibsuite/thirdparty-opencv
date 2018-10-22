@@ -326,6 +326,8 @@ build.dependsOn cppSourcesZip
 build.dependsOn cppLibsZip
 build.dependsOn jniJar
 build.dependsOn cppLibsZipDebug
+build.dependsOn cppLibsZipStatic
+build.dependsOn cppLibsZipStaticDebug
 build.dependsOn jniJarDebug
 build.dependsOn outputJar
 build.dependsOn sourcesJar
@@ -336,6 +338,8 @@ artifacts {
     archives cppLibsZip
     archives jniJar
     archives cppLibsZipDebug
+    archives cppLibsZipStatic
+    archives cppLibsZipStaticDebug
     archives jniJarDebug
     archives outputJar
     archives sourcesJar
@@ -347,6 +351,8 @@ addTaskToCopyAllOutputs(cppLibsZip)
 addTaskToCopyAllOutputs(jniJar)
 addTaskToCopyAllOutputs(cppLibsZipDebug)
 addTaskToCopyAllOutputs(jniJarDebug)
+addTaskToCopyAllOutputs(cppLibsZipStatic)
+addTaskToCopyAllOutputs(cppLibsZipStaticDebug)
 addTaskToCopyAllOutputs(outputJar)
 addTaskToCopyAllOutputs(sourcesJar)
 
@@ -354,22 +360,32 @@ model {
     publishing {
         def allTask
         if (!project.hasProperty('jenkinsBuild')) {
-            allTask = createAllCombined([cppLibsZip], 'opencv', zipBaseName, Zip, project)
+            allTask = createAllCombined([cppLibsZip], 'opencv', zipBaseName, Zip, project, '')
         }
 
         def allJniTask
         if (!project.hasProperty('jenkinsBuild')) {
-            allJniTask = createAllCombined([jniJar], "opencvJNI", jniBaseName, Jar, project)
+            allJniTask = createAllCombined([jniJar], "opencvJNI", jniBaseName, Jar, project, '')
         }
 
         def allTaskDebug
         if (!project.hasProperty('jenkinsBuild')) {
-            allTaskDebug = createAllCombinedDebug([cppLibsZipDebug], 'opencv', zipBaseName, Zip, project)
+            allTaskDebug = createAllCombined([cppLibsZipDebug], 'opencv', zipBaseName, Zip, project, 'debug')
         }
 
         def allJniTaskDebug
         if (!project.hasProperty('jenkinsBuild')) {
-            allJniTaskDebug = createAllCombinedDebug([jniJarDebug], "opencvJNI", jniBaseName, Jar, project)
+            allJniTaskDebug = createAllCombined([jniJarDebug], "opencvJNI", jniBaseName, Jar, project, 'debug')
+        }
+
+        def allTaskStatic
+        if (!project.hasProperty('jenkinsBuild')) {
+            allTaskStatic = createAllCombined([cppLibsZipStatic], 'opencv', zipBaseName, Zip, project, 'static')
+        }
+
+        def allTaskStaticDebug
+        if (!project.hasProperty('jenkinsBuild')) {
+            allTaskStaticDebug = createAllCombined([cppLibsZipStaticDebug], 'opencv', zipBaseName, Zip, project, 'staticdebug')
         }
 
         publications {
@@ -400,10 +416,14 @@ model {
                 artifact cppSourcesZip
                 artifact cppLibsZip
                 artifact cppLibsZipDebug
+                artifact cppLibsZipStatic
+                artifact cppLibsZipStaticDebug
 
                 if (!project.hasProperty('jenkinsBuild')) {
                     artifact allTask
                     artifact allTaskDebug
+                    artifact allTaskStatic
+                    artifact allTaskStaticDebug
                 }
 
                 artifactId = "${baseArtifactId}-cpp"
