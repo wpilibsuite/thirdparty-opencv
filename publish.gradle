@@ -11,7 +11,7 @@ publishing {
     }
 }
 
-def pubVersion = "${project.ext.version}-11"
+def pubVersion = "${project.ext.version}-12"
 
 def outputsFolder = file("$project.buildDir/outputs")
 
@@ -101,139 +101,178 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
 }
 ['', 'Debug' ].each{ buildType ->
 
-def staticBuildDir = buildType.contains('Debug') ? project.cmakeBuildDebugDirectory : project.cmakeBuildDirectory
-def sharedBuildDir = buildType.contains('Debug') ? project.cmakeBuildSharedDebugDirectory : project.cmakeBuildSharedDirectory
+    def staticBuildDir = buildType.contains('Debug') ? project.cmakeBuildDebugDirectory : project.cmakeBuildDirectory
+    def sharedBuildDir = buildType.contains('Debug') ? project.cmakeBuildSharedDebugDirectory : project.cmakeBuildSharedDirectory
 
-def outputClassifier = project.ext.platformClassifier
-if (buildType.contains('Debug')) {
-    outputClassifier = outputClassifier + 'debug'
-}
-
-def buildTypeFolder = buildType.contains('Debug') ? 'Debug' : 'Release'
-
-project.tasks.create('cppLibsZip' + buildType, Zip) {
-    dependsOn tasks.named('nativeLibLinks' + buildType)
-    dependsOn tasks.named('makeShared' + buildType)
-    destinationDir = outputsFolder
-    classifier = outputClassifier
-    baseName = zipBaseName
-    duplicatesStrategy = 'exclude'
-
-    manifest {
-        attributes(
-                "Created-By": "WPILib Gradle Build Script",
-                "Implementation-Title": "OpenCV Native Libraries, ${project.ext.platformClassifier}",
-                "Implementation-Version": pubVersion,
-                "Implementation-Vendor": "Itseez",
-
-                "Bundle-Name": "${baseName}",
-                "Bundle-Version": pubVersion,
-                "Bundle-License": "https://opensource.org/licenses/BSD-3-Clause",
-                "Bundle-Vendor": "WPILib")
+    def outputClassifier = project.ext.platformClassifier
+    def outputClassifierStatic = project.ext.platformClassifier + 'static'
+    if (buildType.contains('Debug')) {
+        outputClassifier = outputClassifier + 'debug'
+        outputClassifierStatic = outputClassifierStatic + 'debug'
     }
 
-    from(licenseFile) {
-        into '/'
-    }
+    def buildTypeFolder = buildType.contains('Debug') ? 'Debug' : 'Release'
 
-    if (!project.platform.startsWith("windows")) {
-        from(staticBuildDir.resolve("lib").toFile()) {
-            into project.platformPath + '/static'
-            include 'libopencv*.a'
-            exclude 'libopencv_*.a'
+    project.tasks.create('cppLibsZip' + buildType, Zip) {
+        dependsOn tasks.named('makeShared' + buildType)
+        destinationDir = outputsFolder
+        classifier = outputClassifier
+        baseName = zipBaseName
+        duplicatesStrategy = 'exclude'
+
+        manifest {
+            attributes(
+                    "Created-By": "WPILib Gradle Build Script",
+                    "Implementation-Title": "OpenCV Native Libraries, ${project.ext.platformClassifier}",
+                    "Implementation-Version": pubVersion,
+                    "Implementation-Vendor": "Itseez",
+
+                    "Bundle-Name": "${baseName}",
+                    "Bundle-Version": pubVersion,
+                    "Bundle-License": "https://opensource.org/licenses/BSD-3-Clause",
+                    "Bundle-Vendor": "WPILib")
         }
-        from(sharedBuildDir.resolve("lib").toFile()) {
-            into project.platformPath + '/shared'
-            include '*.so.*.*.*'
-            exclude 'cv2.so'
-            exclude '**/*dephelp*'
-            eachFile { f->
-                f.name = f.name.replace("${project.ext.version}", "${project.ext.soVersion}")
+
+        from(licenseFile) {
+            into '/'
+        }
+
+        if (!project.platform.startsWith("windows")) {
+            if (buildType.contains('Debug') && project.platform.startsWith('linux')) {
+                dependsOn 'stripLibsSharedDebug'
+                from("$buildDir/stripSharedDebug") {
+                    into project.platformPath + '/shared'
+                }
+            } else {
+                from(sharedBuildDir.resolve("lib").toFile()) {
+                    into project.platformPath + '/shared'
+                    include '*.so.*.*.*'
+                    exclude 'cv2.so'
+                    exclude '**/*dephelp*'
+                    eachFile { f->
+                        f.name = f.name.replace("${project.ext.version}", "${project.ext.soVersion}")
+                    }
+                }
+                from(sharedBuildDir.resolve("lib").toFile()) {
+                    into project.platformPath + '/shared'
+                    include "*.${project.ext.version}.dylib".toString()
+                    eachFile { f->
+                        f.name = f.name.replace("${project.ext.version}", "${project.ext.soVersion}")
+                    }
+                    exclude 'cv2.so'
+                    exclude '**/*dephelp*'
+                }
+                from(sharedBuildDir.resolve("lib").toFile()) {
+                    into project.platformPath + '/shared'
+
+                    include 'libopencv_java*.so'
+                    include 'libopencv_java*.dylib'
+                    exclude 'cv2.so'
+                    exclude '**/*dephelp*'
+                }
+                from(sharedBuildDir.resolve("3rdparty").resolve("lib").toFile()) {
+                    into project.platformPath + '/shared'
+                    include '*.so'
+                }
+            }
+        } else {
+            from(sharedBuildDir.resolve("lib").resolve(buildTypeFolder).toFile()) {
+                into project.platformPath + '/shared'
+                include '*.lib'  // import library
+                include '*.dll'
+                include '*.pdb'
+                exclude 'opencv_ts*'
+            }
+            from(sharedBuildDir.resolve("bin").resolve(buildTypeFolder).toFile()) {
+                into project.platformPath + '/shared'
+                include '*.lib'  // import library
+                include '*.dll'
+                include '*.pdb'
+                exclude 'opencv_ts*'
+            }
+            from(sharedBuildDir.resolve("3rdparty").resolve("lib").toFile()) {
+                into project.platformPath + '/shared'
+                include '*.dll'
             }
         }
-        from(sharedBuildDir.resolve("lib").toFile()) {
-            into project.platformPath + '/shared'
-            include "*.${project.ext.version}.dylib".toString()
-            eachFile { f->
-                f.name = f.name.replace("${project.ext.version}", "${project.ext.soVersion}")
+    }
+
+    project.tasks.create('cppLibsZipStatic' + buildType, Zip) {
+        dependsOn tasks.named('nativeLibLinks' + buildType)
+        destinationDir = outputsFolder
+        classifier = outputClassifierStatic
+        baseName = zipBaseName
+        duplicatesStrategy = 'exclude'
+
+        manifest {
+            attributes(
+                    "Created-By": "WPILib Gradle Build Script",
+                    "Implementation-Title": "OpenCV Native Libraries, ${project.ext.platformClassifier}",
+                    "Implementation-Version": pubVersion,
+                    "Implementation-Vendor": "Itseez",
+
+                    "Bundle-Name": "${baseName}",
+                    "Bundle-Version": pubVersion,
+                    "Bundle-License": "https://opensource.org/licenses/BSD-3-Clause",
+                    "Bundle-Vendor": "WPILib")
+        }
+
+        from(licenseFile) {
+            into '/'
+        }
+
+        if (!project.platform.startsWith("windows")) {
+            from(staticBuildDir.resolve("lib").toFile()) {
+                into project.platformPath + '/static'
+                include 'libopencv*.a'
+                exclude 'libopencv_*.a'
             }
-            exclude 'cv2.so'
-            exclude '**/*dephelp*'
-        }
-        from(sharedBuildDir.resolve("lib").toFile()) {
-            into project.platformPath + '/shared'
-
-            include 'libopencv_java*.so'
-            include 'libopencv_java*.dylib'
-            exclude 'cv2.so'
-            exclude '**/*dephelp*'
-        }
-        from(sharedBuildDir.resolve("3rdparty").resolve("lib").toFile()) {
-            into project.platformPath + '/shared'
-            include '*.so'
-        }
-    } else {
-        from(staticBuildDir.resolve("lib").resolve(buildTypeFolder).toFile()) {
-            into project.platformPath + '/static'
-            include 'opencv*.lib'
-            exclude 'opencv_*.lib'
-        }
-        from(sharedBuildDir.resolve("lib").resolve(buildTypeFolder).toFile()) {
-            into project.platformPath + '/shared'
-            include '*.lib'  // import library
-            include '*.dll'
-            exclude 'opencv_ts*'
-        }
-        from(sharedBuildDir.resolve("bin").resolve(buildTypeFolder).toFile()) {
-            into project.platformPath + '/shared'
-            include '*.lib'  // import library
-            include '*.dll'
-            exclude 'opencv_ts*'
-        }
-        from(sharedBuildDir.resolve("3rdparty").resolve("lib").toFile()) {
-            into project.platformPath + '/shared'
-            include '*.dll'
+        } else {
+            from(staticBuildDir.resolve("lib").resolve(buildTypeFolder).toFile()) {
+                into project.platformPath + '/static'
+                include 'opencv*.lib'
+                exclude 'opencv_*.lib'
+            }
         }
     }
-}
 
-project.tasks.create('jniJar' + buildType, Zip) {
-    dependsOn tasks.named('make' + buildType)
-    destinationDir = outputsFolder
-    classifier = outputClassifier
-    baseName = jniBaseName
-    duplicatesStrategy = 'exclude'
+    project.tasks.create('jniJar' + buildType, Zip) {
+        dependsOn tasks.named('make' + buildType)
+        destinationDir = outputsFolder
+        classifier = outputClassifier
+        baseName = jniBaseName
+        duplicatesStrategy = 'exclude'
 
-    manifest {
-        attributes(
-                "Created-By": "WPILib Gradle Build Script",
-                "Implementation-Title": "OpenCV JNI Library, ${project.ext.platformClassifier}",
-                "Implementation-Version": pubVersion,
-                "Implementation-Vendor": "Itseez",
+        manifest {
+            attributes(
+                    "Created-By": "WPILib Gradle Build Script",
+                    "Implementation-Title": "OpenCV JNI Library, ${project.ext.platformClassifier}",
+                    "Implementation-Version": pubVersion,
+                    "Implementation-Vendor": "Itseez",
 
-                "Bundle-Name": "${baseName}",
-                "Bundle-Version": pubVersion,
-                "Bundle-License": "https://opensource.org/licenses/BSD-3-Clause",
-                "Bundle-Vendor": "WPILib")
-    }
-
-    from(licenseFile) {
-        into '/'
-    }
-
-    if (!project.platform.startsWith("windows")) {
-        from(staticBuildDir.resolve("lib").toFile()) {
-            into project.platformPath
-            include '*java*.so'
-            include '*java*.dylib'
+                    "Bundle-Name": "${baseName}",
+                    "Bundle-Version": pubVersion,
+                    "Bundle-License": "https://opensource.org/licenses/BSD-3-Clause",
+                    "Bundle-Vendor": "WPILib")
         }
-    } else {
-        from(staticBuildDir.resolve("lib").resolve("Release").toFile()) {
-            into project.platformPath
-            include '*java*.dll'
+
+        from(licenseFile) {
+            into '/'
+        }
+
+        if (!project.platform.startsWith("windows")) {
+            from(staticBuildDir.resolve("lib").toFile()) {
+                into project.platformPath
+                include '*java*.so'
+                include '*java*.dylib'
+            }
+        } else {
+            from(staticBuildDir.resolve("lib").resolve("Release").toFile()) {
+                into project.platformPath
+                include '*java*.dll'
+            }
         }
     }
-}
 
 }
 
@@ -287,6 +326,8 @@ build.dependsOn cppSourcesZip
 build.dependsOn cppLibsZip
 build.dependsOn jniJar
 build.dependsOn cppLibsZipDebug
+build.dependsOn cppLibsZipStatic
+build.dependsOn cppLibsZipStaticDebug
 build.dependsOn jniJarDebug
 build.dependsOn outputJar
 build.dependsOn sourcesJar
@@ -297,6 +338,8 @@ artifacts {
     archives cppLibsZip
     archives jniJar
     archives cppLibsZipDebug
+    archives cppLibsZipStatic
+    archives cppLibsZipStaticDebug
     archives jniJarDebug
     archives outputJar
     archives sourcesJar
@@ -308,6 +351,8 @@ addTaskToCopyAllOutputs(cppLibsZip)
 addTaskToCopyAllOutputs(jniJar)
 addTaskToCopyAllOutputs(cppLibsZipDebug)
 addTaskToCopyAllOutputs(jniJarDebug)
+addTaskToCopyAllOutputs(cppLibsZipStatic)
+addTaskToCopyAllOutputs(cppLibsZipStaticDebug)
 addTaskToCopyAllOutputs(outputJar)
 addTaskToCopyAllOutputs(sourcesJar)
 
@@ -315,22 +360,32 @@ model {
     publishing {
         def allTask
         if (!project.hasProperty('jenkinsBuild')) {
-            allTask = createAllCombined([cppLibsZip], 'opencv', zipBaseName, Zip, project)
+            allTask = createAllCombined([cppLibsZip], 'opencv', zipBaseName, Zip, project, '')
         }
 
         def allJniTask
         if (!project.hasProperty('jenkinsBuild')) {
-            allJniTask = createAllCombined([jniJar], "opencvJNI", jniBaseName, Jar, project)
+            allJniTask = createAllCombined([jniJar], "opencvJNI", jniBaseName, Jar, project, '')
         }
 
         def allTaskDebug
         if (!project.hasProperty('jenkinsBuild')) {
-            allTaskDebug = createAllCombinedDebug([cppLibsZipDebug], 'opencv', zipBaseName, Zip, project)
+            allTaskDebug = createAllCombined([cppLibsZipDebug], 'opencv', zipBaseName, Zip, project, 'debug')
         }
 
         def allJniTaskDebug
         if (!project.hasProperty('jenkinsBuild')) {
-            allJniTaskDebug = createAllCombinedDebug([jniJarDebug], "opencvJNI", jniBaseName, Jar, project)
+            allJniTaskDebug = createAllCombined([jniJarDebug], "opencvJNI", jniBaseName, Jar, project, 'debug')
+        }
+
+        def allTaskStatic
+        if (!project.hasProperty('jenkinsBuild')) {
+            allTaskStatic = createAllCombined([cppLibsZipStatic], 'opencv', zipBaseName, Zip, project, 'static')
+        }
+
+        def allTaskStaticDebug
+        if (!project.hasProperty('jenkinsBuild')) {
+            allTaskStaticDebug = createAllCombined([cppLibsZipStaticDebug], 'opencv', zipBaseName, Zip, project, 'staticdebug')
         }
 
         publications {
@@ -361,10 +416,14 @@ model {
                 artifact cppSourcesZip
                 artifact cppLibsZip
                 artifact cppLibsZipDebug
+                artifact cppLibsZipStatic
+                artifact cppLibsZipStaticDebug
 
                 if (!project.hasProperty('jenkinsBuild')) {
                     artifact allTask
                     artifact allTaskDebug
+                    artifact allTaskStatic
+                    artifact allTaskStaticDebug
                 }
 
                 artifactId = "${baseArtifactId}-cpp"
