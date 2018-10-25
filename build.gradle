@@ -275,7 +275,7 @@ if (project.platform == "linux-athena") {
                 workingDir buildDirectory.resolve("lib").resolve(buildTypeFolder).toString()
                 executable 'lib'
                 def inputFiles = ["opencv_calib3d${project.libVersion}", "opencv_features2d${project.libVersion}", "opencv_flann${project.libVersion}", "opencv_highgui${project.libVersion}", "opencv_imgcodecs${project.libVersion}", "opencv_imgproc${project.libVersion}", "opencv_ml${project.libVersion}", "opencv_objdetect${project.libVersion}", "opencv_photo${project.libVersion}", "opencv_shape${project.libVersion}", "opencv_stitching${project.libVersion}", "opencv_superres${project.libVersion}", "opencv_videoio${project.libVersion}", "opencv_video${project.libVersion}", "opencv_videostab${project.libVersion}", "opencv_core${project.libVersion}", "../../3rdparty/lib/${buildTypeFolder}/libjpeg-turbo", "../../3rdparty/lib/${buildTypeFolder}/libpng", "../../3rdparty/lib/${buildTypeFolder}/zlib"]
-                args = ["/OUT:opencv${project.libVersion}.lib"]
+                def setArgs = ["/OUT:opencv${project.libVersion}.lib"]
                 inputFiles.each {
                     def inFile = it
                     if (buildTypeFolder == 'Debug') {
@@ -283,8 +283,10 @@ if (project.platform == "linux-athena") {
                     } else {
                         inFile = inFile + '.lib'
                     }
-                    args << it
+                    setArgs << inFile
                 }
+                args = setArgs
+
                 inputs.file buildDirectory.resolve("lib").resolve(buildTypeFolder).resolve("opencv_core${project.libVersion}.lib").toFile()
                 outputs.file buildDirectory.resolve("lib").resolve(buildTypeFolder).resolve("opencv${project.libVersion}.lib").toFile()
             }
