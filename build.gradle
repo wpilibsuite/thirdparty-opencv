@@ -49,7 +49,8 @@ ext {
             '-DBUILD_TESTS=OFF',
             '-DPython_ADDITIONAL_VERSIONS=3.5',
             '-DWITH_WEBP=OFF',
-            '-DBUILD_JAVA=ON'
+            '-DBUILD_JAVA=ON',
+            '-DBUILD_WITH_STATIC_CRT=OFF'
     ]
 }
 
