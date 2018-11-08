@@ -50,7 +50,8 @@ ext {
             '-DPython_ADDITIONAL_VERSIONS=3.5',
             '-DWITH_WEBP=OFF',
             '-DBUILD_JAVA=ON',
-            '-DBUILD_WITH_STATIC_CRT=OFF'
+            '-DBUILD_WITH_STATIC_CRT=OFF',
+            '-DWITH_PROTOBUF=OFF'
     ]
 }
 
@@ -329,7 +330,12 @@ if (project.platform == "linux-athena") {
                 workingDir buildDirectory.resolve("lib").toString()
                 executable 'ar'
                 args = ['-M']
-                standardInput = new ByteArrayInputStream("create libopencv${project.libVersion}.a\naddlib libopencv_calib3d.a\naddlib libopencv_features2d.a\naddlib libopencv_flann.a\naddlib libopencv_highgui.a\naddlib libopencv_imgcodecs.a\naddlib libopencv_imgproc.a\naddlib libopencv_ml.a\naddlib libopencv_objdetect.a\naddlib libopencv_photo.a\naddlib libopencv_shape.a\naddlib libopencv_stitching.a\naddlib libopencv_superres.a\naddlib libopencv_videoio.a\naddlib libopencv_video.a\naddlib libopencv_videostab.a\naddlib libopencv_core.a\naddlib ../3rdparty/lib/liblibjpeg-turbo.a\naddlib ../3rdparty/lib/liblibpng.a\naddlib ../3rdparty/lib/libzlib.a\nsave\nend\n".getBytes())
+                def inputString = "create libopencv${project.libVersion}.a\naddlib libopencv_calib3d.a\naddlib libopencv_features2d.a\naddlib libopencv_flann.a\naddlib libopencv_highgui.a\naddlib libopencv_imgcodecs.a\naddlib libopencv_imgproc.a\naddlib libopencv_ml.a\naddlib libopencv_objdetect.a\naddlib libopencv_photo.a\naddlib libopencv_shape.a\naddlib libopencv_stitching.a\naddlib libopencv_superres.a\naddlib libopencv_videoio.a\naddlib libopencv_video.a\naddlib libopencv_videostab.a\naddlib libopencv_core.a\naddlib ../3rdparty/lib/liblibjpeg-turbo.a\naddlib ../3rdparty/lib/liblibpng.a\naddlib ../3rdparty/lib/libzlib.a\n"
+                if (project.platform == "linux-athena" || project.platform == "linux-raspbian") {
+                    inputString += "../3rdparty/lib/libtegra_hal.a\n"
+                }
+                inputString += "save\nend\n"
+                standardInput = new ByteArrayInputStream(inputString.getBytes())
                 inputs.file buildDirectory.resolve("lib").resolve("libopencv_core.a").toFile()
                 outputs.file buildDirectory.resolve("lib").resolve("libopencv${project.libVersion}.a").toFile()
             }
