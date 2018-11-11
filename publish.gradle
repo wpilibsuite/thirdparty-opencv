@@ -187,7 +187,6 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
                 into project.platformPath + '/shared'
                 include '*.lib'  // import library
                 include '*.dll'
-                include '*.pdb'
                 exclude 'opencv_ts*'
             }
             from(sharedBuildDir.resolve("3rdparty").resolve("lib").toFile()) {
