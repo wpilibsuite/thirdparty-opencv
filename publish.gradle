@@ -11,7 +11,7 @@ publishing {
     }
 }
 
-def pubVersion = "${project.ext.version}-17"
+def pubVersion = "${project.ext.version}-18"
 
 def outputsFolder = file("$project.buildDir/outputs")
 
@@ -230,7 +230,12 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
             from(staticBuildDir.resolve("lib").resolve(buildTypeFolder).toFile()) {
                 into project.platformPath + '/static'
                 include 'opencv*.lib'
+                include '*.pdb'
                 exclude 'opencv_*.lib'
+            }
+            from(sharedBuildDir.resolve("3rdparty").resolve("lib").toFile()) {
+                into project.platformPath + '/static'
+                include '*.pdb'
             }
         }
     }
