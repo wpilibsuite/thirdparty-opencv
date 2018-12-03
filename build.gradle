@@ -195,7 +195,7 @@ if (project.platform == "linux-athena") {
             def toolchain = null
             def args = defaultCmakeArgs
             if (buildType.contains("Shared")) {
-                args = args + '-DBUILD_SHARED_LIBS=ON'
+                args = args + '-DBUILD_SHARED_LIBS=ON' + '-DCMAKE_DEBUG_POSTFIX=d'
             } else {
                 args = args + '-DBUILD_SHARED_LIBS=OFF'
             }
