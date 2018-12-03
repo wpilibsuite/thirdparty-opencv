@@ -1,3 +1,5 @@
+import java.security.MessageDigest
+
 apply plugin: 'maven-publish'
 
 publishing {
@@ -264,17 +266,30 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
             into '/'
         }
 
+        def directory
+        def jniFileName
+        def jniFile
+
         if (!project.platform.startsWith("windows")) {
-            from(staticBuildDir.resolve("lib").toFile()) {
-                into project.platformPath
-                include '*java*.so'
-                include '*java*.dylib'
-            }
+            directory = staticBuildDir.resolve("lib").toFile()
+            jniFileName = project.platform.startsWith('osx') ? "libopencv_java${libVersion}.dylib" : "libopencv_java${libVersion}.so"
+            jniFile = new File(directory.absolutePath, "${jniFileName}")
         } else {
-            from(staticBuildDir.resolve("lib").resolve("Release").toFile()) {
-                into project.platformPath
-                include '*java*.dll'
-            }
+            directory = staticBuildDir.resolve("lib").resolve(buildTypeFolder).toFile()
+            jniFileName = "opencv_java${libVersion}.dll"
+            jniFile = new File(directory.absolutePath, "${jniFileName}")
+        }
+
+        def hashFile = new File(directory.absolutePath, "${jniFileName}.hash")
+        it.outputs.file(hashFile)
+        it.from(hashFile) {
+            into project.platformPath
+        }
+        it.doFirst {
+            hashFile.text = MessageDigest.getInstance("MD5").digest(jniFile.bytes).encodeHex().toString()
+        }
+        it.from(jniFile) {
+            into project.platformPath
         }
     }
 
