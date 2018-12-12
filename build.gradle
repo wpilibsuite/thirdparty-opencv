@@ -333,9 +333,7 @@ if (project.platform == "linux-athena") {
                 executable 'ar'
                 args = ['-M']
                 def inputFiles = ["libopencv_calib3d", "libopencv_features2d", "libopencv_flann", "libopencv_highgui", "libopencv_imgcodecs", "libopencv_imgproc", "libopencv_ml", "libopencv_objdetect", "libopencv_photo", "libopencv_shape", "libopencv_stitching", "libopencv_superres", "libopencv_videoio", "libopencv_video", "libopencv_videostab", "libopencv_core", "../3rdparty/lib/liblibjpeg-turbo", "../3rdparty/lib/liblibpng", "../3rdparty/lib/libzlib"]
-                if (project.platform == "linux-athena" || project.platform == "linux-raspbian") {
-                    inputFiles += "../3rdparty/lib/libtegra_hal"
-                }
+
                 def inputString = "create libopencv${project.libVersion}.a\n"
                 inputFiles.each {
                     def inFile = 'addlib ' + it
@@ -346,6 +344,11 @@ if (project.platform == "linux-athena") {
                     }
                     inputString += inFile
                 }
+
+                if (project.platform == "linux-athena" || project.platform == "linux-raspbian") {
+                    inputString += "addlib ../3rdparty/lib/libtegra_hal.a\n"
+                }
+
                 inputString += "save\nend\n"
                 standardInput = new ByteArrayInputStream(inputString.getBytes())
                 inputs.file buildDirectory.resolve("lib").resolve("libopencv_core.a").toFile()
