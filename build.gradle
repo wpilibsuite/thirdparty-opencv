@@ -333,11 +333,10 @@ if (project.platform == "linux-athena") {
                 executable 'ar'
                 args = ['-M']
                 def inputFiles = ["libopencv_calib3d", "libopencv_features2d", "libopencv_flann", "libopencv_highgui", "libopencv_imgcodecs", "libopencv_imgproc", "libopencv_ml", "libopencv_objdetect", "libopencv_photo", "libopencv_shape", "libopencv_stitching", "libopencv_superres", "libopencv_videoio", "libopencv_video", "libopencv_videostab", "libopencv_core", "../3rdparty/lib/liblibjpeg-turbo", "../3rdparty/lib/liblibpng", "../3rdparty/lib/libzlib"]
-                //def inputString = "create libopencv${project.libVersion}.a\naddlib libopencv_calib3d.a\naddlib libopencv_videoio.a\naddlib libopencv_video.a\naddlib libopencv_videostab.a\naddlib                                                                            libopencv_core.a\naddlib ../3rdparty/lib/liblibjpeg-turbo.a\naddlib ../3rdparty/lib/liblibpng.a\naddlib ../3rdparty/lib/libzlib.a\n"
                 if (project.platform == "linux-athena" || project.platform == "linux-raspbian") {
                     inputFiles += "../3rdparty/lib/libtegra_hal"
                 }
-                def inputSting = "create libopencv${project.libVersion}.a\n"
+                def inputString = "create libopencv${project.libVersion}.a\n"
                 inputFiles.each {
                     def inFile = 'addlib ' + it
                     if (buildTypeFolder == 'Debug') {
