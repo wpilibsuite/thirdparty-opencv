@@ -18,7 +18,7 @@ jobs:
       submodules: true
     - script: |
         sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/*
-        ./installFFmpeg arm-raspbian9-linux-gnueabihf- armhf
+        ./installFFmpeg.sh arm-raspbian9-linux-gnueabihf- armhf
       displayName: 'Install Ant and FFmpeg'
     - task: Gradle@2
       inputs:
@@ -52,7 +52,7 @@ jobs:
       submodules: true
     - script: |
         sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/*
-        ./installFFmpeg arm-frc2019-linux-gnueabi- arm
+        ./installFFmpeg.sh arm-frc2019-linux-gnueabi- arm
       displayName: 'Install Ant and FFmpeg'
     - task: Gradle@2
       inputs:
