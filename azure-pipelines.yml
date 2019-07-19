@@ -17,8 +17,9 @@ jobs:
     - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
       submodules: true
     - script: |
-        sudo apt-get update && sudo apt-get install ant ffmpeg -y && sudo rm -rf /var/lib/apt/lists/*
-      displayName: 'Install Ant'
+        sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/*
+        ./installFFmpeg arm-raspbian9-linux-gnueabihf- armhf
+      displayName: 'Install Ant and FFmpeg'
     - task: Gradle@2
       inputs:
         workingDirectory: ''
@@ -50,8 +51,9 @@ jobs:
     - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
       submodules: true
     - script: |
-        sudo apt-get update && sudo apt-get install ant ffmpeg -y && sudo rm -rf /var/lib/apt/lists/*
-      displayName: 'Install Ant'
+        sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/*
+        ./installFFmpeg arm-frc2019-linux-gnueabi- arm
+      displayName: 'Install Ant and FFmpeg'
     - task: Gradle@2
       inputs:
         workingDirectory: ''
@@ -85,7 +87,7 @@ jobs:
       submodules: true
     - script: |
         sudo apt-get update && sudo apt-get install ant ffmpeg -y && sudo rm -rf /var/lib/apt/lists/*
-      displayName: 'Install Ant'
+      displayName: 'Install Ant and FFmpeg'
     - task: Gradle@2
       inputs:
         workingDirectory: ''
@@ -188,8 +190,8 @@ jobs:
         wget "https://download.java.net/java/ga/jdk11/openjdk-11_osx-x64_bin.tar.gz" -O "build/jdk.tar.gz"
         sudo tar xvzf build/jdk.tar.gz -C /Library/Java/JavaVirtualMachines/
         export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-11.jdk/Contents/Home/
-        brew install ant binutils
-      displayName: 'Setup JDK Ant and Binutils'
+        brew install ant binutils ffmpeg
+      displayName: 'Setup JDK Ant, Binutils and FFmpeg'
     - task: Gradle@2
       inputs:
         workingDirectory: ''
