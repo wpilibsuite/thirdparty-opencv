@@ -120,7 +120,7 @@ stages:
           jdkDestinationDirectory: 'build/jdkinst'
           jdkArchitectureOption: x64
       - script: |
-          @call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat"
+          @call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
           set PATH=%PATH%;%ANT_HOME%\bin
           gradlew build -PjenkinsBuild
         displayName: 'Gradle Build'
@@ -151,7 +151,7 @@ stages:
           jdkDestinationDirectory: 'build/jdkinst'
           jdkArchitectureOption: x86
       - script: |
-          @call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvars32.bat"
+          @call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Auxiliary\\Build\\vcvars32.bat"
           set PATH=%PATH%;%ANT_HOME%\bin
           gradlew build -PjenkinsBuild
         displayName: 'Gradle Build'

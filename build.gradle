@@ -159,9 +159,10 @@ ext.jarName = "opencv-${project.libVersion}.jar"
 ext.pathToOpenCVJar = ext.cmakeBuildDirectory.resolve("bin").resolve(ext.jarName)
 
 if (project.platform.startsWith('windows')) {
-    def gen = "Visual Studio 15 2017"
+    def gen = "Visual Studio 16 2019"
+    ext.cmakeArch = 'Win32'
     if (project.platform == "windows-x86_64") {
-        gen += " Win64"
+        ext.cmakeArch = 'x64'
     }
     ext.cmakeGenerator = gen
 }
@@ -244,7 +245,7 @@ if (project.platform == "linux-athena") {
 
         if (project.platform.startsWith("windows")) {
             executable project.cmakePath
-            args = cmakeArgs() + ['-G', '"' + project.cmakeGenerator + '"', project.rootPath]
+            args = cmakeArgs() + ['-G', '"' + project.cmakeGenerator + '"', '-A', project.cmakeArch, project.rootPath]
             outputs.file buildDirectory.resolve("OpenCV.sln").toFile()
         } else {
             executable project.cmakePath
