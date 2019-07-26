@@ -90,6 +90,10 @@ stages:
           testResultsFiles: '**/TEST-*.xml'
           tasks: 'build'
 
+      - script: |
+          ls -la
+          ls -la build/
+
       - task: PublishPipelineArtifact@0
         inputs:
           artifactName: 'Linux'
@@ -116,7 +120,7 @@ stages:
           jdkDestinationDirectory: 'build/jdkinst'
           jdkArchitectureOption: x64
       - script: |
-          @call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
+          @call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat"
           set PATH=%PATH%;%ANT_HOME%\bin
           gradlew build -PjenkinsBuild
         displayName: 'Gradle Build'
@@ -147,7 +151,7 @@ stages:
           jdkDestinationDirectory: 'build/jdkinst'
           jdkArchitectureOption: x86
       - script: |
-          @call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Auxiliary\\Build\\vcvars32.bat"
+          @call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvars32.bat"
           set PATH=%PATH%;%ANT_HOME%\bin
           gradlew build -PjenkinsBuild
         displayName: 'Gradle Build'
@@ -176,7 +180,6 @@ stages:
           workingDirectory: ''
           gradleWrapperFile: 'gradlew'
           gradleOptions: '-Xmx3072m'
-          javaHomeOption: 'path'
           jdkVersionOption: '1.11'
           publishJUnitResults: false
           testResultsFiles: '**/TEST-*.xml'
