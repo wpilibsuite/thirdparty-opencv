@@ -33,7 +33,7 @@ stages:
 
       - task: PublishPipelineArtifact@0
         inputs:
-          artifactName: 'Athena'
+          artifactName: 'Raspbian'
           targetPath: 'build/allOutputs'
 
   - job: Linux_Arm
@@ -60,14 +60,10 @@ stages:
           tasks: 'build'
           options: '-Pplatform=linux-athena -PjenkinsBuild'
 
-      # - task: CopyFiles@2
-      #   inputs:
-      #     contents: 'build\lib\**\*.jar'
-      #     targetFolder: $(Build.ArtifactStagingDirectory)
-
-      # - task: PublishBuildArtifacts@1
-      #   inputs:
-      #     artifactName: 'LinuxJar'
+      - task: PublishPipelineArtifact@0
+        inputs:
+          artifactName: 'Athena'
+          targetPath: 'build/allOutputs'
 
 
   - job: Linux
@@ -94,14 +90,10 @@ stages:
           testResultsFiles: '**/TEST-*.xml'
           tasks: 'build'
 
-      # - task: CopyFiles@2
-      #   inputs:
-      #     contents: 'build\lib\**\*.jar'
-      #     targetFolder: $(Build.ArtifactStagingDirectory)
-
-      # - task: PublishBuildArtifacts@1
-      #   inputs:
-      #     artifactName: 'LinuxJar'
+      - task: PublishPipelineArtifact@0
+        inputs:
+          artifactName: 'Linux'
+          targetPath: 'build/allOutputs'
 
   - job: Windows_64_Bit
     pool:
@@ -129,14 +121,10 @@ stages:
           gradlew build -PjenkinsBuild
         displayName: 'Gradle Build'
 
-      # - task: CopyFiles@2
-      #   inputs:
-      #     contents: 'build\lib\**\*.jar'
-      #     targetFolder: $(Build.ArtifactStagingDirectory)
-
-      # - task: PublishBuildArtifacts@1
-      #   inputs:
-      #     artifactName: 'Win64Jar'
+      - task: PublishPipelineArtifact@0
+        inputs:
+          artifactName: 'Win64'
+          targetPath: 'build/allOutputs'
 
   - job: Windows_32_Bit
     pool:
@@ -164,14 +152,10 @@ stages:
           gradlew build -PjenkinsBuild
         displayName: 'Gradle Build'
 
-      # - task: CopyFiles@2
-      #   inputs:
-      #     contents: 'build\lib\**\*.jar'
-      #     targetFolder: $(Build.ArtifactStagingDirectory)
-
-      # - task: PublishBuildArtifacts@1
-      #   inputs:
-      #     artifactName: 'Win32Jar'
+      - task: PublishPipelineArtifact@0
+        inputs:
+          artifactName: 'Win32'
+          targetPath: 'build/allOutputs'
 
   - job: Mac
     pool:
@@ -199,11 +183,57 @@ stages:
           options: '-PjenkinsBuild'
           tasks: 'build'
 
-      # - task: CopyFiles@2
-      #   inputs:
-      #     contents: 'build\lib\**\*.jar'
-      #     targetFolder: $(Build.ArtifactStagingDirectory)
+      - task: PublishPipelineArtifact@0
+        inputs:
+          artifactName: 'Mac'
+          targetPath: 'build/allOutputs'
 
-      # - task: PublishBuildArtifacts@1
-      #   inputs:
-      #     artifactName: 'MacJar'
+- stage: Combine
+  jobs:
+  - job: CombineJob
+    pool:
+      vmImage: 'macOS-10.14'
+
+    steps:
+    - checkout: none
+    - script: |
+        git clone https://github.com/wpilibsuite/build-tools
+      displayName: 'Clone Combiner'
+    - task: DownloadPipelineArtifact@0
+      inputs:
+        artifactName: 'Mac'
+        targetPath: 'build-tools/combiner/products/build/allOutputs'
+    - task: DownloadPipelineArtifact@0
+      inputs:
+        artifactName: 'Win32'
+        targetPath: 'build-tools/combiner/products/build/allOutputs'
+    - task: DownloadPipelineArtifact@0
+      inputs:
+        artifactName: 'Win64'
+        targetPath: 'build-tools/combiner/products/build/allOutputs'
+    - task: DownloadPipelineArtifact@0
+      inputs:
+        artifactName: 'Linux'
+        targetPath: 'build-tools/combiner/products/build/allOutputs'
+    - task: DownloadPipelineArtifact@0
+      inputs:
+        artifactName: 'Raspbian'
+        targetPath: 'build-tools/combiner/products/build/allOutputs'
+    - task: DownloadPipelineArtifact@0
+      inputs:
+        artifactName: 'Athena'
+        targetPath: 'build-tools/combiner/products/build/allOutputs'
+    - task: Gradle@2
+      inputs:
+        workingDirectory: 'build-tools/combiner'
+        gradleWrapperFile: 'build-tools/combiner/gradlew'
+        gradleOptions: '-Xmx3072m'
+        tasks: 'publish '
+        options: '-Pthirdparty'
+    - script: |
+        echo "##vso[task.setvariable variable=UserHome]$HOME"
+      displayName: 'Set Home Variable'
+    - task: PublishPipelineArtifact@0
+      inputs:
+        artifactName: 'Maven'
+        targetPath: $(UserHome)/releases
