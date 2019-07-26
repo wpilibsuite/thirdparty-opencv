@@ -9,7 +9,7 @@ apply from: 'config.gradle'
 
 def date = new Date()
 def formattedDate = date.format('yyMMdd')
-ext.version = "3.4.4"
+ext.version = "3.4.7"
 ext.soVersion = "3.4"
 ext.libVersion = "${ext.version.replace(".", "")}"
 
@@ -53,7 +53,10 @@ ext {
             '-DBUILD_WITH_STATIC_CRT=OFF',
             '-DWITH_PROTOBUF=OFF',
             '-DWITH_DIRECTX=OFF',
-            '-DENABLE_CXX11=ON'
+            '-DENABLE_CXX11=ON',
+            '-DOPENCV_JAVA_SOURCE_VERSION=1.8',
+            '-DOPENCV_JAVA_TARGET_VERSION=1.8',
+            '-DWITH_MSMF_DXVA=OFF'
     ]
 }
 
@@ -172,11 +175,11 @@ def stripExe = 'strip'
 def objCopyExe = 'objcopy'
 
 if (project.platform == "linux-athena") {
-    stripExe = 'arm-frc2019-linux-gnueabi-strip'
-    objCopyExe = 'arm-frc2019-linux-gnueabi-objcopy'
+    stripExe = 'arm-frc2020-linux-gnueabi-strip'
+    objCopyExe = 'arm-frc2020-linux-gnueabi-objcopy'
 } else if (project.platform == "linux-raspbian") {
-    stripExe = 'arm-raspbian9-linux-gnueabihf-strip'
-    objCopyExe = 'arm-raspbian9-linux-gnueabihf-objcopy'
+    stripExe = 'arm-raspbian10-linux-gnueabihf-strip'
+    objCopyExe = 'arm-raspbian10-linux-gnueabihf-objcopy'
 }
 
 ['': project.cmakeBuildDirectory,
