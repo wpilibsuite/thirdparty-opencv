@@ -6,206 +6,204 @@ resources:
     image:  wpilib/raspbian-cross-ubuntu:10-18.04
 
 
-jobs:
- - job: Linux_Arm_Pi
-   pool:
-    vmImage: 'Ubuntu 16.04'
+stages:
+- stage: Build
+  jobs:
+  - job: Linux_Arm_Pi
+    pool:
+      vmImage: 'Ubuntu 16.04'
 
-   container: raspbian
+    container: raspbian
 
-   steps:
-    - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
-      submodules: true
-    - script: |
-        sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/*
-      displayName: 'Install Ant'
-    - task: Gradle@2
-      inputs:
-        workingDirectory: ''
-        gradleWrapperFile: 'gradlew'
-        gradleOptions: '-Xmx3072m'
-        publishJUnitResults: false
-        testResultsFiles: '**/TEST-*.xml'
-        tasks: 'build'
-        options: '-Pplatform=linux-raspbian'
+    steps:
+      - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
+        submodules: true
+      - script: |
+          sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/*
+        displayName: 'Install Ant'
+      - task: Gradle@2
+        inputs:
+          workingDirectory: ''
+          gradleWrapperFile: 'gradlew'
+          gradleOptions: '-Xmx3072m'
+          publishJUnitResults: false
+          testResultsFiles: '**/TEST-*.xml'
+          tasks: 'build'
+          options: '-Pplatform=linux-raspbian -PjenkinsBuild'
 
-    # - task: CopyFiles@2
-    #   inputs:
-    #     contents: 'build\lib\**\*.jar'
-    #     targetFolder: $(Build.ArtifactStagingDirectory)
+      - task: PublishPipelineArtifact@0
+        inputs:
+          artifactName: 'Athena'
+          targetPath: 'build/allOutputs'
 
-    # - task: PublishBuildArtifacts@1
-    #   inputs:
-    #     artifactName: 'LinuxJar'
+  - job: Linux_Arm
+    pool:
+      vmImage: 'Ubuntu 16.04'
 
- - job: Linux_Arm
-   pool:
-    vmImage: 'Ubuntu 16.04'
+    container: wpilib2020
 
-   container: wpilib2020
+    timeoutInMinutes: 0
 
-   timeoutInMinutes: 0
+    steps:
+      - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
+        submodules: true
+      - script: |
+          sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/*
+        displayName: 'Install Ant'
+      - task: Gradle@2
+        inputs:
+          workingDirectory: ''
+          gradleWrapperFile: 'gradlew'
+          gradleOptions: '-Xmx3072m'
+          publishJUnitResults: false
+          testResultsFiles: '**/TEST-*.xml'
+          tasks: 'build'
+          options: '-Pplatform=linux-athena -PjenkinsBuild'
 
-   steps:
-    - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
-      submodules: true
-    - script: |
-        sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/*
-      displayName: 'Install Ant'
-    - task: Gradle@2
-      inputs:
-        workingDirectory: ''
-        gradleWrapperFile: 'gradlew'
-        gradleOptions: '-Xmx3072m'
-        publishJUnitResults: false
-        testResultsFiles: '**/TEST-*.xml'
-        tasks: 'build'
-        options: '-Pplatform=linux-athena'
+      # - task: CopyFiles@2
+      #   inputs:
+      #     contents: 'build\lib\**\*.jar'
+      #     targetFolder: $(Build.ArtifactStagingDirectory)
 
-    # - task: CopyFiles@2
-    #   inputs:
-    #     contents: 'build\lib\**\*.jar'
-    #     targetFolder: $(Build.ArtifactStagingDirectory)
-
-    # - task: PublishBuildArtifacts@1
-    #   inputs:
-    #     artifactName: 'LinuxJar'
+      # - task: PublishBuildArtifacts@1
+      #   inputs:
+      #     artifactName: 'LinuxJar'
 
 
- - job: Linux
-   pool:
-    vmImage: 'Ubuntu 16.04'
+  - job: Linux
+    pool:
+      vmImage: 'Ubuntu 16.04'
 
-   container: wpilib2019
+    container: wpilib2020
 
-   timeoutInMinutes: 0
+    timeoutInMinutes: 0
 
-   steps:
-    - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
-      submodules: true
-    - script: |
-        sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/*
-      displayName: 'Install Ant'
-    - task: Gradle@2
-      inputs:
-        workingDirectory: ''
-        gradleWrapperFile: 'gradlew'
-        gradleOptions: '-Xmx3072m'
-        publishJUnitResults: false
-        testResultsFiles: '**/TEST-*.xml'
-        tasks: 'build'
+    steps:
+      - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
+        submodules: true
+      - script: |
+          sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/*
+        displayName: 'Install Ant'
+      - task: Gradle@2
+        inputs:
+          workingDirectory: ''
+          gradleWrapperFile: 'gradlew'
+          gradleOptions: '-Xmx3072m'
+          options: '-PjenkinsBuild'
+          publishJUnitResults: false
+          testResultsFiles: '**/TEST-*.xml'
+          tasks: 'build'
 
-    # - task: CopyFiles@2
-    #   inputs:
-    #     contents: 'build\lib\**\*.jar'
-    #     targetFolder: $(Build.ArtifactStagingDirectory)
+      # - task: CopyFiles@2
+      #   inputs:
+      #     contents: 'build\lib\**\*.jar'
+      #     targetFolder: $(Build.ArtifactStagingDirectory)
 
-    # - task: PublishBuildArtifacts@1
-    #   inputs:
-    #     artifactName: 'LinuxJar'
+      # - task: PublishBuildArtifacts@1
+      #   inputs:
+      #     artifactName: 'LinuxJar'
 
- - job: Windows_64_Bit
-   pool:
-    vmImage: 'vs2017-win2016'
+  - job: Windows_64_Bit
+    pool:
+      vmImage: 'windows-2019'
 
-   timeoutInMinutes: 0
+    timeoutInMinutes: 0
 
-   steps:
-    - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
-      submodules: true
-    - powershell: |
-        mkdir build
-        $ProgressPreference = 'SilentlyContinue'
-        wget "https://download.java.net/java/ga/jdk11/openjdk-11_windows-x64_bin.zip" -O "build\jdk.zip"
-      displayName: 'Download JDK'
-    - task: JavaToolInstaller@0
-      inputs:
-        jdkSourceOption: localDirectory
-        jdkFile: 'build/jdk.zip'
-        jdkDestinationDirectory: 'build/jdkinst'
-        jdkArchitectureOption: x64
-    - script: |
-        @call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
-        set PATH=%PATH%;%ANT_HOME%\bin
-        gradlew build
-      displayName: 'Gradle Build'
+    steps:
+      - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
+        submodules: true
+      - powershell: |
+          mkdir build
+          $ProgressPreference = 'SilentlyContinue'
+          wget "https://download.java.net/java/ga/jdk11/openjdk-11_windows-x64_bin.zip" -O "build\jdk.zip"
+        displayName: 'Download JDK'
+      - task: JavaToolInstaller@0
+        inputs:
+          jdkSourceOption: localDirectory
+          jdkFile: 'build/jdk.zip'
+          jdkDestinationDirectory: 'build/jdkinst'
+          jdkArchitectureOption: x64
+      - script: |
+          @call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
+          set PATH=%PATH%;%ANT_HOME%\bin
+          gradlew build -PjenkinsBuild
+        displayName: 'Gradle Build'
 
-    # - task: CopyFiles@2
-    #   inputs:
-    #     contents: 'build\lib\**\*.jar'
-    #     targetFolder: $(Build.ArtifactStagingDirectory)
+      # - task: CopyFiles@2
+      #   inputs:
+      #     contents: 'build\lib\**\*.jar'
+      #     targetFolder: $(Build.ArtifactStagingDirectory)
 
-    # - task: PublishBuildArtifacts@1
-    #   inputs:
-    #     artifactName: 'Win64Jar'
+      # - task: PublishBuildArtifacts@1
+      #   inputs:
+      #     artifactName: 'Win64Jar'
 
- - job: Windows_32_Bit
-   pool:
-    vmImage: 'vs2017-win2016'
+  - job: Windows_32_Bit
+    pool:
+      vmImage: 'windows-2019'
 
-   timeoutInMinutes: 0
+    timeoutInMinutes: 0
 
-   steps:
-    - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
-      submodules: true
-    - powershell: |
-        mkdir build
-        $ProgressPreference = 'SilentlyContinue'
-        wget "https://github.com/wpilibsuite/frc-openjdk-windows/releases/download/v11.0.0u28-1/jdk-x86-11.0.0u28-1.zip" -O "build\jdk.zip"
-      displayName: 'Download JDK'
-    - task: JavaToolInstaller@0
-      inputs:
-        jdkSourceOption: localDirectory
-        jdkFile: 'build/jdk.zip'
-        jdkDestinationDirectory: 'build/jdkinst'
-        jdkArchitectureOption: x86
-    - script: |
-        @call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Auxiliary\\Build\\vcvars32.bat"
-        set PATH=%PATH%;%ANT_HOME%\bin
-        gradlew build
-      displayName: 'Gradle Build'
+    steps:
+      - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
+        submodules: true
+      - powershell: |
+          mkdir build
+          $ProgressPreference = 'SilentlyContinue'
+          wget "https://github.com/wpilibsuite/frc-openjdk-windows/releases/download/v11.0.0u28-1/jdk-x86-11.0.0u28-1.zip" -O "build\jdk.zip"
+        displayName: 'Download JDK'
+      - task: JavaToolInstaller@0
+        inputs:
+          jdkSourceOption: localDirectory
+          jdkFile: 'build/jdk.zip'
+          jdkDestinationDirectory: 'build/jdkinst'
+          jdkArchitectureOption: x86
+      - script: |
+          @call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Auxiliary\\Build\\vcvars32.bat"
+          set PATH=%PATH%;%ANT_HOME%\bin
+          gradlew build -PjenkinsBuild
+        displayName: 'Gradle Build'
 
-    # - task: CopyFiles@2
-    #   inputs:
-    #     contents: 'build\lib\**\*.jar'
-    #     targetFolder: $(Build.ArtifactStagingDirectory)
+      # - task: CopyFiles@2
+      #   inputs:
+      #     contents: 'build\lib\**\*.jar'
+      #     targetFolder: $(Build.ArtifactStagingDirectory)
 
-    # - task: PublishBuildArtifacts@1
-    #   inputs:
-    #     artifactName: 'Win32Jar'
+      # - task: PublishBuildArtifacts@1
+      #   inputs:
+      #     artifactName: 'Win32Jar'
 
- - job: Mac
-   pool:
-    vmImage: 'xcode9-macos10.13'
+  - job: Mac
+    pool:
+      vmImage: 'macOS-10.14'
 
-   timeoutInMinutes: 0
+    timeoutInMinutes: 0
 
-   steps:
-    - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
-      submodules: true
-    - script: |
-        mkdir build
-        wget "https://download.java.net/java/ga/jdk11/openjdk-11_osx-x64_bin.tar.gz" -O "build/jdk.tar.gz"
-        sudo tar xvzf build/jdk.tar.gz -C /Library/Java/JavaVirtualMachines/
-        export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-11.jdk/Contents/Home/
-        brew install ant binutils
-      displayName: 'Setup JDK Ant and Binutils'
-    - task: Gradle@2
-      inputs:
-        workingDirectory: ''
-        gradleWrapperFile: 'gradlew'
-        gradleOptions: '-Xmx3072m'
-        javaHomeOption: 'path'
-        jdkDirectory: '/Library/Java/JavaVirtualMachines/jdk-11.jdk/Contents/Home/'
-        publishJUnitResults: false
-        testResultsFiles: '**/TEST-*.xml'
-        tasks: 'build'
+    steps:
+      - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
+        submodules: true
+      - script: |
+          mkdir build
+          export JAVA_HOME=`/usr/libexec/java_home -v 11`
+          brew install ant binutils
+        displayName: 'Setup JDK Ant and Binutils'
+      - task: Gradle@2
+        inputs:
+          workingDirectory: ''
+          gradleWrapperFile: 'gradlew'
+          gradleOptions: '-Xmx3072m'
+          javaHomeOption: 'path'
+          jdkVersionOption: '1.11'
+          publishJUnitResults: false
+          testResultsFiles: '**/TEST-*.xml'
+          options: '-PjenkinsBuild'
+          tasks: 'build'
 
-    # - task: CopyFiles@2
-    #   inputs:
-    #     contents: 'build\lib\**\*.jar'
-    #     targetFolder: $(Build.ArtifactStagingDirectory)
+      # - task: CopyFiles@2
+      #   inputs:
+      #     contents: 'build\lib\**\*.jar'
+      #     targetFolder: $(Build.ArtifactStagingDirectory)
 
-    # - task: PublishBuildArtifacts@1
-    #   inputs:
-    #     artifactName: 'MacJar'
+      # - task: PublishBuildArtifacts@1
+      #   inputs:
+      #     artifactName: 'MacJar'
