@@ -344,12 +344,27 @@ task sourcesJar(type: Jar, dependsOn: make) {
 
 build.dependsOn cppHeadersZip
 build.dependsOn cppSourcesZip
-build.dependsOn cppLibsZip
-build.dependsOn jniJar
-build.dependsOn cppLibsZipDebug
-build.dependsOn cppLibsZipStatic
-build.dependsOn cppLibsZipStaticDebug
-build.dependsOn jniJarDebug
+
+
+if (!project.hasProperty('skipRelease')) {
+    build.dependsOn jniJar
+    build.dependsOn cppLibsZip
+    build.dependsOn cppLibsZipStatic
+    addTaskToCopyAllOutputs(cppLibsZip)
+    addTaskToCopyAllOutputs(jniJar)
+    addTaskToCopyAllOutputs(cppLibsZipStatic)
+}
+
+if (!project.hasProperty('skipDebug')) {
+    build.dependsOn cppLibsZipDebug
+    build.dependsOn cppLibsZipStaticDebug
+    build.dependsOn jniJarDebug
+
+    addTaskToCopyAllOutputs(cppLibsZipDebug)
+    addTaskToCopyAllOutputs(jniJarDebug)
+    addTaskToCopyAllOutputs(cppLibsZipStaticDebug)
+}
+
 build.dependsOn outputJar
 build.dependsOn sourcesJar
 
@@ -368,12 +383,9 @@ artifacts {
 
 addTaskToCopyAllOutputs(cppSourcesZip)
 addTaskToCopyAllOutputs(cppHeadersZip)
-addTaskToCopyAllOutputs(cppLibsZip)
-addTaskToCopyAllOutputs(jniJar)
-addTaskToCopyAllOutputs(cppLibsZipDebug)
-addTaskToCopyAllOutputs(jniJarDebug)
-addTaskToCopyAllOutputs(cppLibsZipStatic)
-addTaskToCopyAllOutputs(cppLibsZipStaticDebug)
+
+
+
 addTaskToCopyAllOutputs(outputJar)
 addTaskToCopyAllOutputs(sourcesJar)
 

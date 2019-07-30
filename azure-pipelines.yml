@@ -34,7 +34,7 @@ stages:
       - task: PublishPipelineArtifact@0
         inputs:
           artifactName: 'Raspbian'
-          targetPath: 'build/allOutputs'
+          targetPath: 'gradleDir/outputs'
 
   - job: Linux_Arm
     pool:
@@ -63,7 +63,7 @@ stages:
       - task: PublishPipelineArtifact@0
         inputs:
           artifactName: 'Athena'
-          targetPath: 'build/allOutputs'
+          targetPath: 'gradleDir/outputs'
 
 
   - job: Linux
@@ -97,7 +97,7 @@ stages:
       - task: PublishPipelineArtifact@0
         inputs:
           artifactName: 'Linux'
-          targetPath: 'build/allOutputs'
+          targetPath: 'gradleDir/outputs'
 
   - job: Windows_64_Bit
     pool:
@@ -128,7 +128,7 @@ stages:
       - task: PublishPipelineArtifact@0
         inputs:
           artifactName: 'Win64'
-          targetPath: 'build/allOutputs'
+          targetPath: 'gradleDir/outputs'
 
   - job: Windows_32_Bit
     pool:
@@ -159,7 +159,7 @@ stages:
       - task: PublishPipelineArtifact@0
         inputs:
           artifactName: 'Win32'
-          targetPath: 'build/allOutputs'
+          targetPath: 'gradleDir/outputs'
 
   - job: Mac
     pool:
@@ -189,7 +189,7 @@ stages:
       - task: PublishPipelineArtifact@0
         inputs:
           artifactName: 'Mac'
-          targetPath: 'build/allOutputs'
+          targetPath: 'gradleDir/outputs'
 
 - stage: Combine
   jobs:
