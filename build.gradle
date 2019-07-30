@@ -427,10 +427,16 @@ if (project.platform == "linux-athena") {
     }
 }
 
-build.dependsOn make
-build.dependsOn makeShared
-build.dependsOn makeDebug
-build.dependsOn makeSharedDebug
+
+if (!project.hasProperty('skipRelease')) {
+    build.dependsOn make
+    build.dependsOn makeShared
+}
+
+if (!project.hasProperty('skipDebug')) {
+    build.dependsOn makeDebug
+    build.dependsOn makeSharedDebug
+}
 
 apply from: 'publish.gradle'
 
