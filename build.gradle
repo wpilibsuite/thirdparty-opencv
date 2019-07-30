@@ -429,11 +429,13 @@ if (project.platform == "linux-athena") {
 
 
 if (!project.hasProperty('skipRelease')) {
+    println "skipRelease"
     build.dependsOn make
     build.dependsOn makeShared
 }
 
 if (!project.hasProperty('skipDebug')) {
+    println "skipDebug"
     build.dependsOn makeDebug
     build.dependsOn makeSharedDebug
 }

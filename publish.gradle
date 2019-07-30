@@ -342,11 +342,9 @@ task sourcesJar(type: Jar, dependsOn: make) {
     }
 }
 
-build.dependsOn cppHeadersZip
-build.dependsOn cppSourcesZip
-
 
 if (!project.hasProperty('skipRelease')) {
+    println "skipRelease Publish"
     build.dependsOn jniJar
     build.dependsOn cppLibsZip
     build.dependsOn cppLibsZipStatic
@@ -356,6 +354,7 @@ if (!project.hasProperty('skipRelease')) {
 }
 
 if (!project.hasProperty('skipDebug')) {
+    println "skipDebug Publish"
     build.dependsOn cppLibsZipDebug
     build.dependsOn cppLibsZipStaticDebug
     build.dependsOn jniJarDebug
@@ -365,29 +364,31 @@ if (!project.hasProperty('skipDebug')) {
     addTaskToCopyAllOutputs(cppLibsZipStaticDebug)
 }
 
-build.dependsOn outputJar
-build.dependsOn sourcesJar
-
-artifacts {
-    archives cppHeadersZip
-    archives cppSourcesZip
-    archives cppLibsZip
-    archives jniJar
-    archives cppLibsZipDebug
-    archives cppLibsZipStatic
-    archives cppLibsZipStaticDebug
-    archives jniJarDebug
-    archives outputJar
-    archives sourcesJar
+if (!project.hasProperty('skipSources')) {
+    build.dependsOn cppHeadersZip
+    build.dependsOn cppSourcesZip
+    build.dependsOn outputJar
+    build.dependsOn sourcesJar
+    addTaskToCopyAllOutputs(cppSourcesZip)
+    addTaskToCopyAllOutputs(cppHeadersZip)
+    addTaskToCopyAllOutputs(outputJar)
+    addTaskToCopyAllOutputs(sourcesJar)
 }
 
-addTaskToCopyAllOutputs(cppSourcesZip)
-addTaskToCopyAllOutputs(cppHeadersZip)
-
-
-
-addTaskToCopyAllOutputs(outputJar)
-addTaskToCopyAllOutputs(sourcesJar)
+if (!project.hasProperty('jenkinsBuild')) {
+    artifacts {
+        archives cppHeadersZip
+        archives cppSourcesZip
+        archives cppLibsZip
+        archives jniJar
+        archives cppLibsZipDebug
+        archives cppLibsZipStatic
+        archives cppLibsZipStaticDebug
+        archives jniJarDebug
+        archives outputJar
+        archives sourcesJar
+    }
+}
 
 model {
     publishing {
