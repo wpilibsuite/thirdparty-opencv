@@ -4,6 +4,8 @@ resources:
     image: wpilib/roborio-cross-ubuntu:2020-18.04
   - container: raspbian
     image:  wpilib/raspbian-cross-ubuntu:10-18.04
+  - container: bionic
+    image: wpilib/aarch64-cross-ubuntu:bionic-18.04
 
 
 stages:
@@ -34,6 +36,33 @@ stages:
       - task: PublishPipelineArtifact@0
         inputs:
           artifactName: 'Raspbian'
+          targetPath: 'gradleDir/outputs'
+
+  - job: Linux_Bionic
+    pool:
+      vmImage: 'Ubuntu 16.04'
+
+    container: bionic
+
+    steps:
+      - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
+        submodules: true
+      - script: |
+          sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/*
+        displayName: 'Install Ant'
+      - task: Gradle@2
+        inputs:
+          workingDirectory: ''
+          gradleWrapperFile: 'gradlew'
+          gradleOptions: '-Xmx3072m'
+          publishJUnitResults: false
+          testResultsFiles: '**/TEST-*.xml'
+          tasks: 'build'
+          options: '-Pplatform=linux-bionic -PjenkinsBuild'
+
+      - task: PublishPipelineArtifact@0
+        inputs:
+          artifactName: 'Bionic'
           targetPath: 'gradleDir/outputs'
 
   - job: Linux_Arm
@@ -158,7 +187,7 @@ stages:
 
       - task: PublishPipelineArtifact@0
         inputs:
-          artifactName: 'Win32Debug'
+          artifactName: 'Win32Release'
           targetPath: 'gradleDir/outputs'
 
   - job: Windows_64_Bit
@@ -287,6 +316,10 @@ stages:
     - task: DownloadPipelineArtifact@0
       inputs:
         artifactName: 'Linux'
+        targetPath: 'build-tools/combiner/products/build/allOutputs'
+    - task: DownloadPipelineArtifact@0
+      inputs:
+        artifactName: 'Bionic'
         targetPath: 'build-tools/combiner/products/build/allOutputs'
     - task: DownloadPipelineArtifact@0
       inputs:
