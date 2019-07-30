@@ -249,6 +249,8 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
         baseName = jniBaseName
         duplicatesStrategy = 'exclude'
 
+        println destinationDir
+
         manifest {
             attributes(
                     "Created-By": "WPILib Gradle Build Script",

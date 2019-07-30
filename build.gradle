@@ -17,6 +17,8 @@ ext.licenseFile = file("$rootDir/opencv/LICENSE")
 
 def outputsFolder = file("$buildDir/allOutputs")
 
+println outputsFolder
+
 task copyAllOutputs(type: Copy) {
     destinationDir outputsFolder
 }
