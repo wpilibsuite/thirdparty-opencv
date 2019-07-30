@@ -249,8 +249,6 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
         baseName = jniBaseName
         duplicatesStrategy = 'exclude'
 
-        println destinationDir
-
         manifest {
             attributes(
                     "Created-By": "WPILib Gradle Build Script",
@@ -344,7 +342,6 @@ task sourcesJar(type: Jar, dependsOn: make) {
 
 
 if (!project.hasProperty('skipRelease')) {
-    println "skipRelease Publish"
     build.dependsOn jniJar
     build.dependsOn cppLibsZip
     build.dependsOn cppLibsZipStatic
@@ -354,7 +351,6 @@ if (!project.hasProperty('skipRelease')) {
 }
 
 if (!project.hasProperty('skipDebug')) {
-    println "skipDebug Publish"
     build.dependsOn cppLibsZipDebug
     build.dependsOn cppLibsZipStaticDebug
     build.dependsOn jniJarDebug

@@ -17,8 +17,6 @@ ext.licenseFile = file("$rootDir/opencv/LICENSE")
 
 def outputsFolder = file("$buildDir/allOutputs")
 
-println outputsFolder
-
 task copyAllOutputs(type: Copy) {
     destinationDir outputsFolder
 }
@@ -245,7 +243,6 @@ if (project.platform == "linux-athena") {
                 println "Using toolchain '${toolchain}'"
                 return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
                     '-DCMAKE_MAKE_PROGRAM=make' +
-                    // TODO Figure out aarch64 extra flags
                     '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
                     "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
             }
@@ -446,13 +443,11 @@ if (project.platform == "linux-athena") {
 
 
 if (!project.hasProperty('skipRelease')) {
-    println "skipRelease"
     build.dependsOn make
     build.dependsOn makeShared
 }
 
 if (!project.hasProperty('skipDebug')) {
-    println "skipDebug"
     build.dependsOn makeDebug
     build.dependsOn makeSharedDebug
 }
