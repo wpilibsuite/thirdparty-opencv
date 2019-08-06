@@ -217,6 +217,7 @@ if (project.platform == "linux-athena") {
                     '-DENABLE_NEON=ON' +
                     '-DENABLE_VFPV3=ON' +
                     '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
+                    '-DOPENCV_ENABLE_PKG_CONFIG=ON' +
                     "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
             } else if (project.platform == "linux-raspbian") {
                 toolchain = projectDir.canonicalPath + "/arm-pi-gnueabihf.toolchain.cmake"
@@ -226,6 +227,7 @@ if (project.platform == "linux-athena") {
                     '-DENABLE_NEON=ON' +
                     '-DENABLE_VFPV3=ON' +
                     '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
+                    '-DOPENCV_ENABLE_PKG_CONFIG=ON' +
                     "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
             }
             if (toolchain) {

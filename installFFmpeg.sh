@@ -17,6 +17,7 @@ else
     ./configure --enable-cross-compile --cross-prefix=$1 --arch=$2 --target-os=linux
     make
     make install
-    pkg_config=$(which pkg-config) PKG_CONFIG_PATH=/usr/local
+    export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/
+    export PKG_CONFIG_LIBDIR=/usr/local/lib
     cd ..
 fi
