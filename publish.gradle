@@ -69,6 +69,13 @@ task cppSourcesZip(type: Zip, dependsOn: make) {
         include '**/*.cpp', '**/*.h*'
     }
 
+    if (!project.platform.startsWith("windows")) {
+        from('ffmpeg') {
+            into '/ffmpeg'
+            include '**/*.c', '**/*.cpp', '**/*.h*'
+        }
+    }
+
     includeEmptyDirs = false
 }
 

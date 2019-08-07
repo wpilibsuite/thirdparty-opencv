@@ -1,23 +1,28 @@
 #!/bin/bash
 
 # Bash script that download, cross-compile and install FFmpeg with the specified compiler
-# First argument = the cross-compiler prefix
-# Second argument = the target architecture
-# example : ./installFFmpeg.sh arm-raspbian9-linux-gnueabihf- armhf
+#
+# Argument [optional] = the platform for which ffmpeg has to be built for ("raspbian" or "athena")
+# If no argument is provided, the build system's platform is used
+#
+# example : ./installFFmpeg.sh raspbian
 
 if [ "$1" = "" ]; then
-    echo "Parameter 1 is empty"
-    echo "You must specified a cross-compiler to build FFmpeg with"
-elif [ "$2" = "" ]; then
-    echo "Parameter 2 is empty"
-    echo "You must specified the target architecture"
-else
-    git clone git://source.ffmpeg.org/ffmpeg.git
-    cd ffmpeg
-    ./configure --enable-cross-compile --cross-prefix=$1 --arch=$2 --target-os=linux
-    make
-    make install
-    export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/
-    export PKG_CONFIG_LIBDIR=/usr/local/lib
-    cd ..
+    echo "No platform specified; using the build system's platform"
+elif [ "$1" = "raspbian" ]; then
+    CROSS_COMPILE_OPTIONS="--enable-cross-compile --cross-prefix=arm-raspbian9-linux-gnueabihf- --arch=armhf --target-os=linux"
+elif [ "$1" = "athena" ]; then
+    CROSS_COMPILE_OPTIONS="--enable-cross-compile --cross-prefix=arm-frc2019-linux-gnueabi- --arch=arm --target-os=linux"
 fi
+
+git clone git://source.ffmpeg.org/ffmpeg.git
+cd ffmpeg
+BUILD_PATH=$(pwd)/build
+mkdir $BUILD_PATH
+./configure --prefix=$BUILD_PATH --disable-programs $CROSS_COMPILE_OPTIONS
+make
+make install
+cd ..
+
+export PKG_CONFIG_PATH=$BUILD_PATH/lib/pkgconfig/
+export PKG_CONFIG_LIBDIR=$BUILD_PATH/lib

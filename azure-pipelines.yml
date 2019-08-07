@@ -18,7 +18,7 @@ jobs:
       submodules: true
     - script: |
         sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/*
-        ./installFFmpeg.sh arm-raspbian9-linux-gnueabihf- armhf
+        ./installFFmpeg.sh raspbian
       displayName: 'Install Ant and FFmpeg'
     - task: Gradle@2
       inputs:
@@ -52,7 +52,7 @@ jobs:
       submodules: true
     - script: |
         sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/*
-        ./installFFmpeg.sh arm-frc2019-linux-gnueabi- arm
+        ./installFFmpeg.sh athena
       displayName: 'Install Ant and FFmpeg'
     - task: Gradle@2
       inputs:
@@ -86,7 +86,8 @@ jobs:
     - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
       submodules: true
     - script: |
-        sudo apt-get update && sudo apt-get install ant ffmpeg -y && sudo rm -rf /var/lib/apt/lists/*
+        sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/*
+        ./installFFmpeg.sh
       displayName: 'Install Ant and FFmpeg'
     - task: Gradle@2
       inputs:
@@ -190,8 +191,9 @@ jobs:
         wget "https://download.java.net/java/ga/jdk11/openjdk-11_osx-x64_bin.tar.gz" -O "build/jdk.tar.gz"
         sudo tar xvzf build/jdk.tar.gz -C /Library/Java/JavaVirtualMachines/
         export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-11.jdk/Contents/Home/
-        brew install ant binutils pkg-config ffmpeg
+        brew install ant binutils pkg-config
         brew link gettext --force
+        ./installFFmpeg.sh
       displayName: 'Setup JDK, Ant, Binutils, Pkg-config, FFmpeg and Gettext'
     - task: Gradle@2
       inputs:
