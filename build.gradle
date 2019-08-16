@@ -88,7 +88,7 @@ def getOutputFormat(platform) {
         return "elf32-littlearm"
     } else if (platform == "linux-raspbian") {
         return "elf32-littlearm"
-    } else if (platform == "linux-bionic") {
+    } else if (platform == "linux-aarch64bionic") {
         return ""
     } else if (platform == "linux-x86") {
         return "elf32-i386"
@@ -112,8 +112,8 @@ def getPlatformPath(platform) {
         return "linux/athena"
     } else if (platform == "linux-raspbian") {
         return "linux/raspbian"
-    } else if (platform == "linux-bionic") {
-        return "linux/bionic"
+    } else if (platform == "linux-aarch64bionic") {
+        return "linux/aarch64bionic"
     } else if (platform == "linux-x86") {
         return "linux/x86"
     } else if (platform == "linux-x86_64") {
@@ -185,7 +185,7 @@ if (project.platform == "linux-athena") {
 } else if (project.platform == "linux-raspbian") {
     stripExe = 'arm-raspbian10-linux-gnueabihf-strip'
     objCopyExe = 'arm-raspbian10-linux-gnueabihf-objcopy'
-} else if (project.platform == "linux-bionic") {
+} else if (project.platform == "linux-aarch64bionic") {
     stripExe = 'aarch64-bionic-linux-gnu-strip'
     objCopyExe = 'aarch64-bionic-linux-gnu-objcopy'
 }
@@ -238,7 +238,7 @@ if (project.platform == "linux-athena") {
                     '-DENABLE_VFPV3=ON' +
                     '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
                     "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
-            } else if (project.platform == "linux-bionic") {
+            } else if (project.platform == "linux-aarch64bionic") {
                 toolchain = projectDir.canonicalPath + "/aarch64-bionic-gnu.toolchain.cmake"
                 println "Using toolchain '${toolchain}'"
                 return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
@@ -365,7 +365,7 @@ if (project.platform == "linux-athena") {
 
                 if (project.platform == "linux-athena" || project.platform == "linux-raspbian") {
                     inputString += "addlib ../3rdparty/lib/libtegra_hal.a\n"
-                } else if (project.platform == "linux-bionic") {
+                } else if (project.platform == "linux-aarch64bionic") {
                     inputString += "addlib ../3rdparty/lib/libtegra_hal.a\n"
                 }
 

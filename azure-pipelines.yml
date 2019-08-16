@@ -58,7 +58,7 @@ stages:
           publishJUnitResults: false
           testResultsFiles: '**/TEST-*.xml'
           tasks: 'build'
-          options: '-Pplatform=linux-bionic -PjenkinsBuild'
+          options: '-Pplatform=linux-aarch64bionic -PjenkinsBuild'
 
       - task: PublishPipelineArtifact@0
         inputs:
