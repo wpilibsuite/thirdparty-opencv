@@ -7,6 +7,8 @@ resources:
   - container: bionic
     image: wpilib/aarch64-cross-ubuntu:bionic-18.04
 
+variables:
+- group: Artifactory-Package-Publish
 
 stages:
 - stage: Build
