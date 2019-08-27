@@ -13,15 +13,15 @@ publishing {
     }
 }
 
-def pubVersion = "${project.ext.version}-5"
+def pubVersion = "${project.ext.version}-1"
 
 def outputsFolder = file("$project.buildDir/outputs")
 
 def baseArtifactId = 'opencv'
-def artifactGroupId = 'edu.wpi.first.thirdparty.frc2019.opencv'
-def zipBaseName = '_GROUP_edu_wpi_first_thirdparty_frc2019_opencv_ID_opencv-cpp_CLS'
-def jniBaseName = "_GROUP_edu_wpi_first_thirdparty_frc2019_opencv_ID_opencv-jni_CLS"
-def javaBaseName = "_GROUP_edu_wpi_first_thirdparty_frc2019_opencv_ID_opencv-java_CLS"
+def artifactGroupId = 'edu.wpi.first.thirdparty.frc2020.opencv'
+def zipBaseName = '_GROUP_edu_wpi_first_thirdparty_frc2020_opencv_ID_opencv-cpp_CLS'
+def jniBaseName = "_GROUP_edu_wpi_first_thirdparty_frc2020_opencv_ID_opencv-jni_CLS"
+def javaBaseName = "_GROUP_edu_wpi_first_thirdparty_frc2020_opencv_ID_opencv-java_CLS"
 
 def versionFile = file("$outputsFolder/version.txt")
 
@@ -347,40 +347,51 @@ task sourcesJar(type: Jar, dependsOn: make) {
     }
 }
 
-build.dependsOn cppHeadersZip
-build.dependsOn cppSourcesZip
-build.dependsOn cppLibsZip
-build.dependsOn jniJar
-build.dependsOn cppLibsZipDebug
-build.dependsOn cppLibsZipStatic
-build.dependsOn cppLibsZipStaticDebug
-build.dependsOn jniJarDebug
-build.dependsOn outputJar
-build.dependsOn sourcesJar
 
-artifacts {
-    archives cppHeadersZip
-    archives cppSourcesZip
-    archives cppLibsZip
-    archives jniJar
-    archives cppLibsZipDebug
-    archives cppLibsZipStatic
-    archives cppLibsZipStaticDebug
-    archives jniJarDebug
-    archives outputJar
-    archives sourcesJar
+if (!project.hasProperty('skipRelease')) {
+    build.dependsOn jniJar
+    build.dependsOn cppLibsZip
+    build.dependsOn cppLibsZipStatic
+    addTaskToCopyAllOutputs(cppLibsZip)
+    addTaskToCopyAllOutputs(jniJar)
+    addTaskToCopyAllOutputs(cppLibsZipStatic)
 }
 
-addTaskToCopyAllOutputs(cppSourcesZip)
-addTaskToCopyAllOutputs(cppHeadersZip)
-addTaskToCopyAllOutputs(cppLibsZip)
-addTaskToCopyAllOutputs(jniJar)
-addTaskToCopyAllOutputs(cppLibsZipDebug)
-addTaskToCopyAllOutputs(jniJarDebug)
-addTaskToCopyAllOutputs(cppLibsZipStatic)
-addTaskToCopyAllOutputs(cppLibsZipStaticDebug)
-addTaskToCopyAllOutputs(outputJar)
-addTaskToCopyAllOutputs(sourcesJar)
+if (!project.hasProperty('skipDebug')) {
+    build.dependsOn cppLibsZipDebug
+    build.dependsOn cppLibsZipStaticDebug
+    build.dependsOn jniJarDebug
+
+    addTaskToCopyAllOutputs(cppLibsZipDebug)
+    addTaskToCopyAllOutputs(jniJarDebug)
+    addTaskToCopyAllOutputs(cppLibsZipStaticDebug)
+}
+
+if (!project.hasProperty('skipSources')) {
+    build.dependsOn cppHeadersZip
+    build.dependsOn cppSourcesZip
+    build.dependsOn outputJar
+    build.dependsOn sourcesJar
+    addTaskToCopyAllOutputs(cppSourcesZip)
+    addTaskToCopyAllOutputs(cppHeadersZip)
+    addTaskToCopyAllOutputs(outputJar)
+    addTaskToCopyAllOutputs(sourcesJar)
+}
+
+if (!project.hasProperty('jenkinsBuild')) {
+    artifacts {
+        archives cppHeadersZip
+        archives cppSourcesZip
+        archives cppLibsZip
+        archives jniJar
+        archives cppLibsZipDebug
+        archives cppLibsZipStatic
+        archives cppLibsZipStaticDebug
+        archives jniJarDebug
+        archives outputJar
+        archives sourcesJar
+    }
+}
 
 model {
     publishing {

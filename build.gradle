@@ -9,7 +9,7 @@ apply from: 'config.gradle'
 
 def date = new Date()
 def formattedDate = date.format('yyMMdd')
-ext.version = "3.4.4"
+ext.version = "3.4.7"
 ext.soVersion = "3.4"
 ext.libVersion = "${ext.version.replace(".", "")}"
 
@@ -53,7 +53,10 @@ ext {
             '-DBUILD_WITH_STATIC_CRT=OFF',
             '-DWITH_PROTOBUF=OFF',
             '-DWITH_DIRECTX=OFF',
-            '-DENABLE_CXX11=ON'
+            '-DENABLE_CXX11=ON',
+            '-DOPENCV_JAVA_SOURCE_VERSION=1.8',
+            '-DOPENCV_JAVA_TARGET_VERSION=1.8',
+            '-DWITH_MSMF_DXVA=OFF'
     ]
 }
 
@@ -85,6 +88,8 @@ def getOutputFormat(platform) {
         return "elf32-littlearm"
     } else if (platform == "linux-raspbian") {
         return "elf32-littlearm"
+    } else if (platform == "linux-aarch64bionic") {
+        return ""
     } else if (platform == "linux-x86") {
         return "elf32-i386"
     } else if (platform == "linux-x86_64") {
@@ -107,6 +112,8 @@ def getPlatformPath(platform) {
         return "linux/athena"
     } else if (platform == "linux-raspbian") {
         return "linux/raspbian"
+    } else if (platform == "linux-aarch64bionic") {
+        return "linux/aarch64bionic"
     } else if (platform == "linux-x86") {
         return "linux/x86"
     } else if (platform == "linux-x86_64") {
@@ -156,9 +163,10 @@ ext.jarName = "opencv-${project.libVersion}.jar"
 ext.pathToOpenCVJar = ext.cmakeBuildDirectory.resolve("bin").resolve(ext.jarName)
 
 if (project.platform.startsWith('windows')) {
-    def gen = "Visual Studio 15 2017"
+    def gen = "Visual Studio 16 2019"
+    ext.cmakeArch = 'Win32'
     if (project.platform == "windows-x86_64") {
-        gen += " Win64"
+        ext.cmakeArch = 'x64'
     }
     ext.cmakeGenerator = gen
 }
@@ -172,11 +180,14 @@ def stripExe = 'strip'
 def objCopyExe = 'objcopy'
 
 if (project.platform == "linux-athena") {
-    stripExe = 'arm-frc2019-linux-gnueabi-strip'
-    objCopyExe = 'arm-frc2019-linux-gnueabi-objcopy'
+    stripExe = 'arm-frc2020-linux-gnueabi-strip'
+    objCopyExe = 'arm-frc2020-linux-gnueabi-objcopy'
 } else if (project.platform == "linux-raspbian") {
-    stripExe = 'arm-raspbian9-linux-gnueabihf-strip'
-    objCopyExe = 'arm-raspbian9-linux-gnueabihf-objcopy'
+    stripExe = 'arm-raspbian10-linux-gnueabihf-strip'
+    objCopyExe = 'arm-raspbian10-linux-gnueabihf-objcopy'
+} else if (project.platform == "linux-aarch64bionic") {
+    stripExe = 'aarch64-bionic-linux-gnu-strip'
+    objCopyExe = 'aarch64-bionic-linux-gnu-objcopy'
 }
 
 ['': project.cmakeBuildDirectory,
@@ -229,6 +240,14 @@ if (project.platform == "linux-athena") {
                     '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
                     '-DOPENCV_ENABLE_PKG_CONFIG=ON' +
                     "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
+            } else if (project.platform == "linux-aarch64bionic") {
+                toolchain = projectDir.canonicalPath + "/aarch64-bionic-gnu.toolchain.cmake"
+                println "Using toolchain '${toolchain}'"
+                return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
+                    '-DCMAKE_MAKE_PROGRAM=make' +
+                    '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
+                    '-DOPENCV_ENABLE_PKG_CONFIG=ON' +
+                    "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
             }
             if (toolchain) {
                 println "Using toolchain '${toolchain}'"
@@ -243,7 +262,7 @@ if (project.platform == "linux-athena") {
 
         if (project.platform.startsWith("windows")) {
             executable project.cmakePath
-            args = cmakeArgs() + ['-G', '"' + project.cmakeGenerator + '"', project.rootPath]
+            args = cmakeArgs() + ['-G', '"' + project.cmakeGenerator + '"', '-A', project.cmakeArch, project.rootPath]
             outputs.file buildDirectory.resolve("OpenCV.sln").toFile()
         } else {
             executable project.cmakePath
@@ -349,6 +368,8 @@ if (project.platform == "linux-athena") {
 
                 if (project.platform == "linux-athena" || project.platform == "linux-raspbian") {
                     inputString += "addlib ../3rdparty/lib/libtegra_hal.a\n"
+                } else if (project.platform == "linux-aarch64bionic") {
+                    inputString += "addlib ../3rdparty/lib/libtegra_hal.a\n"
                 }
 
                 inputString += "save\nend\n"
@@ -423,10 +444,16 @@ if (project.platform == "linux-athena") {
     }
 }
 
-build.dependsOn make
-build.dependsOn makeShared
-build.dependsOn makeDebug
-build.dependsOn makeSharedDebug
+
+if (!project.hasProperty('skipRelease')) {
+    build.dependsOn make
+    build.dependsOn makeShared
+}
+
+if (!project.hasProperty('skipDebug')) {
+    build.dependsOn makeDebug
+    build.dependsOn makeSharedDebug
+}
 
 apply from: 'publish.gradle'
 

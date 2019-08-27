@@ -10,9 +10,11 @@
 if [ "$1" = "" ]; then
     echo "No platform specified; using the build system's platform"
 elif [ "$1" = "raspbian" ]; then
-    CROSS_COMPILE_OPTIONS="--enable-cross-compile --cross-prefix=arm-raspbian9-linux-gnueabihf- --arch=armhf --target-os=linux"
+    CROSS_COMPILE_OPTIONS="--enable-cross-compile --cross-prefix=arm-raspbian10-linux-gnueabihf- --arch=armhf --target-os=linux"
 elif [ "$1" = "athena" ]; then
-    CROSS_COMPILE_OPTIONS="--enable-cross-compile --cross-prefix=arm-frc2019-linux-gnueabi- --arch=arm --target-os=linux"
+    CROSS_COMPILE_OPTIONS="--enable-cross-compile --cross-prefix=arm-frc2020-linux-gnueabi- --arch=arm --target-os=linux"
+elif [ "$1" = "aarch64bionic" ]; then
+    CROSS_COMPILE_OPTIONS="--enable-cross-compile --cross-prefix=aarch64-bionic-linux-gnu- --arch=aarch64 --target-os=linux"
 fi
 
 git clone git://source.ffmpeg.org/ffmpeg.git

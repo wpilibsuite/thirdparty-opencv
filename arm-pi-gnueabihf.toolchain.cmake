@@ -1,5 +1,5 @@
 set(GCC_COMPILER_VERSION "" CACHE STRING "GCC Compiler version")
-set(GNU_MACHINE "arm-raspbian9-linux-gnueabi" CACHE STRING "GNU compiler triple")
+set(GNU_MACHINE "arm-raspbian10-linux-gnueabi" CACHE STRING "GNU compiler triple")
 
 if(COMMAND toolchain_save_config)
   return() # prevent recursive call
@@ -48,7 +48,7 @@ else()
 endif()
 
 if(NOT DEFINED ARM_LINUX_SYSROOT AND DEFINED GNU_MACHINE)
-  set(ARM_LINUX_SYSROOT /usr/${GNU_MACHINE}${FLOAT_ABI_SUFFIX})
+  set(ARM_LINUX_SYSROOT /usr/local/sys-root)
 endif()
 
 if(NOT DEFINED CMAKE_CXX_FLAGS)
