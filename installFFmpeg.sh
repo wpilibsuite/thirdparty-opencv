@@ -28,4 +28,3 @@ cd ..
 
 export PKG_CONFIG_PATH=$BUILD_PATH/lib/pkgconfig/
 export PKG_CONFIG_LIBDIR=$BUILD_PATH/lib
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$BUILD_PATH/lib

@@ -218,7 +218,9 @@ if (project.platform == "linux-athena") {
             }
 
             if (!project.platform.startsWith('windows')) {
-                args = args + '-DOPENCV_ENABLE_PKG_CONFIG=ON'
+                args = args + '-DOPENCV_ENABLE_PKG_CONFIG=ON' +
+                    "-DFFMPEG_INCLUDE_DIR=$rootDir/ffmpeg/build/include/" +
+                    "-DFFMPEG_LIB_DIR=$rootDir/ffmpeg/build/lib/"
             }
 
             if (hasProperty('toolchain')) {
