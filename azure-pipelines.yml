@@ -112,7 +112,7 @@ stages:
       - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
         submodules: true
       - script: |
-          sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/*
+          sudo apt-get update && sudo apt-get install ant nasm -y && sudo rm -rf /var/lib/apt/lists/*
           ./installFFmpeg.sh
         displayName: 'Install Ant and FFmpeg'
       - task: Gradle@2
@@ -270,7 +270,7 @@ stages:
       - script: |
           mkdir build
           export JAVA_HOME=`/usr/libexec/java_home -v 11`
-          brew install ant binutils pkg-config yasm nasm
+          brew install ant binutils pkg-config nasm
           brew link gettext --force
           ./installFFmpeg.sh
         displayName: 'Setup JDK, Ant, Binutils, Pkg-config, FFmpeg and Gettext'

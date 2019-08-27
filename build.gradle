@@ -217,6 +217,10 @@ if (project.platform == "linux-athena") {
                 args = args + '-DCMAKE_BUILD_TYPE=Release'
             }
 
+            if (!project.platform.startsWith('windows')) {
+                args = args + '-DOPENCV_ENABLE_PKG_CONFIG=ON'
+            }
+
             if (hasProperty('toolchain')) {
                 toolchain = project.toolchain
             }
@@ -228,7 +232,6 @@ if (project.platform == "linux-athena") {
                     '-DENABLE_NEON=ON' +
                     '-DENABLE_VFPV3=ON' +
                     '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
-                    '-DOPENCV_ENABLE_PKG_CONFIG=ON' +
                     "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
             } else if (project.platform == "linux-raspbian") {
                 toolchain = projectDir.canonicalPath + "/arm-pi-gnueabihf.toolchain.cmake"
@@ -238,7 +241,6 @@ if (project.platform == "linux-athena") {
                     '-DENABLE_NEON=ON' +
                     '-DENABLE_VFPV3=ON' +
                     '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
-                    '-DOPENCV_ENABLE_PKG_CONFIG=ON' +
                     "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
             } else if (project.platform == "linux-aarch64bionic") {
                 toolchain = projectDir.canonicalPath + "/aarch64-bionic-gnu.toolchain.cmake"
@@ -246,7 +248,6 @@ if (project.platform == "linux-athena") {
                 return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
                     '-DCMAKE_MAKE_PROGRAM=make' +
                     '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
-                    '-DOPENCV_ENABLE_PKG_CONFIG=ON' +
                     "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
             }
             if (toolchain) {
