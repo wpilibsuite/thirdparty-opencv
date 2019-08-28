@@ -274,6 +274,16 @@ stages:
           brew link gettext --force
           ./installFFmpeg.sh
         displayName: 'Setup JDK, Ant, Binutils, Pkg-config, FFmpeg and Gettext'
+      - script: |
+          pkg-config ffmpeg --modversion
+          pkg-config avcodec --modversion
+          pkg-config avformat --modversion
+          pkg-config avutil --modversion
+          pkg-config swscale --modversion
+          pkg-config avresample --modversion
+          ffmpeg
+          which ffmpeg
+        displayName: 'Tests FFmpeg'
       - task: Gradle@2
         inputs:
           workingDirectory: ''
