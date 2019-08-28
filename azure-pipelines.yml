@@ -116,6 +116,8 @@ stages:
           ./installFFmpeg.sh
         displayName: 'Install Ant and FFmpeg'
       - script: |
+          export PKG_CONFIG_PATH=$(pwd)/ffmpeg/build/lib/pkgconfig/
+          export PKG_CONFIG_LIBDIR=$(pwd)/ffmpeg/build/lib
           echo '##### $PKG_CONFIG_PATH' && echo $PKG_CONFIG_PATH
           echo '##### $PKG_CONFIG_LIBDIR' && echo $PKG_CONFIG_LIBDIR
           echo '##### ls $PKG_CONFIG_PATH' && ls $PKG_CONFIG_PATH
@@ -289,6 +291,8 @@ stages:
           ./installFFmpeg.sh
         displayName: 'Setup JDK, Ant, Binutils, Pkg-config, FFmpeg and Gettext'
       - script: |
+          export PKG_CONFIG_PATH=$(pwd)/ffmpeg/build/lib/pkgconfig/
+          export PKG_CONFIG_LIBDIR=$(pwd)/ffmpeg/build/lib
           echo '##### $PKG_CONFIG_PATH' && echo $PKG_CONFIG_PATH
           echo '##### $PKG_CONFIG_LIBDIR' && echo $PKG_CONFIG_LIBDIR
           echo '##### ls $PKG_CONFIG_PATH' && ls $PKG_CONFIG_PATH
