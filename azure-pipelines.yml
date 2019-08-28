@@ -115,6 +115,20 @@ stages:
           sudo apt-get update && sudo apt-get install ant nasm -y && sudo rm -rf /var/lib/apt/lists/*
           ./installFFmpeg.sh
         displayName: 'Install Ant and FFmpeg'
+      - script: |
+          echo '##### $PKG_CONFIG_PATH' && echo $PKG_CONFIG_PATH
+          echo '##### $PKG_CONFIG_LIBDIR' && echo $PKG_CONFIG_LIBDIR
+          echo '##### ls $PKG_CONFIG_PATH' && ls $PKG_CONFIG_PATH
+          echo '##### ls $PKG_CONFIG_LIBDIR' && ls $PKG_CONFIG_LIBDIR
+          echo '##### pkg-config ffmpeg --modversion' && pkg-config ffmpeg --modversion
+          echo '##### pkg-config avcodec --modversion' && pkg-config avcodec --modversion
+          echo '##### pkg-config avformat --modversion' && pkg-config avformat --modversion
+          echo '##### pkg-config avutil --modversion' && pkg-config avutil --modversion
+          echo '##### pkg-config swscale --modversion' && pkg-config swscale --modversion
+          echo '##### pkg-config avresample --modversion' && pkg-config avresample --modversion
+          echo '##### ffmpeg' && ffmpeg
+          echo '##### which ffmpeg' && which ffmpeg
+        displayName: 'Tests FFmpeg'
       - task: Gradle@2
         inputs:
           workingDirectory: ''
@@ -275,18 +289,18 @@ stages:
           ./installFFmpeg.sh
         displayName: 'Setup JDK, Ant, Binutils, Pkg-config, FFmpeg and Gettext'
       - script: |
-          echo $PKG_CONFIG_PATH
-          echo $PKG_CONFIG_LIBDIR
-          ls $PKG_CONFIG_PATH
-          ls $PKG_CONFIG_LIBDIR
-          pkg-config ffmpeg --modversion
-          pkg-config avcodec --modversion
-          pkg-config avformat --modversion
-          pkg-config avutil --modversion
-          pkg-config swscale --modversion
-          pkg-config avresample --modversion
-          ffmpeg
-          which ffmpeg
+          echo '##### $PKG_CONFIG_PATH' && echo $PKG_CONFIG_PATH
+          echo '##### $PKG_CONFIG_LIBDIR' && echo $PKG_CONFIG_LIBDIR
+          echo '##### ls $PKG_CONFIG_PATH' && ls $PKG_CONFIG_PATH
+          echo '##### ls $PKG_CONFIG_LIBDIR' && ls $PKG_CONFIG_LIBDIR
+          echo '##### pkg-config ffmpeg --modversion' && pkg-config ffmpeg --modversion
+          echo '##### pkg-config avcodec --modversion' && pkg-config avcodec --modversion
+          echo '##### pkg-config avformat --modversion' && pkg-config avformat --modversion
+          echo '##### pkg-config avutil --modversion' && pkg-config avutil --modversion
+          echo '##### pkg-config swscale --modversion' && pkg-config swscale --modversion
+          echo '##### pkg-config avresample --modversion' && pkg-config avresample --modversion
+          echo '##### ffmpeg' && ffmpeg
+          echo '##### which ffmpeg' && which ffmpeg
         displayName: 'Tests FFmpeg'
       - task: Gradle@2
         inputs:
