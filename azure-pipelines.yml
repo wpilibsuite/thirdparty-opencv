@@ -275,6 +275,10 @@ stages:
           ./installFFmpeg.sh
         displayName: 'Setup JDK, Ant, Binutils, Pkg-config, FFmpeg and Gettext'
       - script: |
+          echo $PKG_CONFIG_PATH
+          echo $PKG_CONFIG_LIBDIR
+          ls $PKG_CONFIG_PATH
+          ls $PKG_CONFIG_LIBDIR
           pkg-config ffmpeg --modversion
           pkg-config avcodec --modversion
           pkg-config avformat --modversion
