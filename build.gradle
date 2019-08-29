@@ -190,12 +190,83 @@ if (project.platform == "linux-athena") {
     objCopyExe = 'aarch64-bionic-linux-gnu-objcopy'
 }
 
+['': project.cmakeBuildDirectory.resolve('ffmpeg'),
+ 'Shared': project.cmakeBuildSharedDirectory.resolve('ffmpeg'),
+ 'Debug': project.cmakeBuildDebugDirectory.resolve('ffmpeg'),
+ 'SharedDebug': project.cmakeBuildSharedDebugDirectory.resolve('ffmpeg')
+].each{ buildType, installDirectory ->
+    def buildDirectory = Paths.get(projectDir.canonicalPath).resolve('ffmpeg').resolve('build')
+
+    project.tasks.create('FFmpegConfigure' + buildType, Exec) {
+        inputs.dir 'ffmpeg'
+
+        def configureArgs = {
+            def args = ['--disable-programs', "--prefix=${installDirectory.toString()}"]
+
+            if (project.platform == "linux-athena") {
+                return args + '--enable-cross-compile' +
+                    '--cross-prefix=arm-frc2020-linux-gnueabi-' +
+                    '--arch=arm' +
+                    '--target-os=linux'
+            } else if (project.platform == "linux-raspbian") {
+                return args + '--enable-cross-compile' +
+                    '--cross-prefix=arm-raspbian10-linux-gnueabihf-' +
+                    '--arch=armhf' +
+                    '--target-os=linux'
+            } else if (project.platform == "linux-aarch64bionic") {
+                return args + '--enable-cross-compile' +
+                    '--cross-prefix=aarch64-bionic-linux-gnu-' +
+                    '--arch=aarch64' +
+                    '--target-os=linux'
+            }
+
+            return args
+        }
+
+        if (!Files.exists(buildDirectory)) {
+            Files.createDirectories(buildDirectory)
+        }
+        workingDir buildDirectory.toString()
+
+        executable Paths.get(projectDir.canonicalPath).resolve('ffmpeg').resolve('configure').toString()
+        args = configureArgs()
+    }
+
+    project.tasks.create('FFmpegMake' + buildType, Exec) {
+        dependsOn 'FFmpegConfigure' + buildType
+        workingDir buildDirectory.toString()
+        def processors = Runtime.runtime.availableProcessors()
+
+        executable 'make'
+        args = ["-j${processors}"]
+        inputs.file buildDirectory.resolve("Makefile").toFile()
+    }
+
+    project.tasks.create('FFmpegMakeInstall' + buildType, Exec) {
+        dependsOn 'FFmpegMake' + buildType
+        workingDir buildDirectory.toString()
+
+        executable 'make'
+        args = ['install']
+        inputs.file buildDirectory.resolve("Makefile").toFile()
+    }
+
+    project.tasks.withType(Exec) {
+        def environmentVars = ['PKG_CONFIG_PATH': "${installDirectory.resolve('lib').resolve('pkgconfig').toString()}", 'PKG_CONFIG_LIBDIR': "${installDirectory.resolve('lib').toString()}"]
+        environment environmentVars
+    }
+}
+
 ['': project.cmakeBuildDirectory,
  'Shared': project.cmakeBuildSharedDirectory,
  'Debug': project.cmakeBuildDebugDirectory,
  'SharedDebug': project.cmakeBuildSharedDebugDirectory
 ].each{ buildType, buildDirectory ->
     project.tasks.create('cmake' + buildType, Exec) {
+        if (!project.platform.startsWith('windows')) {
+            dependsOn 'FFmpegMakeInstall' + buildType
+        }
+
         inputs.dir 'opencv'
 
         if (!Files.exists(buildDirectory)) {

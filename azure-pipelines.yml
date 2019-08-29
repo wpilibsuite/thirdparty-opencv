@@ -24,8 +24,7 @@ stages:
         submodules: true
       - script: |
           sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/*
-          ./installFFmpeg.sh raspbian
-        displayName: 'Install Ant and FFmpeg'
+        displayName: 'Install Ant'
       - task: Gradle@2
         inputs:
           workingDirectory: ''
@@ -52,8 +51,7 @@ stages:
         submodules: true
       - script: |
           sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/*
-          ./installFFmpeg.sh aarch64bionic
-        displayName: 'Install Ant and FFmpeg'
+        displayName: 'Install Ant'
       - task: Gradle@2
         inputs:
           workingDirectory: ''
@@ -82,8 +80,7 @@ stages:
         submodules: true
       - script: |
           sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/*
-          ./installFFmpeg.sh athena
-        displayName: 'Install Ant and FFmpeg'
+        displayName: 'Install Ant'
       - task: Gradle@2
         inputs:
           workingDirectory: ''
@@ -113,25 +110,7 @@ stages:
         submodules: true
       - script: |
           sudo apt-get update && sudo apt-get install ant nasm -y && sudo rm -rf /var/lib/apt/lists/*
-          ./installFFmpeg.sh
-          echo '##### $PKG_CONFIG_PATH' && echo $PKG_CONFIG_PATH
-          echo '##### $PKG_CONFIG_LIBDIR' && echo $PKG_CONFIG_LIBDIR
-          echo '##### ls $PKG_CONFIG_PATH' && ls $PKG_CONFIG_PATH
-          echo '##### ls $PKG_CONFIG_LIBDIR' && ls $PKG_CONFIG_LIBDIR
-        displayName: 'Install Ant and FFmpeg'
-      - script: |
-          export PKG_CONFIG_PATH=$(pwd)/ffmpeg/build/lib/pkgconfig/
-          export PKG_CONFIG_LIBDIR=$(pwd)/ffmpeg/build/lib
-          echo '##### $PKG_CONFIG_PATH' && echo $PKG_CONFIG_PATH
-          echo '##### $PKG_CONFIG_LIBDIR' && echo $PKG_CONFIG_LIBDIR
-          echo '##### ls $PKG_CONFIG_PATH' && ls $PKG_CONFIG_PATH
-          echo '##### ls $PKG_CONFIG_LIBDIR' && ls $PKG_CONFIG_LIBDIR
-          echo '##### pkg-config libavcodec --modversion' && pkg-config libavcodec --modversion
-          echo '##### pkg-config libavformat --modversion' && pkg-config libavformat --modversion
-          echo '##### pkg-config libavutil --modversion' && pkg-config libavutil --modversion
-          echo '##### pkg-config libswscale --modversion' && pkg-config libswscale --modversion
-          echo '##### pkg-config libavresample --modversion' && pkg-config libavresample --modversion
-        displayName: 'Tests FFmpeg'
+        displayName: 'Install Ant'
       - task: Gradle@2
         inputs:
           workingDirectory: ''
@@ -289,25 +268,7 @@ stages:
           export JAVA_HOME=`/usr/libexec/java_home -v 11`
           brew install ant binutils pkg-config nasm
           brew link gettext --force
-          ./installFFmpeg.sh
-          echo '##### $PKG_CONFIG_PATH' && echo $PKG_CONFIG_PATH
-          echo '##### $PKG_CONFIG_LIBDIR' && echo $PKG_CONFIG_LIBDIR
-          echo '##### ls $PKG_CONFIG_PATH' && ls $PKG_CONFIG_PATH
-          echo '##### ls $PKG_CONFIG_LIBDIR' && ls $PKG_CONFIG_LIBDIR
-        displayName: 'Setup JDK, Ant, Binutils, Pkg-config, FFmpeg and Gettext'
-      - script: |
-          export PKG_CONFIG_PATH=$(pwd)/ffmpeg/build/lib/pkgconfig/
-          export PKG_CONFIG_LIBDIR=$(pwd)/ffmpeg/build/lib
-          echo '##### $PKG_CONFIG_PATH' && echo $PKG_CONFIG_PATH
-          echo '##### $PKG_CONFIG_LIBDIR' && echo $PKG_CONFIG_LIBDIR
-          echo '##### ls $PKG_CONFIG_PATH' && ls $PKG_CONFIG_PATH
-          echo '##### ls $PKG_CONFIG_LIBDIR' && ls $PKG_CONFIG_LIBDIR
-          echo '##### pkg-config libavcodec --modversion' && pkg-config libavcodec --modversion
-          echo '##### pkg-config libavformat --modversion' && pkg-config libavformat --modversion
-          echo '##### pkg-config libavutil --modversion' && pkg-config libavutil --modversion
-          echo '##### pkg-config libswscale --modversion' && pkg-config libswscale --modversion
-          echo '##### pkg-config libavresample --modversion' && pkg-config libavresample --modversion
-        displayName: 'Tests FFmpeg'
+        displayName: 'Setup JDK, Ant, Binutils, Pkg-config and Gettext'
       - task: Gradle@2
         inputs:
           workingDirectory: ''
