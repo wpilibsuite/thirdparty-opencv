@@ -17,6 +17,9 @@ ext.licenseFile = file("$rootDir/opencv/LICENSE")
 
 def outputsFolder = file("$buildDir/allOutputs")
 
+def String pkgConfigPath
+def String pkgConfigLibDir
+
 task copyAllOutputs(type: Copy) {
     destinationDir outputsFolder
 }
@@ -203,6 +206,10 @@ if (project.platform == "linux-athena") {
         def configureArgs = {
             def args = ['--disable-programs', "--prefix=${installDirectory.toString()}"]
 
+            if (buildType.contains("Shared")) {
+                args = args + '--enable-shared' + '--disable-static'
+            }
+
             if (project.platform == "linux-athena") {
                 return args + '--enable-cross-compile' +
                     '--cross-prefix=arm-frc2020-linux-gnueabi-' +
@@ -251,10 +258,8 @@ if (project.platform == "linux-athena") {
         inputs.file buildDirectory.resolve("Makefile").toFile()
     }
 
-    project.tasks.withType(Exec) {
-        def environmentVars = ['PKG_CONFIG_PATH': "${installDirectory.resolve('lib').resolve('pkgconfig').toString()}", 'PKG_CONFIG_LIBDIR': "${installDirectory.resolve('lib').toString()}"]
-        environment environmentVars
-    }
+    pkgConfigPath = installDirectory.resolve('lib').resolve('pkgconfig').toString()
+    pkgConfigLibDir = installDirectory.resolve('lib').toString()
 }
 
 ['': project.cmakeBuildDirectory,
@@ -265,6 +270,8 @@ if (project.platform == "linux-athena") {
     project.tasks.create('cmake' + buildType, Exec) {
         if (!project.platform.startsWith('windows')) {
             dependsOn 'FFmpegMakeInstall' + buildType
+            environment 'PKG_CONFIG_PATH', pkgConfigPath
+            environment 'PKG_CONFIG_LIBDIR', pkgConfigLibDir
         }
 
         inputs.dir 'opencv'
