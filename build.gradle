@@ -198,8 +198,6 @@ if (project.platform == "linux-athena") {
  'Debug': project.cmakeBuildDebugDirectory.resolve('ffmpeg'),
  'SharedDebug': project.cmakeBuildSharedDebugDirectory.resolve('ffmpeg')
 ].each{ buildType, installDirectory ->
-    def buildDirectory = Paths.get(projectDir.canonicalPath).resolve('ffmpeg').resolve('build')
-
     project.tasks.create('FFmpegConfigure' + buildType, Exec) {
         inputs.dir 'ffmpeg'
 
@@ -230,6 +228,7 @@ if (project.platform == "linux-athena") {
             return args
         }
 
+        def buildDirectory = Paths.get(projectDir.canonicalPath).resolve('ffmpeg').resolve('build')
         if (!Files.exists(buildDirectory)) {
             Files.createDirectories(buildDirectory)
         }
@@ -256,9 +255,6 @@ if (project.platform == "linux-athena") {
         executable 'make'
         args = ['install']
         inputs.file buildDirectory.resolve("Makefile").toFile()
-
-        pkgConfigPath = installDirectory.resolve('lib').resolve('pkgconfig').toString()
-        pkgConfigLibDir = installDirectory.resolve('lib').toString()
     }
 }
 
@@ -270,8 +266,8 @@ if (project.platform == "linux-athena") {
     project.tasks.create('cmake' + buildType, Exec) {
         if (!project.platform.startsWith('windows')) {
             dependsOn 'FFmpegMakeInstall' + buildType
-            environment 'PKG_CONFIG_PATH', pkgConfigPath
-            environment 'PKG_CONFIG_LIBDIR', pkgConfigLibDir
+            environment 'PKG_CONFIG_PATH', buildDirectory.resolve('ffmpeg').resolve('lib').resolve('pkgconfig').toString()
+            environment 'PKG_CONFIG_LIBDIR', buildDirectory.resolve('ffmpeg').resolve('lib').toString()
         }
 
         inputs.dir 'opencv'
