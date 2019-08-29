@@ -204,7 +204,7 @@ if (project.platform == "linux-athena") {
         inputs.dir 'ffmpeg'
 
         def configureArgs = {
-            def args = ['--disable-programs', "--prefix=${installDirectory.toString()}"]
+            def args = ['--disable-programs', '--enable-avresample' "--prefix=${installDirectory.toString()}"]
 
             if (buildType.contains("Shared")) {
                 args = args + '--enable-shared' + '--disable-static'
@@ -256,10 +256,10 @@ if (project.platform == "linux-athena") {
         executable 'make'
         args = ['install']
         inputs.file buildDirectory.resolve("Makefile").toFile()
-    }
 
-    pkgConfigPath = installDirectory.resolve('lib').resolve('pkgconfig').toString()
-    pkgConfigLibDir = installDirectory.resolve('lib').toString()
+        pkgConfigPath = installDirectory.resolve('lib').resolve('pkgconfig').toString()
+        pkgConfigLibDir = installDirectory.resolve('lib').toString()
+    }
 }
 
 ['': project.cmakeBuildDirectory,
