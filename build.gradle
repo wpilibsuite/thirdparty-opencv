@@ -271,9 +271,9 @@ if (project.platform == "linux-athena") {
             environment 'PKG_CONFIG_LIBDIR', buildDirectory.resolve('ffmpeg').resolve('lib').toString()
 
             if (project.platform.startsWith('osx')) {
-                environment 'DYLD_LIBRARY_PATH', "${System.env.DYLD_LIBRARY_PATH}:${buildDirectory.resolve('ffmpeg').resolve('lib').toString()}"
+                environment 'DYLD_LIBRARY_PATH', buildDirectory.resolve('ffmpeg').resolve('lib').toString()
             } else {
-                environment 'LD_LIBRARY_PATH', "${System.env.LD_LIBRARY_PATH}:${buildDirectory.resolve('ffmpeg').resolve('lib').toString()}"
+                environment 'LD_LIBRARY_PATH', buildDirectory.resolve('ffmpeg').resolve('lib').toString()
             }
         }
 
