@@ -114,6 +114,10 @@ stages:
       - script: |
           sudo apt-get update && sudo apt-get install ant nasm -y && sudo rm -rf /var/lib/apt/lists/*
           ./installFFmpeg.sh
+          echo '##### $PKG_CONFIG_PATH' && echo $PKG_CONFIG_PATH
+          echo '##### $PKG_CONFIG_LIBDIR' && echo $PKG_CONFIG_LIBDIR
+          echo '##### ls $PKG_CONFIG_PATH' && ls $PKG_CONFIG_PATH
+          echo '##### ls $PKG_CONFIG_LIBDIR' && ls $PKG_CONFIG_LIBDIR
         displayName: 'Install Ant and FFmpeg'
       - script: |
           export PKG_CONFIG_PATH=$(pwd)/ffmpeg/build/lib/pkgconfig/
@@ -122,14 +126,11 @@ stages:
           echo '##### $PKG_CONFIG_LIBDIR' && echo $PKG_CONFIG_LIBDIR
           echo '##### ls $PKG_CONFIG_PATH' && ls $PKG_CONFIG_PATH
           echo '##### ls $PKG_CONFIG_LIBDIR' && ls $PKG_CONFIG_LIBDIR
-          echo '##### pkg-config ffmpeg --modversion' && pkg-config ffmpeg --modversion
-          echo '##### pkg-config avcodec --modversion' && pkg-config avcodec --modversion
-          echo '##### pkg-config avformat --modversion' && pkg-config avformat --modversion
-          echo '##### pkg-config avutil --modversion' && pkg-config avutil --modversion
-          echo '##### pkg-config swscale --modversion' && pkg-config swscale --modversion
-          echo '##### pkg-config avresample --modversion' && pkg-config avresample --modversion
-          echo '##### ffmpeg' && ffmpeg
-          echo '##### which ffmpeg' && which ffmpeg
+          echo '##### pkg-config libavcodec --modversion' && pkg-config libavcodec --modversion
+          echo '##### pkg-config libavformat --modversion' && pkg-config libavformat --modversion
+          echo '##### pkg-config libavutil --modversion' && pkg-config libavutil --modversion
+          echo '##### pkg-config libswscale --modversion' && pkg-config libswscale --modversion
+          echo '##### pkg-config libavresample --modversion' && pkg-config libavresample --modversion
         displayName: 'Tests FFmpeg'
       - task: Gradle@2
         inputs:
@@ -289,6 +290,10 @@ stages:
           brew install ant binutils pkg-config nasm
           brew link gettext --force
           ./installFFmpeg.sh
+          echo '##### $PKG_CONFIG_PATH' && echo $PKG_CONFIG_PATH
+          echo '##### $PKG_CONFIG_LIBDIR' && echo $PKG_CONFIG_LIBDIR
+          echo '##### ls $PKG_CONFIG_PATH' && ls $PKG_CONFIG_PATH
+          echo '##### ls $PKG_CONFIG_LIBDIR' && ls $PKG_CONFIG_LIBDIR
         displayName: 'Setup JDK, Ant, Binutils, Pkg-config, FFmpeg and Gettext'
       - script: |
           export PKG_CONFIG_PATH=$(pwd)/ffmpeg/build/lib/pkgconfig/
@@ -297,14 +302,11 @@ stages:
           echo '##### $PKG_CONFIG_LIBDIR' && echo $PKG_CONFIG_LIBDIR
           echo '##### ls $PKG_CONFIG_PATH' && ls $PKG_CONFIG_PATH
           echo '##### ls $PKG_CONFIG_LIBDIR' && ls $PKG_CONFIG_LIBDIR
-          echo '##### pkg-config ffmpeg --modversion' && pkg-config ffmpeg --modversion
-          echo '##### pkg-config avcodec --modversion' && pkg-config avcodec --modversion
-          echo '##### pkg-config avformat --modversion' && pkg-config avformat --modversion
-          echo '##### pkg-config avutil --modversion' && pkg-config avutil --modversion
-          echo '##### pkg-config swscale --modversion' && pkg-config swscale --modversion
-          echo '##### pkg-config avresample --modversion' && pkg-config avresample --modversion
-          echo '##### ffmpeg' && ffmpeg
-          echo '##### which ffmpeg' && which ffmpeg
+          echo '##### pkg-config libavcodec --modversion' && pkg-config libavcodec --modversion
+          echo '##### pkg-config libavformat --modversion' && pkg-config libavformat --modversion
+          echo '##### pkg-config libavutil --modversion' && pkg-config libavutil --modversion
+          echo '##### pkg-config libswscale --modversion' && pkg-config libswscale --modversion
+          echo '##### pkg-config libavresample --modversion' && pkg-config libavresample --modversion
         displayName: 'Tests FFmpeg'
       - task: Gradle@2
         inputs:
