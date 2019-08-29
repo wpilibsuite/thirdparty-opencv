@@ -198,6 +198,8 @@ if (project.platform == "linux-athena") {
  'Debug': project.cmakeBuildDebugDirectory.resolve('ffmpeg'),
  'SharedDebug': project.cmakeBuildSharedDebugDirectory.resolve('ffmpeg')
 ].each{ buildType, installDirectory ->
+    def buildDirectory = Paths.get(projectDir.canonicalPath).resolve('ffmpeg').resolve('build')
+
     project.tasks.create('FFmpegConfigure' + buildType, Exec) {
         inputs.dir 'ffmpeg'
 
@@ -228,7 +230,6 @@ if (project.platform == "linux-athena") {
             return args
         }
 
-        def buildDirectory = Paths.get(projectDir.canonicalPath).resolve('ffmpeg').resolve('build')
         if (!Files.exists(buildDirectory)) {
             Files.createDirectories(buildDirectory)
         }
