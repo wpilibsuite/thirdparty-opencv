@@ -412,6 +412,7 @@ if (project.platform == "linux-athena") {
                 workingDir buildDirectory.resolve("lib").toString()
                 def libDirectory = buildDirectory.resolve("lib").toFile()
                 def thirdPartyLib = buildDirectory.resolve("3rdParty").resolve("lib").toFile()
+                def ffmpegLib = buildDirectory.resolve("ffmpeg").resolve("lib").toFile()
                 args '-static'
                 args '-o'
                 args "libopencv${project.libVersion}.a"
@@ -432,9 +433,17 @@ if (project.platform == "linux-athena") {
                         args it.absolutePath
                     }
 
+                    ffmpegLib.eachFile() {
+                        if (!it.name.endsWith('.a')) {
+                            return
+                        }
+                        args it.absolutePath
+                    }
+
                 }
                 inputs.dir buildDirectory.resolve("lib").toFile()
                 inputs.dir thirdPartyLib
+                inputs.dir ffmpegLib
                 outputs.file buildDirectory.resolve("lib").resolve("libopencv${project.libVersion}.a").toFile()
             }
         } else {
@@ -500,6 +509,9 @@ if (project.platform == "linux-athena") {
                 exclude '**/*dephelp*'
             }
             from(buildDirectory.resolve("3rdparty").resolve("lib").toFile()) {
+                include '*.so'
+            }
+            from(buildDirectory.resolve("ffmpeg").resolve("lib").toFile()) {
                 include '*.so'
             }
         }

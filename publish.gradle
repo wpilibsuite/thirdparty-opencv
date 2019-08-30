@@ -73,6 +73,7 @@ task cppSourcesZip(type: Zip, dependsOn: make) {
         from('ffmpeg') {
             into '/ffmpeg'
             include '**/*.c', '**/*.cpp', '**/*.h*'
+            exclude 'build/'
         }
     }
 
@@ -106,6 +107,13 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
             fcp.relativePath = new RelativePath(!fcp.file.isDirectory(), fcp.relativePath.segments[2..-1] as String[])
         }
     }
+
+    if (!project.platform.startsWith("windows")) {
+        from(project.cmakeBuildDirectory.resolve('ffmpeg').resolve('include')) {
+            into '/'
+        }
+    }
+
     includeEmptyDirs = false
 }
 ['', 'Debug' ].each{ buildType ->
@@ -180,6 +188,10 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
                     exclude '**/*dephelp*'
                 }
                 from(sharedBuildDir.resolve("3rdparty").resolve("lib").toFile()) {
+                    into project.platformPath + '/shared'
+                    include '*.so'
+                }
+                from(sharedBuildDir.resolve("ffmpeg").resolve("lib").toFile()) {
                     into project.platformPath + '/shared'
                     include '*.so'
                 }
