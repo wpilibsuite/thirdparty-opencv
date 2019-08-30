@@ -204,10 +204,10 @@ if (project.platform == "linux-athena") {
         inputs.dir 'ffmpeg'
 
         def configureArgs = {
-            def args = ['--disable-programs', '--enable-avresample', "--prefix=${installDirectory.toString()}"]
+            def args = ['--disable-programs', '--enable-avresample', '--enable-shared', "--prefix=${installDirectory.toString()}"]
 
             if (buildType.contains("Shared")) {
-                args = args + '--enable-shared' + '--disable-static'
+                args = args + '--disable-static'
             }
 
             if (project.platform == "linux-athena") {
