@@ -353,13 +353,17 @@ if (project.platform == "linux-athena") {
     project.tasks.create('cmake' + buildType, Exec) {
         if (!project.platform.startsWith('windows')) {
             dependsOn 'FFmpegMakeInstall' + buildType
-            environment 'PKG_CONFIG_PATH', buildDirectory.resolve('ffmpeg').resolve('lib').resolve('pkgconfig').toString()
-            environment 'PKG_CONFIG_LIBDIR', buildDirectory.resolve('ffmpeg').resolve('lib').toString()
+
+            def ffmpegLibDir = buildDirectory.resolve('ffmpeg').resolve('lib').toString()
+            def ffmpegPkgConfigDir = buildDirectory.resolve('ffmpeg').resolve('lib').resolve('pkgconfig').toString()
+
+            environment 'PKG_CONFIG_PATH', ffmpegPkgConfigDir
+            environment 'PKG_CONFIG_LIBDIR', ffmpegLibDir
 
             if (project.platform.startsWith('osx')) {
-                environment 'DYLD_LIBRARY_PATH', buildDirectory.resolve('ffmpeg').resolve('lib').toString()
+                environment 'DYLD_LIBRARY_PATH', ffmpegLibDir
             } else {
-                environment 'LD_LIBRARY_PATH', buildDirectory.resolve('ffmpeg').resolve('lib').toString()
+                environment 'LD_LIBRARY_PATH', ffmpegLibDir
             }
         }
 
@@ -446,13 +450,16 @@ if (project.platform == "linux-athena") {
         workingDir buildDirectory.toString()
         def processors = Runtime.runtime.availableProcessors()
 
-        environment 'PKG_CONFIG_PATH', buildDirectory.resolve('ffmpeg').resolve('lib').resolve('pkgconfig').toString()
-        environment 'PKG_CONFIG_LIBDIR', buildDirectory.resolve('ffmpeg').resolve('lib').toString()
+        def ffmpegLibDir = buildDirectory.resolve('ffmpeg').resolve('lib').toString()
+        def ffmpegPkgConfigDir = buildDirectory.resolve('ffmpeg').resolve('lib').resolve('pkgconfig').toString()
+
+        environment 'PKG_CONFIG_PATH', ffmpegPkgConfigDir
+        environment 'PKG_CONFIG_LIBDIR', ffmpegLibDir
 
         if (project.platform.startsWith('osx')) {
-            environment 'DYLD_LIBRARY_PATH', "${System.env.DYLD_LIBRARY_PATH}:${buildDirectory.resolve('ffmpeg').resolve('lib').toString()}"
+            environment 'DYLD_LIBRARY_PATH', ffmpegLibDir
         } else {
-            environment 'LD_LIBRARY_PATH', "${System.env.LD_LIBRARY_PATH}:${buildDirectory.resolve('ffmpeg').resolve('lib').toString()}"
+            environment 'LD_LIBRARY_PATH', ffmpegLibDir
         }
 
 
