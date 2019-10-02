@@ -70,6 +70,12 @@ task cppSourcesZip(type: Zip, dependsOn: make) {
     }
 
     if (!project.platform.startsWith("windows")) {
+        from('x264') {
+            into '/x264'
+            include '**/*.c', '**/*.h*'
+            exclude 'build/'
+        }
+
         from('ffmpeg') {
             into '/ffmpeg'
             include '**/*.c', '**/*.cpp', '**/*.h*'
@@ -109,6 +115,10 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
     }
 
     if (!project.platform.startsWith("windows")) {
+        from(project.cmakeBuildDirectory.resolve('x264').resolve('include')) {
+            into '/'
+        }
+
         from(project.cmakeBuildDirectory.resolve('ffmpeg').resolve('include')) {
             into '/'
         }
@@ -188,6 +198,10 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
                     exclude '**/*dephelp*'
                 }
                 from(sharedBuildDir.resolve("3rdparty").resolve("lib").toFile()) {
+                    into project.platformPath + '/shared'
+                    include '*.so'
+                }
+                from(sharedBuildDir.resolve("x264").resolve("lib").toFile()) {
                     into project.platformPath + '/shared'
                     include '*.so'
                 }
