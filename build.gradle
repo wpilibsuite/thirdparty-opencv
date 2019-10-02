@@ -265,19 +265,32 @@ if (project.platform == "linux-athena") {
     project.tasks.create('FFmpegConfigure' + buildType, Exec) {
         dependsOn 'x264MakeInstall' + buildType
 
-        environment 'PKG_CONFIG_PATH', buildDirectory.resolve('x264').resolve('lib').resolve('pkgconfig').toString()
-        environment 'PKG_CONFIG_LIBDIR', buildDirectory.resolve('x264').resolve('lib').toString()
+        def x264LibDir = buildDirectory.resolve('x264').resolve('lib').toString()
+        def x264IncludeDir = buildDirectory.resolve('x264').resolve('include').toString()
+        def x264PkgConfigDir = buildDirectory.resolve('x264').resolve('lib').resolve('pkgconfig').toString()
+
+        environment 'PKG_CONFIG_PATH', x264PkgConfigDir
+        environment 'PKG_CONFIG_LIBDIR', x264LibDir
 
         if (project.platform.startsWith('osx')) {
-            environment 'DYLD_LIBRARY_PATH', buildDirectory.resolve('x264').resolve('lib').toString()
+            environment 'DYLD_LIBRARY_PATH', x264LibDir
         } else {
-            environment 'LD_LIBRARY_PATH', buildDirectory.resolve('x264').resolve('lib').toString()
+            environment 'LD_LIBRARY_PATH', x264LibDir
         }
 
         inputs.dir 'ffmpeg'
 
         def configureArgs = {
-            def args = ['--disable-programs', '--enable-avresample', '--enable-shared', '--enable-libx264', '--enable-gpl', "--prefix=${ffmpegInstallDirectory.toString()}"]
+            def args = ['--disable-programs',
+                    '--disable-doc',
+                    '--enable-avresample',
+                    '--enable-shared',
+                    '--enable-libx264',
+                    '--enable-gpl',
+                    "--extra-cflags=-I${x264IncludeDir}",
+                    "--extra-ldflags=-L${x264LibDir}",
+                    "--prefix=${ffmpegInstallDirectory.toString()}"
+            ]
 
             if (buildType.contains("Shared")) {
                 args = args + '--disable-static'
