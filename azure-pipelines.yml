@@ -109,7 +109,7 @@ stages:
       - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
         submodules: true
       - script: |
-          sudo apt-get update && sudo apt-get install ant nasm -y && sudo rm -rf /var/lib/apt/lists/*
+          sudo apt-get update && sudo apt-get install ant yasm -y && sudo rm -rf /var/lib/apt/lists/*
         displayName: 'Install Ant'
       - task: Gradle@2
         inputs:
@@ -266,7 +266,7 @@ stages:
       - script: |
           mkdir build
           export JAVA_HOME=`/usr/libexec/java_home -v 11`
-          brew install ant binutils pkg-config nasm
+          brew install ant binutils pkg-config yasm
           brew link gettext --force
         displayName: 'Setup JDK, Ant, Binutils, Pkg-config and Gettext'
       - task: Gradle@2
