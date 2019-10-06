@@ -266,6 +266,7 @@ stages:
       - script: |
           mkdir build
           export JAVA_HOME=`/usr/libexec/java_home -v 11`
+          brew update
           brew install ant binutils pkg-config nasm
           brew link gettext nasm --force
         displayName: 'Setup JDK, Ant, Binutils, Pkg-config and Gettext'
