@@ -205,7 +205,10 @@ if (project.platform == "linux-athena") {
         inputs.dir 'x264'
 
         def configureArgs = {
-            def args = ['--disable-cli', '--enable-shared', "--prefix=${x264InstallDirectory.toString()}"]
+            def args = ['--disable-cli',
+                    '--enable-shared',
+                    "--prefix=${x264InstallDirectory.toString()}"
+            ]
 
             if (!buildType.contains("Shared")) {
                 args = args + '--enable-static'
