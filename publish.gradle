@@ -280,7 +280,7 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
             jniFile = new File(directory.absolutePath, "${jniFileName}")
         }
 
-        def hashFile = new File(directory.absolutePath, "${jniFileName}.hash")
+        def hashFile = new File(directory.absolutePath, "opencv_java${libVersion}.hash")
         it.outputs.file(hashFile)
         it.from(hashFile) {
             into project.platformPath
