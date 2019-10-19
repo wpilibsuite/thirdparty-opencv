@@ -19,6 +19,8 @@ stages:
 
     container: raspbian
 
+    timeoutInMinutes: 0
+
     steps:
       - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
         submodules: true
@@ -45,6 +47,8 @@ stages:
       vmImage: 'Ubuntu 16.04'
 
     container: bionic
+
+    timeoutInMinutes: 0
 
     steps:
       - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
