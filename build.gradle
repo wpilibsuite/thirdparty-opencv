@@ -357,16 +357,18 @@ if (project.platform == "linux-athena") {
         if (!project.platform.startsWith('windows')) {
             dependsOn 'FFmpegMakeInstall' + buildType
 
+            def x264LibDir = buildDirectory.resolve('x264').resolve('lib').toString()
+            def x264PkgConfigDir = buildDirectory.resolve('x264').resolve('lib').resolve('pkgconfig').toString()
             def ffmpegLibDir = buildDirectory.resolve('ffmpeg').resolve('lib').toString()
             def ffmpegPkgConfigDir = buildDirectory.resolve('ffmpeg').resolve('lib').resolve('pkgconfig').toString()
 
-            environment 'PKG_CONFIG_PATH', ffmpegPkgConfigDir
-            environment 'PKG_CONFIG_LIBDIR', ffmpegLibDir
+            environment 'PKG_CONFIG_PATH', "$ffmpegPkgConfigDir:$x264PkgConfigDir"
+            environment 'PKG_CONFIG_LIBDIR', "$ffmpegLibDir:$x264LibDir"
 
             if (project.platform.startsWith('osx')) {
-                environment 'DYLD_LIBRARY_PATH', ffmpegLibDir
+                environment 'DYLD_LIBRARY_PATH', "$ffmpegLibDir:$x264LibDir"
             } else {
-                environment 'LD_LIBRARY_PATH', ffmpegLibDir
+                environment 'LD_LIBRARY_PATH', "$ffmpegLibDir:$x264LibDir"
             }
         }
 
@@ -453,18 +455,19 @@ if (project.platform == "linux-athena") {
         workingDir buildDirectory.toString()
         def processors = Runtime.runtime.availableProcessors()
 
+        def x264LibDir = buildDirectory.resolve('x264').resolve('lib').toString()
+        def x264PkgConfigDir = buildDirectory.resolve('x264').resolve('lib').resolve('pkgconfig').toString()
         def ffmpegLibDir = buildDirectory.resolve('ffmpeg').resolve('lib').toString()
         def ffmpegPkgConfigDir = buildDirectory.resolve('ffmpeg').resolve('lib').resolve('pkgconfig').toString()
 
-        environment 'PKG_CONFIG_PATH', ffmpegPkgConfigDir
-        environment 'PKG_CONFIG_LIBDIR', ffmpegLibDir
+        environment 'PKG_CONFIG_PATH', "$ffmpegPkgConfigDir:$x264PkgConfigDir"
+        environment 'PKG_CONFIG_LIBDIR', "$ffmpegLibDir:$x264LibDir"
 
         if (project.platform.startsWith('osx')) {
-            environment 'DYLD_LIBRARY_PATH', ffmpegLibDir
+            environment 'DYLD_LIBRARY_PATH', "$ffmpegLibDir:$x264LibDir"
         } else {
-            environment 'LD_LIBRARY_PATH', ffmpegLibDir
+            environment 'LD_LIBRARY_PATH', "$ffmpegLibDir:$x264LibDir"
         }
-
 
         if (project.platform.startsWith("windows")) {
             executable 'cmd'
