@@ -35,8 +35,8 @@ stages:
 #         jdkArchitectureOption: x64
       - script: |
           @call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
-#         set PATH=%PATH%;%ANT_HOME%\bin
-#         set PATH=%PATH%;C:\\mingw\\msys\\1.0\\bin
+          set PATH=%PATH%;%ANT_HOME%\bin
+          set PATH=%PATH%;C:\\mingw\\msys\\1.0\\bin
           mkdir build-x264-static
           cd build-x264-static
           bash -c 'CC=cl ../x264/configure --disable-cli --enable-static'
