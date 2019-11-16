@@ -36,13 +36,11 @@ stages:
       - powershell: |
           $ProgressPreference = 'SilentlyContinue'
           wget "https://www.nasm.us/pub/nasm/releasebuilds/2.14.02/win64/nasm-2.14.02-win64.zip" -O "nasm.zip"
-          mkdir nasm
-          Expand-Archive "nasm.zip" -DestinationPath "nasm"
+          Expand-Archive "nasm.zip"
       - script: |
           @call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
-          set PATH=%PATH%;%CD%\nasm
+          set PATH=%PATH%;%CD%\nasm-2.14.02
           set PATH=%PATH%;%ANT_HOME%\bin
-          set PATH=%PATH%;C:\\mingw\\msys\\1.0\\bin
           mkdir build-x264-static
           cd build-x264-static
           bash -c 'CC=cl ../x264/configure --disable-cli --enable-static'
