@@ -39,7 +39,7 @@ stages:
 #         set PATH=%PATH%;C:\\mingw\\msys\\1.0\\bin
           mkdir build-x264-static
           cd build-x264-static
-          bash -c "CC=cl ../x264/configure --disable-cli --enable-static"
+          bash -c 'CC=cl ../x264/configure --disable-cli --enable-static'
           make
 #     - script: |
 #         gradlew build -PjenkinsBuild -PskipDebug
