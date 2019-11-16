@@ -43,6 +43,8 @@ stages:
           set PATH=%PATH%;%ANT_HOME%\bin
           mkdir build-x264-static
           cd build-x264-static
+          echo %PATH%
+          nasm
           bash -c 'CC=cl ../x264/configure --disable-cli --enable-static'
           make
 #     - script: |
