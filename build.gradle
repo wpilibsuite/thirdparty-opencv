@@ -206,12 +206,17 @@ if (project.platform == "linux-athena") {
 
         def configureArgs = {
             def args = ['--disable-cli',
-                    '--enable-shared',
+                    '--enable-pic',
                     "--prefix=${x264InstallDirectory.toString()}"
             ]
 
-            if (!buildType.contains("Shared")) {
+            if (buildType.contains("Shared")) {
+                args = args + '--enable-shared'
+            } else {
                 args = args + '--enable-static'
+            }
+            if (buildType.contains("Debug")) {
+                args = args + '--enable-debug'
             }
 
             if (project.platform == "linux-athena") {
@@ -233,8 +238,13 @@ if (project.platform == "linux-athena") {
         }
         workingDir x264BuildDirectory.toString()
 
-        executable Paths.get(projectDir.canonicalPath).resolve('x264').resolve('configure').toString()
-        args = configureArgs()
+        if (project.platform.startsWith("windows")) {
+            executable 'bash'
+            args = ["-c", "CC=cl ../x264/configure " + configureArgs().join(" ")]
+        } else {
+            executable Paths.get(projectDir.canonicalPath).resolve('x264').resolve('configure').toString()
+            args = configureArgs()
+        }
     }
 
     project.tasks.create('x264Make' + buildType, Exec) {
@@ -286,9 +296,13 @@ if (project.platform == "linux-athena") {
         def configureArgs = {
             def args = ['--disable-programs',
                     '--disable-doc',
+                    '--disable-avdevice',
+                    '--disable-postproc',
+                    '--disable-avfilter',
+                    '--disable-network',
                     '--enable-avresample',
-                    '--enable-shared',
                     '--enable-libx264',
+                    '--enable-pic',
                     '--enable-gpl',
                     "--extra-cflags=-I${x264IncludeDir}",
                     "--extra-ldflags=-L${x264LibDir}",
@@ -296,7 +310,10 @@ if (project.platform == "linux-athena") {
             ]
 
             if (buildType.contains("Shared")) {
-                args = args + '--disable-static'
+                args = args + '--disable-static' + '--enable-shared'
+            }
+            if (buildType.contains("Debug")) {
+                args = args + '--disable-stripping'
             }
 
             if (project.platform == "linux-athena") {
@@ -314,6 +331,8 @@ if (project.platform == "linux-athena") {
                     '--cross-prefix=aarch64-bionic-linux-gnu-' +
                     '--arch=aarch64' +
                     '--target-os=linux'
+            } else if (project.platform.startsWith("windows") {
+                return args + '--toolchain=msvc'
             }
 
             return args
@@ -324,8 +343,13 @@ if (project.platform == "linux-athena") {
         }
         workingDir ffmpegBuildDirectory.toString()
 
-        executable Paths.get(projectDir.canonicalPath).resolve('ffmpeg').resolve('configure').toString()
-        args = configureArgs()
+        if (project.platform.startsWith("windows")) {
+            executable 'bash'
+            args = ["-c", "CC=cl ../x264/configure " + configureArgs().join(" ")]
+        } else {
+            executable Paths.get(projectDir.canonicalPath).resolve('ffmpeg').resolve('configure').toString()
+            args = configureArgs()
+        }
     }
 
     project.tasks.create('FFmpegMake' + buildType, Exec) {
