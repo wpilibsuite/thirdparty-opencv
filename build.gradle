@@ -240,7 +240,7 @@ if (project.platform == "linux-athena") {
 
         if (project.platform.startsWith("windows")) {
             executable 'bash'
-            args = ["-c", "CC=cl ../x264/configure " + configureArgs().join(" ")]
+            args = ["-c", "CC=cl ../configure " + configureArgs().join(" ")]
         } else {
             executable Paths.get(projectDir.canonicalPath).resolve('x264').resolve('configure').toString()
             args = configureArgs()
@@ -345,7 +345,7 @@ if (project.platform == "linux-athena") {
 
         if (project.platform.startsWith("windows")) {
             executable 'bash'
-            args = ["-c", "CC=cl ../x264/configure " + configureArgs().join(" ")]
+            args = ["-c", "../configure " + configureArgs().join(" ")]
         } else {
             executable Paths.get(projectDir.canonicalPath).resolve('ffmpeg').resolve('configure').toString()
             args = configureArgs()
@@ -378,22 +378,20 @@ if (project.platform == "linux-athena") {
  'SharedDebug': project.cmakeBuildSharedDebugDirectory
 ].each{ buildType, buildDirectory ->
     project.tasks.create('cmake' + buildType, Exec) {
-        if (!project.platform.startsWith('windows')) {
-            dependsOn 'FFmpegMakeInstall' + buildType
+        dependsOn 'FFmpegMakeInstall' + buildType
 
-            def x264LibDir = buildDirectory.resolve('x264').resolve('lib').toString()
-            def x264PkgConfigDir = buildDirectory.resolve('x264').resolve('lib').resolve('pkgconfig').toString()
-            def ffmpegLibDir = buildDirectory.resolve('ffmpeg').resolve('lib').toString()
-            def ffmpegPkgConfigDir = buildDirectory.resolve('ffmpeg').resolve('lib').resolve('pkgconfig').toString()
+        def x264LibDir = buildDirectory.resolve('x264').resolve('lib').toString()
+        def x264PkgConfigDir = buildDirectory.resolve('x264').resolve('lib').resolve('pkgconfig').toString()
+        def ffmpegLibDir = buildDirectory.resolve('ffmpeg').resolve('lib').toString()
+        def ffmpegPkgConfigDir = buildDirectory.resolve('ffmpeg').resolve('lib').resolve('pkgconfig').toString()
 
-            environment 'PKG_CONFIG_PATH', "$ffmpegPkgConfigDir:$x264PkgConfigDir"
-            environment 'PKG_CONFIG_LIBDIR', "$ffmpegLibDir:$x264LibDir"
+        environment 'PKG_CONFIG_PATH', "$ffmpegPkgConfigDir:$x264PkgConfigDir"
+        environment 'PKG_CONFIG_LIBDIR', "$ffmpegLibDir:$x264LibDir"
 
-            if (project.platform.startsWith('osx')) {
-                environment 'DYLD_LIBRARY_PATH', "$ffmpegLibDir:$x264LibDir"
-            } else {
-                environment 'LD_LIBRARY_PATH', "$ffmpegLibDir:$x264LibDir"
-            }
+        if (project.platform.startsWith('osx')) {
+            environment 'DYLD_LIBRARY_PATH', "$ffmpegLibDir:$x264LibDir"
+        } else {
+            environment 'LD_LIBRARY_PATH', "$ffmpegLibDir:$x264LibDir"
         }
 
         inputs.dir 'opencv'
