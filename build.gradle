@@ -331,7 +331,7 @@ if (project.platform == "linux-athena") {
                     '--cross-prefix=aarch64-bionic-linux-gnu-' +
                     '--arch=aarch64' +
                     '--target-os=linux'
-            } else if (project.platform.startsWith("windows") {
+            } else if (project.platform.startsWith("windows")) {
                 return args + '--toolchain=msvc'
             }
 
