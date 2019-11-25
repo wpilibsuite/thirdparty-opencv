@@ -302,9 +302,9 @@ if (project.platform == "linux-athena") {
     project.tasks.create('FFmpegConfigure' + buildType, Exec) {
         dependsOn 'x264MakeInstall' + buildType
 
-        def x264LibDir = buildDirectory.resolve('x264').resolve('lib').toString()
-        def x264IncludeDir = buildDirectory.resolve('x264').resolve('include').toString()
-        def x264PkgConfigDir = buildDirectory.resolve('x264').resolve('lib').resolve('pkgconfig').toString()
+        def x264LibDir = buildDirectory.resolve('x264').resolve('lib').toString().replaceAll("\\\\", "/")
+        def x264IncludeDir = buildDirectory.resolve('x264').resolve('include').toString().replaceAll("\\\\", "/")
+        def x264PkgConfigDir = buildDirectory.resolve('x264').resolve('lib').resolve('pkgconfig').toString().replaceAll("\\\\", "/")
 
         environment 'PKG_CONFIG_PATH', x264PkgConfigDir
         environment 'PKG_CONFIG_LIBDIR', x264LibDir
@@ -332,11 +332,7 @@ if (project.platform == "linux-athena") {
                     "--extra-ldflags=-L${x264LibDir}"
             ]
 
-            if (project.platform.startsWith("windows")) {
-                args = args + "--prefix=`pwd`/ffmpeg"
-            } else {
-                args = args + "--prefix=${ffmpegInstallDirectory.toString()}"
-            }
+            args = args + "--prefix=${ffmpegInstallDirectory.toString().replaceAll('\\\\', '/')}"
 
             if (buildType.contains("Shared")) {
                 args = args + '--disable-static' + '--enable-shared'
