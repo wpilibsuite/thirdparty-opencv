@@ -45,6 +45,8 @@ stages:
         displayName: 'Gradle Build'
       - script: |
           type "ffmpeg\\build\\ffbuild\\config.log"
+          dir /s x264
+          dir /s build/windows-x86_64/x264
         condition: failed()
       - task: PublishPipelineArtifact@0
         inputs:

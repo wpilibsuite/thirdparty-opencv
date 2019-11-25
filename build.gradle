@@ -268,12 +268,14 @@ if (project.platform == "linux-athena") {
             }
 
             copy {
-                from x264BuildDirectory.resolve('x264_config.h').toFile()
+                from x264BuildDirectory.toFile()
+                include 'x264_config.h'
                 into x264InstallDirectory.resolve('include').toFile()
             }
 
             copy {
-                from Paths.get(projectDir.canonicalPath).resolve('x264').resolve('x264.h').toFile()
+                from Paths.get(projectDir.canonicalPath).resolve('x264').toFile()
+                include 'x264.h'
                 into x264InstallDirectory.resolve('include').toFile()
             }
 
