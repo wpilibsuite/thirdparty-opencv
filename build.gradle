@@ -261,6 +261,14 @@ if (project.platform == "linux-athena") {
         project.tasks.create('x264MakeInstall' + buildType) {
             dependsOn 'x264Make' + buildType
 
+            if (!Files.exists(x264InstallDirectory.resolve('lib'))) {
+                Files.createDirectories(x264InstallDirectory.resolve('lib'))
+            }
+
+            if (!Files.exists(x264InstallDirectory.resolve('include'))) {
+                Files.createDirectories(x264InstallDirectory.resolve('include'))
+            }
+
             copy {
                 from x264BuildDirectory.toFile()
                 include 'libx264*'
