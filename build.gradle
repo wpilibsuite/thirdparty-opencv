@@ -255,8 +255,13 @@ if (project.platform == "linux-athena") {
         workingDir x264BuildDirectory.toString()
         def processors = Runtime.runtime.availableProcessors()
 
-        executable 'make'
-        args = ["-j${processors}"]
+        if (project.platform.startsWith("windows")) {
+            executable 'bash'
+            args = ["-c", "make -j${processors}"]
+        } else {
+            executable 'make'
+            args = ["-j${processors}"]
+        }
         inputs.file x264BuildDirectory.resolve("Makefile").toFile()
     }
 
@@ -264,8 +269,13 @@ if (project.platform == "linux-athena") {
         dependsOn 'x264Make' + buildType
         workingDir x264BuildDirectory.toString()
 
-        executable 'make'
-        args = ['install']
+        if (project.platform.startsWith("windows")) {
+            executable 'bash'
+            args = ["-c", "make install"]
+        } else {
+            executable 'make'
+            args = ['install']
+        }
         inputs.file x264BuildDirectory.resolve("Makefile").toFile()
     }
 }
