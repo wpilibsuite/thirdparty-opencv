@@ -42,9 +42,10 @@ stages:
           set PATH=%PATH%;%CD%\nasm\nasm-2.14.02
           set PATH=%PATH%;%ANT_HOME%\bin
           gradlew build -PjenkinsBuild -PskipDebug
-          type "ffmpeg\\build\\ffbuild\\config.log"
         displayName: 'Gradle Build'
-
+      - script: |
+          type "ffmpeg\\build\\ffbuild\\config.log"
+        condition: failed()
       - task: PublishPipelineArtifact@0
         inputs:
           artifactName: 'Win64Release'
