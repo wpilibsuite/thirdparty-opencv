@@ -205,13 +205,10 @@ if (project.platform == "linux-athena") {
         inputs.dir 'x264'
 
         def configureArgs = {
-            def args = ['--disable-cli', '--enable-pic']
-
-            if (project.platform.startsWith("windows")) {
-                args = args + "--prefix=`pwd`/x264"
-            } else {
-                args = args + "--prefix=${x264InstallDirectory.toString()}"
-            }
+            def args = ['--disable-cli',
+                    '--enable-pic',
+                    "--prefix=${x264InstallDirectory.toString()}"
+            ]
 
             if (buildType.contains("Shared")) {
                 args = args + '--enable-shared'
@@ -260,17 +257,37 @@ if (project.platform == "linux-athena") {
         inputs.file x264BuildDirectory.resolve("Makefile").toFile()
     }
 
-    project.tasks.create('x264MakeInstall' + buildType, Exec) {
-        if (project.platform.startsWith("windows")) {
-            dependsOn 'x264Configure' + buildType
-        } else {
+    if (project.platform.startsWith("windows")) {
+        project.tasks.create('x264MakeInstall' + buildType) {
             dependsOn 'x264Make' + buildType
-        }
-        workingDir x264BuildDirectory.toString()
 
-        executable 'make'
-        args = ['install']
-        inputs.file x264BuildDirectory.resolve("Makefile").toFile()
+            copy {
+                from x264BuildDirectory.toFile()
+                include 'libx264*'
+                into x264InstallDirectory.resolve('lib').toFile()
+            }
+
+            copy {
+                from x264BuildDirectory.resolve('x264_config.h').toFile()
+                into x264InstallDirectory.resolve('include').toFile()
+            }
+
+            copy {
+                from Paths.get(projectDir.canonicalPath).resolve('x264').resolve('x264.h').toFile()
+                into x264InstallDirectory.resolve('include').toFile()
+            }
+
+            inputs.file x264BuildDirectory.resolve('x264_config.h').toFile()
+        }
+    } else {
+        project.tasks.create('x264MakeInstall' + buildType, Exec) {
+            dependsOn 'x264Configure' + buildType
+            workingDir x264BuildDirectory.toString()
+
+            executable 'make'
+            args = ['install']
+            inputs.file x264BuildDirectory.resolve("Makefile").toFile()
+        }
     }
 }
 
