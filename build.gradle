@@ -258,33 +258,23 @@ if (project.platform == "linux-athena") {
     }
 
     if (project.platform.startsWith("windows")) {
-        project.tasks.create('x264MakeInstall' + buildType) {
+        project.tasks.create('x264MakeInstall' + buildType, Copy) {
             dependsOn 'x264Make' + buildType
+            into x264InstallDirectory
 
-            if (!Files.exists(x264InstallDirectory.resolve('lib'))) {
-                Files.createDirectories(x264InstallDirectory.resolve('lib'))
-            }
-
-            if (!Files.exists(x264InstallDirectory.resolve('include'))) {
-                Files.createDirectories(x264InstallDirectory.resolve('include'))
-            }
-
-            copy {
+            into('lib') {
                 from x264BuildDirectory.toFile()
                 include 'libx264*'
-                into x264InstallDirectory.resolve('lib').toFile()
             }
 
-            copy {
+            into('include') {
                 from x264BuildDirectory.toFile()
                 include 'x264_config.h'
-                into x264InstallDirectory.resolve('include').toFile()
             }
 
-            copy {
+            into('include') {
                 from Paths.get(projectDir.canonicalPath).resolve('x264').toFile()
                 include 'x264.h'
-                into x264InstallDirectory.resolve('include').toFile()
             }
 
             inputs.file x264BuildDirectory.resolve('x264_config.h').toFile()
