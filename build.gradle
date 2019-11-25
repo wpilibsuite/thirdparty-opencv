@@ -329,10 +329,14 @@ if (project.platform == "linux-athena") {
                     '--enable-pic',
                     '--enable-gpl',
                     "--extra-cflags=-I${x264IncludeDir}",
-                    "--extra-ldflags=-L${x264LibDir}"
+                    "--prefix=${ffmpegInstallDirectory.toString().replaceAll('\\\\', '/')}"
             ]
 
-            args = args + "--prefix=${ffmpegInstallDirectory.toString().replaceAll('\\\\', '/')}"
+            if (project.platform.startsWith("windows")) {
+                args = args + "--extra-ldflags=/LIBPATH:${x264LibDir}"
+            } else {
+                args = args + "--extra-ldflags=-L${x264LibDir}"
+            }
 
             if (buildType.contains("Shared")) {
                 args = args + '--disable-static' + '--enable-shared'
