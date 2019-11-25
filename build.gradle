@@ -205,10 +205,13 @@ if (project.platform == "linux-athena") {
         inputs.dir 'x264'
 
         def configureArgs = {
-            def args = ['--disable-cli',
-                    '--enable-pic',
-                    "--prefix=${x264InstallDirectory.toString()}"
-            ]
+            def args = ['--disable-cli', '--enable-pic']
+
+            if (project.platform.startsWith("windows")) {
+                args = args + "--prefix=`pwd`/x264"
+            } else {
+                args = args + "--prefix=${x264InstallDirectory.toString()}"
+            }
 
             if (buildType.contains("Shared")) {
                 args = args + '--enable-shared'
@@ -305,9 +308,14 @@ if (project.platform == "linux-athena") {
                     '--enable-pic',
                     '--enable-gpl',
                     "--extra-cflags=-I${x264IncludeDir}",
-                    "--extra-ldflags=-L${x264LibDir}",
-                    "--prefix=${ffmpegInstallDirectory.toString()}"
+                    "--extra-ldflags=-L${x264LibDir}"
             ]
+
+            if (project.platform.startsWith("windows")) {
+                args = args + "--prefix=`pwd`/ffmpeg"
+            } else {
+                args = args + "--prefix=${ffmpegInstallDirectory.toString()}"
+            }
 
             if (buildType.contains("Shared")) {
                 args = args + '--disable-static' + '--enable-shared'
