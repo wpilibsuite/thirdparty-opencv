@@ -386,12 +386,10 @@ if (project.platform == "linux-athena") {
         workingDir ffmpegBuildDirectory.toString()
         def processors = Runtime.runtime.availableProcessors()
 
+        executable 'make'
+        args = ["-j${processors}"]
         if (project.platform.startsWith("windows")) {
-            executable 'bash'
-            args = ["-c", "make -j${processors}"]
-        } else {
-            executable 'make'
-            args = ["-j${processors}"]
+            args = args + "--file=../Makefile"
         }
         inputs.file ffmpegBuildDirectory.resolve("Makefile").toFile()
     }
