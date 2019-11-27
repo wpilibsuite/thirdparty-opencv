@@ -23,7 +23,8 @@ stages:
       - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
         submodules: true
       - script: |
-          dir "c:\\ProgramData\\Chocolatey\\bin"
+          dir C:\ProgramData\Chocolatey\bin
+          where make
           where mingw32-make
           where awk
           where bash
@@ -34,9 +35,8 @@ stages:
           choco install gawk
           choco install make
       - script: |
-          dir C:\\ProgramData\\Chocolatey\\bin
           dir C:\ProgramData\Chocolatey\bin
-          echo %PATH%
+          where make
           where mingw32-make
           where awk
           where bash
@@ -44,10 +44,11 @@ stages:
           awk --version
           bash --version
           set PATH=C:\ProgramData\Chocolatey\bin;%PATH%
+          make --version
           mingw32-make --version
           awk --version
           bash --version
-          exit 1
+          bash -c "ls /c/ProgramData"
       - powershell: |
           mkdir build
           $ProgressPreference = 'SilentlyContinue'
@@ -69,6 +70,7 @@ stages:
           @call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
           set PATH=%PATH%;%CD%\nasm\nasm-2.14.02
           set PATH=%PATH%;%ANT_HOME%\bin
+          set PATH=C:\ProgramData\Chocolatey\bin;%PATH%
           gradlew build -PjenkinsBuild -PskipDebug
         displayName: 'Gradle Build'
       - script: |
