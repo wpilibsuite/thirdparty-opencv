@@ -34,7 +34,8 @@ stages:
           choco install gawk
           choco install make
       - script: |
-          dir "C:\\ProgramData\\Chocolatey\\bin"
+          dir C:\\ProgramData\\Chocolatey\\bin
+          dir C:\ProgramData\Chocolatey\bin
           echo %PATH%
           where mingw32-make
           where awk
@@ -42,7 +43,7 @@ stages:
           mingw32-make --version
           awk --version
           bash --version
-          set PATH="C:\\ProgramData\\Chocolatey\\bin";%PATH%
+          set PATH=C:\ProgramData\Chocolatey\bin;%PATH%
           mingw32-make --version
           awk --version
           bash --version
