@@ -23,8 +23,8 @@ stages:
       - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
         submodules: true
       - script: |
-          dir "c:\\tools\\mingw64\\bin"
-          where make
+          dir "c:\\program files\\mingw64\\bin"
+          where mingw32-make
           where awk
           where bash
           exit 1
