@@ -22,6 +22,12 @@ stages:
     steps:
       - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
         submodules: true
+      - script: |
+          dir "c:\\tools\\mingw64\\bin"
+          where make
+          where awk
+          where bash
+          exit 1
       - powershell: |
           mkdir build
           $ProgressPreference = 'SilentlyContinue'
