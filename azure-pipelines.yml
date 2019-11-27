@@ -35,6 +35,7 @@ stages:
           choco install make
       - script: |
           dir "C:\\ProgramData\\Chocolatey\\bin"
+          echo %PATH%
           where mingw32-make
           where awk
           where bash
