@@ -44,7 +44,7 @@ stages:
           gradlew build -PjenkinsBuild -PskipDebug
         displayName: 'Gradle Build'
       - script: |
-          type "ffmpeg\\build\\ffbuild\\config.log"
+          type "ffmpeg-build\\ffbuild\\config.log"
           dir /s x264
           dir /s "build\\windows-x86_64\\x264"
         condition: failed()
