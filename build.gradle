@@ -326,10 +326,16 @@ if (project.platform == "linux-athena") {
                     '--disable-network',
                     '--disable-muxers',
                     '--disable-demuxers',
+                    '--disable-decoders',
+                    '--enable-decoder=h264',
+                    '--disable-encoders',
+                    '--enable-encoder=libx264',
+                    '--enable-encoder=libx264rgb',
                     '--disable-parsers',
                     '--disable-protocols',
                     '--disable-devices',
                     '--disable-filters',
+                    '--disable-bsfs',
                     '--enable-avresample',
                     '--enable-libx264',
                     '--enable-pic',
@@ -392,8 +398,13 @@ if (project.platform == "linux-athena") {
         workingDir ffmpegBuildDirectory.toString()
         def processors = Runtime.runtime.availableProcessors()
 
-        executable 'make'
-        args = ["-j${processors}"]
+        if (project.platform.startsWith("windows")) {
+            executable 'bash'
+            args = ["-c", "make -j${processors}"]
+        } else {
+            executable 'make'
+            args = ["-j${processors}"]
+        }
         inputs.file ffmpegBuildDirectory.resolve("Makefile").toFile()
     }
 
