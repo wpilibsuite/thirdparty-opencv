@@ -22,13 +22,29 @@ stages:
     steps:
       - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
         submodules: true
-      - powershell: |
-          choco install gawk
       - script: |
-          dir "c:\\programdata\\chocolatey\\bin"
+          dir "c:\\ProgramData\\Chocolatey\\bin"
           where mingw32-make
           where awk
           where bash
+          mingw32-make --version
+          awk --version
+          bash --version
+      - powershell: |
+          choco install gawk
+          choco install make
+      - script: |
+          dir "C:\\ProgramData\\Chocolatey\\bin"
+          where mingw32-make
+          where awk
+          where bash
+          mingw32-make --version
+          awk --version
+          bash --version
+          set PATH="C:\\ProgramData\\Chocolatey\\bin";%PATH%
+          mingw32-make --version
+          awk --version
+          bash --version
           exit 1
       - powershell: |
           mkdir build
