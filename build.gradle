@@ -400,7 +400,7 @@ if (project.platform == "linux-athena") {
 
         if (project.platform.startsWith("windows")) {
             executable 'bash'
-            args = ["-c", "which make && make -j${processors}"]
+            args = ["-c", "make"]
         } else {
             executable 'make'
             args = ["-j${processors}"]

@@ -69,6 +69,7 @@ stages:
           set PATH=%PATH%;%CD%\nasm\nasm-2.14.02
           set PATH=%PATH%;%ANT_HOME%\bin
           set PATH=C:\ProgramData\Chocolatey\bin;%PATH%
+          patch < ffmpeg.patch
           gradlew build -PjenkinsBuild -PskipDebug
         displayName: 'Gradle Build'
       - script: |

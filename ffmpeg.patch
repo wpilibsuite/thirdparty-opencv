@@ -1,0 +1,11 @@
+--- ffmpeg/configure.orig	2019-10-19 14:11:10.857154311 -0700
++++ ffmpeg/configure	2019-11-27 21:55:24.451699221 -0800
+@@ -4613,7 +4613,7 @@
+     elif $_cc -nologo- 2>&1 | grep -q Microsoft || { $_cc -v 2>&1 | grep -q clang && $_cc -? > /dev/null 2>&1; }; then
+         _type=msvc
+         _ident=$($_cc 2>&1 | head -n1 | tr -d '\r')
+-        _DEPCMD='$(DEP$(1)) $(DEP$(1)FLAGS) $($(1)DEP_FLAGS) $< 2>&1 | awk '\''/including/ { sub(/^.*file: */, ""); gsub(/\\/, "/"); if (!match($$0, / /)) print "$@:", $$0 }'\'' > $(@:.o=.d)'
++        _DEPCMD='echo $@: > $(@:.o=.d)'
+         _DEPFLAGS='$(CPPFLAGS) $(CFLAGS) -showIncludes -Zs'
+         _cflags_speed="-O2"
+         _cflags_size="-O1"
