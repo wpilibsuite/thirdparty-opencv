@@ -56,7 +56,9 @@ ext {
             '-DENABLE_CXX11=ON',
             '-DOPENCV_JAVA_SOURCE_VERSION=1.8',
             '-DOPENCV_JAVA_TARGET_VERSION=1.8',
-            '-DWITH_MSMF_DXVA=OFF'
+            '-DWITH_MSMF_DXVA=OFF',
+            '-DCMAKE_INSTALL_RPATH=$ORIGIN',
+            '-DCMAKE_BUILD_WITH_INSTALL_RPATH=TRUE'            
     ]
 }
 
