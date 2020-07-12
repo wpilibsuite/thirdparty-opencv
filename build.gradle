@@ -58,7 +58,10 @@ ext {
             '-DOPENCV_JAVA_TARGET_VERSION=1.8',
             '-DWITH_MSMF_DXVA=OFF',
             '-DCMAKE_INSTALL_RPATH=$ORIGIN',
-            '-DCMAKE_BUILD_WITH_INSTALL_RPATH=TRUE'            
+            '-DCMAKE_BUILD_WITH_INSTALL_RPATH=TRUE',
+            '-DBUILD_opencv_apps=OFF',
+            '-DBUILD_TESTS=OFF',
+            '-DBUILD_PERF_TESTS=OFF'
     ]
 }
 
@@ -280,8 +283,8 @@ if (project.platform == "linux-athena") {
 
 
         if (project.platform.startsWith("windows")) {
-            executable 'cmd'
-            args = ['/c', 'msbuild', '/m', 'OpenCV.sln', '/t:Build', "/p:Configuration=${buildTypeFolder}".toString(), '/v:m', project.platform == "windows-x86" ? '/p:Platform=win32' : '/p:Platform=x64']
+            executable 'cmake'
+            args = ['--build', '.', '--', '/t:Build', "/p:Configuration=${buildTypeFolder}".toString(), '/v:m', project.platform == "windows-x86" ? '/p:Platform=win32' : '/p:Platform=x64']
             inputs.file buildDirectory.resolve("OpenCV.sln").toFile()
         } else {
             executable 'make'
