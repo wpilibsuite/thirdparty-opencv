@@ -146,7 +146,11 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
                     into project.platformPath + '/shared'
                 }
             } else {
-                from(sharedBuildDir.resolve("lib").toFile()) {
+                def resolvedDir = sharedBuildDir.resolve("lib")
+                if (project.platform.startsWith("osx")) {
+                    resolvedDir = resolvedDir.resolve(buildTypeFolder)
+                }
+                from(resolvedDir.toFile()) {
                     into project.platformPath + '/shared'
                     include '*.so.*.*.*'
                     exclude 'cv2.so'
@@ -155,7 +159,7 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
                         f.name = f.name.replace("${project.ext.version}", "${project.ext.soVersion}")
                     }
                 }
-                from(sharedBuildDir.resolve("lib").toFile()) {
+                from(resolvedDir.toFile()) {
                     into project.platformPath + '/shared'
                     include "*.${project.ext.version}.dylib".toString()
                     eachFile { f->
@@ -164,7 +168,7 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
                     exclude 'cv2.so'
                     exclude '**/*dephelp*'
                 }
-                from(sharedBuildDir.resolve("lib").toFile()) {
+                from(resolvedDir.toFile()) {
                     into project.platformPath + '/shared'
 
                     include 'libopencv_java*.so'
@@ -225,7 +229,11 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
         }
 
         if (!project.platform.startsWith("windows")) {
-            from(staticBuildDir.resolve("lib").toFile()) {
+            def resolvedDir = staticBuildDir.resolve("lib")
+            if (project.platform.startsWith("osx")) {
+                resolvedDir = resolvedDir.resolve(buildTypeFolder)
+            }
+            from(resolvedDir.toFile()) {
                 into project.platformPath + '/static'
                 include 'libopencv*.a'
                 exclude 'libopencv_*.a'

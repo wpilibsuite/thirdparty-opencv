@@ -289,8 +289,13 @@ if (project.platform == "linux-athena") {
             args = ['--build', '.', '--', '/t:Build', "/p:Configuration=${buildTypeFolder}".toString(), '/v:m', project.platform == "windows-x86" ? '/p:Platform=win32' : '/p:Platform=x64']
             inputs.file buildDirectory.resolve("OpenCV.sln").toFile()
         } else if (project.platform.startsWith("osx")) {
-            executable 'xcodebuild'
-            args = ["-alltargets", "-configuration", "${buildTypeFolder}", "-jobs", "${processors}"]
+            executable 'sh'
+            String incantation = "xcodebuild -alltargets -configuration ${buildTypeFolder} -jobs ${processors}"
+            if (project.hasProperty("developerID")) {
+                incantation += " CODE_SIGN_IDENTITY=" + project.findProperty("developerID") +
+                               " OTHER_CODE_SIGN_FLAGS='--timestamp --options=runtime'"
+            }
+            args = ["-c", incantation]
         } else {
             executable 'make'
             args = ["-j${processors}"]

@@ -1,0 +1,147 @@
+name: CI
+
+on: [pull_request, push]
+
+jobs:
+  build-docker:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - container: wpilib/roborio-cross-ubuntu:2020-18.04
+            artifact-name: Athena
+            build-options: "-Pplatform=linux-athena"
+          - container: wpilib/raspbian-cross-ubuntu:10-18.04
+            artifact-name: Raspbian
+            build-options: "-Pplatform=linux-raspbian"
+          - container: wpilib/aarch64-cross-ubuntu:bionic-18.04
+            artifact-name: Bionic
+            build-options: "-Pplatform=linux-aarch64bionic"
+          - container: wpilib/ubuntu-base:18.04
+            artifact-name: Linux
+            build-options: ""
+
+    name: "Build - ${{ matrix.artifact-name }}"
+    runs-on: ubuntu-latest
+    container: ${{ matrix.container }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+      - run: sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/*
+        name: Install Ant
+      - run: ./gradlew build -PjenkinsBuild ${{ matrix.build-options }}
+        name: Build with Gradle
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: gradleDir/outputs/
+
+  build-windows:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - artifact-name: Win64Release
+            architecture: x64
+            build-options: "-PskipDebug"
+          - artifact-name: Win32Release
+            architecture: x86
+            build-options: "-PskipDebug"
+          - artifact-name: Win64
+            architecture: x64
+            build-options: "-PskipRelease -PskipSources"
+          - artifact-name: Win32
+            architecture: x86
+            build-options: "-PskipRelease -PskipSources"
+
+    name: "Build - ${{ matrix.artifact-name }}"
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 11
+          architecture: ${{ matrix.architecture }}
+      - run: |
+          @call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
+          set PATH=%PATH%;%ANT_HOME%\bin
+          gradlew build -PjenkinsBuild ${{ matrix.build-options }}
+        shell: cmd
+        name: Build with Gradle
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: gradleDir/outputs/
+
+  build-mac:
+    env:
+      developer-id: ${{ secrets.DEVELOPER_ID }}
+    name: "Build - macOS"
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - run: ./gradlew build -PjenkinsBuild
+        name: Build with Gradle
+      - uses: devbotsxyz/xcode-import-certificate@v1
+        name: Import Developer ID Certificate
+        with:
+          certificate-data: ${{ secrets.CERTIFICATE_DATA }}
+          certificate-passphrase: ${{ secrets.CERTIFICATE_PASSWORD }}
+          keychain-password: ${{ secrets.KEYCHAIN_PASSWORD }}
+        if: ${{ env.developer-id != 0 }}
+      - run: ./gradlew build -PjenkinsBuild -PdeveloperID=${{ secrets.DEVELOPER_ID }}
+        name: Sign Binaries with Developer ID
+        if: ${{ env.developer-id != 0 }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: macOS
+          path: gradleDir/outputs/
+
+  combine:
+    name: Combine
+    needs: [build-docker, build-windows, build-mac]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          repository: wpilibsuite/build-tools
+      - uses: actions/download-artifact@v2
+        with:
+          path: combiner/products/build/allOutputs
+      - name: Flatten Artifacts
+        run: rsync -a --delete combiner/products/build/allOutputs/*/* combiner/products/build/allOutputs/
+      - name: Combine
+        if: |
+          !startsWith(github.ref, 'refs/tags/v') &&
+          github.ref != 'refs/heads/master'
+        run: cd combiner && ./gradlew publish -Pthirdparty
+      - name: Combine (Master)
+        if: |
+          github.repository_owner == 'wpilibsuite' &&
+          github.ref == 'refs/heads/master'
+        run: cd combiner && ./gradlew publish -Pthirdparty
+        env:
+          RUN_AZURE_ARTIFACTORY_RELEASE: 'TRUE'
+          ARTIFACTORY_PUBLISH_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+          ARTIFACTORY_PUBLISH_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+      - name: Combine (Release)
+        if: |
+          github.repository_owner == 'wpilibsuite' &&
+          startsWith(github.ref, 'refs/tags/v')
+        run: cd combiner && ./gradlew publish -Pthirdparty -PreleaseRepoPublish
+        env:
+          RUN_AZURE_ARTIFACTORY_RELEASE: 'TRUE'
+          ARTIFACTORY_PUBLISH_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+          ARTIFACTORY_PUBLISH_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Maven
+          path: ~/releases
