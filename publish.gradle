@@ -272,9 +272,14 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
         def jniFileName
         def jniFile
 
-        if (!project.platform.startsWith("windows")) {
+        if (project.platform.startsWith("linux")) {
             directory = staticBuildDir.resolve("lib").toFile()
-            jniFileName = project.platform.startsWith('osx') ? "libopencv_java${libVersion}.dylib" : "libopencv_java${libVersion}.so"
+            jniFileName = "libopencv_java${libVersion}.so"
+            jniFile = new File(directory.absolutePath, "${jniFileName}")
+        } else if (project.platform.startsWith("osx")) {
+            directory = staticBuildDir.resolve("lib").resolve(buildTypeFolder).toFile()
+            System.out.println(directory.absolutePath)
+            jniFileName = "libopencv_java${libVersion}.dylib"
             jniFile = new File(directory.absolutePath, "${jniFileName}")
         } else {
             directory = staticBuildDir.resolve("lib").resolve(buildTypeFolder).toFile()

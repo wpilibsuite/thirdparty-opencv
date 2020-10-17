@@ -266,6 +266,10 @@ if (project.platform == "linux-athena") {
             executable project.cmakePath
             args = cmakeArgs() + ['-G', '"' + project.cmakeGenerator + '"', '-A', project.cmakeArch, project.rootPath]
             outputs.file buildDirectory.resolve("OpenCV.sln").toFile()
+        } else if (project.platform.startsWith("osx")) {
+            executable project.cmakePath
+            args = cmakeArgs() + ['-G', "Xcode", project.rootPath]
+            outputs.file buildDirectory.resolve("OpenCV.xcodeproj").toFile()
         } else {
             executable project.cmakePath
             args = cmakeArgs() + [project.rootPath]
@@ -280,12 +284,13 @@ if (project.platform == "linux-athena") {
         workingDir buildDirectory.toString()
         def processors = Runtime.runtime.availableProcessors()
 
-
-
         if (project.platform.startsWith("windows")) {
             executable 'cmake'
             args = ['--build', '.', '--', '/t:Build', "/p:Configuration=${buildTypeFolder}".toString(), '/v:m', project.platform == "windows-x86" ? '/p:Platform=win32' : '/p:Platform=x64']
             inputs.file buildDirectory.resolve("OpenCV.sln").toFile()
+        } else if (project.platform.startsWith("osx")) {
+            executable 'xcodebuild'
+            args = ["-alltargets", "-configuration", "${buildTypeFolder}", "-jobs", "${processors}"]
         } else {
             executable 'make'
             args = ["-j${processors}"]
@@ -321,9 +326,9 @@ if (project.platform == "linux-athena") {
             project.tasks.create('nativeLibLinks' + buildType, Exec) {
                 dependsOn 'make' + buildType
                 executable 'libtool'
-                workingDir buildDirectory.resolve("lib").toString()
-                def libDirectory = buildDirectory.resolve("lib").toFile()
-                def thirdPartyLib = buildDirectory.resolve("3rdParty").resolve("lib").toFile()
+                workingDir buildDirectory.resolve("lib/${buildTypeFolder}").toString()
+                def libDirectory = buildDirectory.resolve("lib/${buildTypeFolder}").toFile()
+                def thirdPartyLib = buildDirectory.resolve("3rdParty").resolve("lib/${buildTypeFolder}").toFile()
                 args '-static'
                 args '-o'
                 args "libopencv${project.libVersion}.a"
@@ -345,9 +350,9 @@ if (project.platform == "linux-athena") {
                     }
 
                 }
-                inputs.dir buildDirectory.resolve("lib").toFile()
+                inputs.dir buildDirectory.resolve("lib/${buildTypeFolder}").toFile()
                 inputs.dir thirdPartyLib
-                outputs.file buildDirectory.resolve("lib").resolve("libopencv${project.libVersion}.a").toFile()
+                outputs.file buildDirectory.resolve("lib/${buildTypeFolder}").resolve("libopencv${project.libVersion}.a").toFile()
             }
         } else {
             project.tasks.create('nativeLibLinks' + buildType, Exec) {
