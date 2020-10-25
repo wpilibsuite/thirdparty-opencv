@@ -123,7 +123,7 @@ jobs:
       - name: Combine
         if: |
           !startsWith(github.ref, 'refs/tags/v')
-        run: cd combiner && ./gradlew publish -Pthirdparty
+        run: ./gradlew publish -Pthirdparty
         working-directory: combiner
       - name: Combine (Release)
         if: |
