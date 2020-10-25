@@ -95,13 +95,13 @@ jobs:
           certificate-passphrase: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
         if: |
-          matrix.artifact-name == 'macOS' && (github.repository_owner == 'wpilibsuite' &&
-          (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/actions'))
+          github.repository_owner == 'wpilibsuite' &&
+          (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/actions')
       - run: ./gradlew build -PjenkinsBuild -PdeveloperID=${{ secrets.DEVELOPER_ID }}
         name: Sign Binaries with Developer ID
         if: |
-          matrix.artifact-name == 'macOS' && (github.repository_owner == 'wpilibsuite' &&
-          (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/actions'))
+          github.repository_owner == 'wpilibsuite' &&
+          (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/actions')
       - uses: actions/upload-artifact@v2
         with:
           name: macOS
