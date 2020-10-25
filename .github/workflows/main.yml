@@ -122,23 +122,17 @@ jobs:
         run: rsync -a --delete combiner/products/build/allOutputs/*/* combiner/products/build/allOutputs/
       - name: Combine
         if: |
-          !startsWith(github.ref, 'refs/tags/v') &&
-          github.ref != 'refs/heads/master'
+          !startsWith(github.ref, 'refs/tags/v')
         run: cd combiner && ./gradlew publish -Pthirdparty
-      - name: Combine (Master)
-        if: |
-          github.repository_owner == 'wpilibsuite' &&
-          github.ref == 'refs/heads/master'
-        run: cd combiner && ./gradlew publish -Pthirdparty
-        env:
-          RUN_AZURE_ARTIFACTORY_RELEASE: 'TRUE'
-          ARTIFACTORY_PUBLISH_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
-          ARTIFACTORY_PUBLISH_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+        working-directory: combiner
       - name: Combine (Release)
         if: |
           github.repository_owner == 'wpilibsuite' &&
           startsWith(github.ref, 'refs/tags/v')
-        run: cd combiner && ./gradlew publish -Pthirdparty -PreleaseRepoPublish
+        run: |
+          ./gradlew publish -Pthirdparty
+          ./gradlew publish -Pthirdparty -PreleaseRepoPublish
+        working-directory: combiner
         env:
           RUN_AZURE_ARTIFACTORY_RELEASE: 'TRUE'
           ARTIFACTORY_PUBLISH_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
