@@ -39,7 +39,7 @@ ext {
             '-DWITH_OPENEXR=OFF',
             '-DWITH_GSTREAMER=OFF',
             '-DWITH_LAPACK=OFF',
-            '-DWITH_GTK=ON',
+            '-DWITH_GTK=OFF',
             '-DWITH_1394=OFF',
             '-DWITH_JASPER=OFF',
             '-DWITH_TIFF=OFF',
