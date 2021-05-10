@@ -365,7 +365,7 @@ if (project.platform == "linux-athena") {
                 workingDir buildDirectory.resolve("lib").toString()
                 executable 'ar'
                 args = ['-M']
-                def inputFiles = ["libopencv_calib3d", "libopencv_features2d", "libopencv_flann", "libopencv_gapi", "libopencv_highgui", "libopencv_imgcodecs", "libopencv_imgproc", "libopencv_ml", "libopencv_objdetect", "libopencv_photo", "libopencv_stitching", "libopencv_videoio", "libopencv_video", "libopencv_core", "../3rdparty/lib/libade" "../3rdparty/lib/liblibjpeg-turbo", "../3rdparty/lib/liblibopenjp2" "../3rdparty/lib/liblibpng", "../3rdparty/lib/libquirc" "../3rdparty/lib/libzlib"]
+                def inputFiles = ["libopencv_calib3d", "libopencv_features2d", "libopencv_flann", "libopencv_gapi", "libopencv_highgui", "libopencv_imgcodecs", "libopencv_imgproc", "libopencv_ml", "libopencv_objdetect", "libopencv_photo", "libopencv_stitching", "libopencv_videoio", "libopencv_video", "libopencv_core", "../3rdparty/lib/libade", "../3rdparty/lib/liblibjpeg-turbo", "../3rdparty/lib/liblibopenjp2", "../3rdparty/lib/liblibpng", "../3rdparty/lib/libquirc", "../3rdparty/lib/libzlib"]
 
                 def inputString = "create libopencv${project.libVersion}.a\n"
                 inputFiles.each {
