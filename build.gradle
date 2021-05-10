@@ -9,8 +9,8 @@ apply from: 'config.gradle'
 
 def date = new Date()
 def formattedDate = date.format('yyMMdd')
-ext.version = "3.4.7"
-ext.soVersion = "3.4"
+ext.version = "4.5.2"
+ext.soVersion = "4.5"
 ext.libVersion = "${ext.version.replace(".", "")}"
 
 ext.licenseFile = file("$rootDir/opencv/LICENSE")
@@ -311,7 +311,7 @@ if (project.platform == "linux-athena") {
                 dependsOn 'make' + buildType
                 workingDir buildDirectory.resolve("lib").resolve(buildTypeFolder).toString()
                 executable 'lib'
-                def inputFiles = ["opencv_calib3d${project.libVersion}", "opencv_features2d${project.libVersion}", "opencv_flann${project.libVersion}", "opencv_highgui${project.libVersion}", "opencv_imgcodecs${project.libVersion}", "opencv_imgproc${project.libVersion}", "opencv_ml${project.libVersion}", "opencv_objdetect${project.libVersion}", "opencv_photo${project.libVersion}", "opencv_shape${project.libVersion}", "opencv_stitching${project.libVersion}", "opencv_superres${project.libVersion}", "opencv_videoio${project.libVersion}", "opencv_video${project.libVersion}", "opencv_videostab${project.libVersion}", "opencv_core${project.libVersion}", "../../3rdparty/lib/${buildTypeFolder}/libjpeg-turbo", "../../3rdparty/lib/${buildTypeFolder}/libpng", "../../3rdparty/lib/${buildTypeFolder}/zlib"]
+                def inputFiles = ["opencv_calib3d${project.libVersion}", "opencv_features2d${project.libVersion}", "opencv_flann${project.libVersion}", "opencv_gapi${project.libVersion}", "opencv_highgui${project.libVersion}", "opencv_imgcodecs${project.libVersion}", "opencv_imgproc${project.libVersion}", "opencv_ml${project.libVersion}", "opencv_objdetect${project.libVersion}", "opencv_photo${project.libVersion}", "opencv_stitching${project.libVersion}", "opencv_videoio${project.libVersion}", "opencv_video${project.libVersion}", "opencv_core${project.libVersion}", "../../3rdparty/lib/${buildTypeFolder}/ade", "../../3rdparty/lib/${buildTypeFolder}/libjpeg-turbo", "../../3rdparty/lib/${buildTypeFolder}/libopenjp2", "../../3rdparty/lib/${buildTypeFolder}/libpng", "../../3rdparty/lib/${buildTypeFolder}/quirc", "../../3rdparty/lib/${buildTypeFolder}/zlib"]
                 def setArgs = ["/OUT:opencv${project.libVersion}.lib"]
                 inputFiles.each {
                     def inFile = it
@@ -365,7 +365,7 @@ if (project.platform == "linux-athena") {
                 workingDir buildDirectory.resolve("lib").toString()
                 executable 'ar'
                 args = ['-M']
-                def inputFiles = ["libopencv_calib3d", "libopencv_features2d", "libopencv_flann", "libopencv_highgui", "libopencv_imgcodecs", "libopencv_imgproc", "libopencv_ml", "libopencv_objdetect", "libopencv_photo", "libopencv_shape", "libopencv_stitching", "libopencv_superres", "libopencv_videoio", "libopencv_video", "libopencv_videostab", "libopencv_core", "../3rdparty/lib/liblibjpeg-turbo", "../3rdparty/lib/liblibpng", "../3rdparty/lib/libzlib"]
+                def inputFiles = ["libopencv_calib3d", "libopencv_features2d", "libopencv_flann", "libopencv_gapi", "libopencv_highgui", "libopencv_imgcodecs", "libopencv_imgproc", "libopencv_ml", "libopencv_objdetect", "libopencv_photo", "libopencv_stitching", "libopencv_videoio", "libopencv_video", "libopencv_core", "../3rdparty/lib/libade", "../3rdparty/lib/liblibjpeg-turbo", "../3rdparty/lib/liblibopenjp2", "../3rdparty/lib/liblibpng", "../3rdparty/lib/libquirc", "../3rdparty/lib/libzlib"]
 
                 def inputString = "create libopencv${project.libVersion}.a\n"
                 inputFiles.each {
