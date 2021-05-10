@@ -9,8 +9,8 @@ apply from: 'config.gradle'
 
 def date = new Date()
 def formattedDate = date.format('yyMMdd')
-ext.version = "3.4.7"
-ext.soVersion = "3.4"
+ext.version = "4.5.2"
+ext.soVersion = "4.5"
 ext.libVersion = "${ext.version.replace(".", "")}"
 
 ext.licenseFile = file("$rootDir/opencv/LICENSE")
