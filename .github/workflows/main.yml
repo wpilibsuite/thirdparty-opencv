@@ -131,7 +131,6 @@ jobs:
           startsWith(github.ref, 'refs/tags/v')
         run: |
           ./gradlew publish -Pthirdparty
-          ./gradlew publish -Pthirdparty -PreleaseRepoPublish
         working-directory: combiner
         env:
           RUN_AZURE_ARTIFACTORY_RELEASE: 'TRUE'
