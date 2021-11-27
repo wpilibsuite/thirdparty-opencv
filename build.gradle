@@ -9,7 +9,7 @@ apply from: 'config.gradle'
 
 def date = new Date()
 def formattedDate = date.format('yyMMdd')
-ext.version = "4.5.2"
+ext.version = "4.5.4"
 ext.soVersion = "4.5"
 ext.libVersion = "${ext.version.replace(".", "")}"
 
