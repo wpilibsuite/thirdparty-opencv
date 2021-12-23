@@ -468,7 +468,3 @@ if (!project.hasProperty('skipDebug')) {
 }
 
 apply from: 'publish.gradle'
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.9'
-}
