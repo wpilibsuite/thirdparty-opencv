@@ -229,7 +229,6 @@ if (project.platform == "linux-athena") {
                 toolchain = projectDir.canonicalPath + "/arm-frc-gnueabi.toolchain.cmake"
                 println "Using toolchain '${toolchain}'"
                 return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
-                    '-DCMAKE_MAKE_PROGRAM=make' +
                     '-DENABLE_NEON=ON' +
                     '-DENABLE_VFPV3=ON' +
                     '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
@@ -238,7 +237,6 @@ if (project.platform == "linux-athena") {
                 toolchain = projectDir.canonicalPath + "/arm-pi-gnueabihf.toolchain.cmake"
                 println "Using toolchain '${toolchain}'"
                 return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
-                    '-DCMAKE_MAKE_PROGRAM=make' +
                     '-DENABLE_NEON=ON' +
                     '-DENABLE_VFPV3=ON' +
                     '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
@@ -247,7 +245,6 @@ if (project.platform == "linux-athena") {
                 toolchain = projectDir.canonicalPath + "/aarch64-bionic-gnu.toolchain.cmake"
                 println "Using toolchain '${toolchain}'"
                 return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
-                    '-DCMAKE_MAKE_PROGRAM=make' +
                     '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
                     "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
             }
@@ -265,15 +262,12 @@ if (project.platform == "linux-athena") {
         if (project.platform.startsWith("windows")) {
             executable project.cmakePath
             args = cmakeArgs() + ['-G', '"' + project.cmakeGenerator + '"', '-A', project.cmakeArch, project.rootPath]
-            outputs.file buildDirectory.resolve("OpenCV.sln").toFile()
         } else if (project.platform.startsWith("osx")) {
             executable project.cmakePath
             args = cmakeArgs() + ['-G', "Xcode", project.rootPath]
-            outputs.file buildDirectory.resolve("OpenCV.xcodeproj").toFile()
         } else {
             executable project.cmakePath
             args = cmakeArgs() + [project.rootPath]
-            outputs.file buildDirectory.resolve("Makefile").toFile()
         }
     }
 
@@ -286,7 +280,7 @@ if (project.platform == "linux-athena") {
 
         if (project.platform.startsWith("windows")) {
             executable 'cmake'
-            args = ['--build', '.', '--', '/t:Build', "/p:Configuration=${buildTypeFolder}".toString(), '/v:m', project.platform == "windows-x86" ? '/p:Platform=win32' : '/p:Platform=x64']
+            args = ['--build', '.', '--parallel', "${processors}", '--', '/t:Build', "/p:Configuration=${buildTypeFolder}".toString(), '/v:m', project.platform == "windows-x86" ? '/p:Platform=win32' : '/p:Platform=x64']
             inputs.file buildDirectory.resolve("OpenCV.sln").toFile()
         } else if (project.platform.startsWith("osx")) {
             executable 'sh'
@@ -297,12 +291,10 @@ if (project.platform == "linux-athena") {
             }
             args = ["-c", incantation]
         } else {
-            executable 'make'
-            args = ["-j${processors}"]
-            inputs.file buildDirectory.resolve("Makefile").toFile()
+            executable 'cmake'
+            args = ['--build', '.', '--parallel', "${processors}"]
+            inputs.file buildDirectory.resolve("CMakeCache.txt").toFile()
         }
-
-        outputs.file buildDirectory.resolve("bin").resolve(project.jarName).toFile()
     }
 
     if (!buildType.contains("Shared")) {
@@ -325,7 +317,6 @@ if (project.platform == "linux-athena") {
                 args = setArgs
 
                 inputs.file buildDirectory.resolve("lib").resolve(buildTypeFolder).resolve("opencv_core${project.libVersion}.lib").toFile()
-                outputs.file buildDirectory.resolve("lib").resolve(buildTypeFolder).resolve("opencv${project.libVersion}.lib").toFile()
             }
         } else if (project.platform.startsWith('osx')) {
             project.tasks.create('nativeLibLinks' + buildType, Exec) {
@@ -357,7 +348,6 @@ if (project.platform == "linux-athena") {
                 }
                 inputs.dir buildDirectory.resolve("lib/${buildTypeFolder}").toFile()
                 inputs.dir thirdPartyLib
-                outputs.file buildDirectory.resolve("lib/${buildTypeFolder}").resolve("libopencv${project.libVersion}.a").toFile()
             }
         } else {
             project.tasks.create('nativeLibLinks' + buildType, Exec) {
@@ -387,7 +377,6 @@ if (project.platform == "linux-athena") {
                 inputString += "save\nend\n"
                 standardInput = new ByteArrayInputStream(inputString.getBytes())
                 inputs.file buildDirectory.resolve("lib").resolve("libopencv_core.a").toFile()
-                outputs.file buildDirectory.resolve("lib").resolve("libopencv${project.libVersion}.a").toFile()
             }
         }
     } else if (project.platform.startsWith('linux') && buildType.contains('SharedDebug')) {
