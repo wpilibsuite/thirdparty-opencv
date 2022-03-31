@@ -185,8 +185,8 @@ def stripExe = 'strip'
 def objCopyExe = 'objcopy'
 
 if (project.platform == "linux-athena") {
-    stripExe = 'arm-frc2021-linux-gnueabi-strip'
-    objCopyExe = 'arm-frc2021-linux-gnueabi-objcopy'
+    stripExe = 'arm-frc2022-linux-gnueabi-strip'
+    objCopyExe = 'arm-frc2022-linux-gnueabi-objcopy'
 } else if (project.platform == "linux-raspbian") {
     stripExe = 'arm-raspbian10-linux-gnueabihf-strip'
     objCopyExe = 'arm-raspbian10-linux-gnueabihf-objcopy'
