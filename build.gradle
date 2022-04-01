@@ -44,6 +44,7 @@ ext {
             '-DWITH_JASPER=OFF',
             '-DWITH_TIFF=OFF',
             '-DBUILD_JPEG=ON',
+            '-DBUILD_OPENJPEG=ON',
             '-DBUILD_PNG=ON',
             '-DBUILD_ZLIB=ON',
             '-DBUILD_TESTS=OFF',
@@ -281,7 +282,6 @@ if (project.platform == "linux-athena") {
         if (project.platform.startsWith("windows")) {
             executable 'cmake'
             args = ['--build', '.', '--parallel', "${processors}", '--', '/t:Build', "/p:Configuration=${buildTypeFolder}".toString(), '/v:m', project.platform == "windows-x86" ? '/p:Platform=win32' : '/p:Platform=x64']
-            inputs.file buildDirectory.resolve("OpenCV.sln").toFile()
         } else if (project.platform.startsWith("osx")) {
             executable 'sh'
             String incantation = "xcodebuild -alltargets -configuration ${buildTypeFolder} -jobs ${processors}"
@@ -293,7 +293,6 @@ if (project.platform == "linux-athena") {
         } else {
             executable 'cmake'
             args = ['--build', '.', '--parallel', "${processors}"]
-            inputs.file buildDirectory.resolve("CMakeCache.txt").toFile()
         }
     }
 
@@ -315,8 +314,6 @@ if (project.platform == "linux-athena") {
                     setArgs << inFile
                 }
                 args = setArgs
-
-                inputs.file buildDirectory.resolve("lib").resolve(buildTypeFolder).resolve("opencv_core${project.libVersion}.lib").toFile()
             }
         } else if (project.platform.startsWith('osx')) {
             project.tasks.create('nativeLibLinks' + buildType, Exec) {
@@ -376,7 +373,6 @@ if (project.platform == "linux-athena") {
 
                 inputString += "save\nend\n"
                 standardInput = new ByteArrayInputStream(inputString.getBytes())
-                inputs.file buildDirectory.resolve("lib").resolve("libopencv_core.a").toFile()
             }
         }
     } else if (project.platform.startsWith('linux') && buildType.contains('SharedDebug')) {
@@ -457,7 +453,3 @@ if (!project.hasProperty('skipDebug')) {
 }
 
 apply from: 'publish.gradle'
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.9'
-}
