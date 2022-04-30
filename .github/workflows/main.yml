@@ -49,14 +49,8 @@ jobs:
           - artifact-name: Win64Release
             architecture: x64
             build-options: "-PskipDebug"
-          - artifact-name: Win32Release
-            architecture: x86
-            build-options: "-PskipDebug"
           - artifact-name: Win64
             architecture: x64
-            build-options: "-PskipRelease -PskipSources"
-          - artifact-name: Win32
-            architecture: x86
             build-options: "-PskipRelease -PskipSources"
 
     name: "Build - ${{ matrix.artifact-name }}"
