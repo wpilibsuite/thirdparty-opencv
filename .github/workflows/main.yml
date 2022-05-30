@@ -12,16 +12,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - container: wpilib/roborio-cross-ubuntu:2022-18.04
+          - container: wpilib/roborio-cross-ubuntu:2022-20.04
             artifact-name: Athena
             build-options: "-Pplatform=linux-athena"
-          - container: wpilib/raspbian-cross-ubuntu:10-18.04
+          - container: wpilib/raspbian-cross-ubuntu:10-20.04
             artifact-name: Raspbian
             build-options: "-Pplatform=linux-raspbian"
-          - container: wpilib/aarch64-cross-ubuntu:bionic-18.04
+          - container: wpilib/aarch64-cross-ubuntu:bionic-20.04
             artifact-name: Bionic
             build-options: "-Pplatform=linux-aarch64bionic"
-          - container: wpilib/ubuntu-base:18.04
+          - container: wpilib/ubuntu-base:20.04
             artifact-name: Linux
             build-options: ""
 
