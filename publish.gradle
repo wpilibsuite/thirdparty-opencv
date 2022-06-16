@@ -403,36 +403,6 @@ if (!project.hasProperty('jenkinsBuild')) {
 
 model {
     publishing {
-        def allTask
-        if (!project.hasProperty('jenkinsBuild')) {
-            allTask = createAllCombined([cppLibsZip], 'opencv', zipBaseName, Zip, project, '')
-        }
-
-        def allJniTask
-        if (!project.hasProperty('jenkinsBuild')) {
-            allJniTask = createAllCombined([jniJar], "opencvJNI", jniBaseName, Jar, project, '')
-        }
-
-        def allTaskDebug
-        if (!project.hasProperty('jenkinsBuild')) {
-            allTaskDebug = createAllCombined([cppLibsZipDebug], 'opencv', zipBaseName, Zip, project, 'debug')
-        }
-
-        def allJniTaskDebug
-        if (!project.hasProperty('jenkinsBuild')) {
-            allJniTaskDebug = createAllCombined([jniJarDebug], "opencvJNI", jniBaseName, Jar, project, 'debug')
-        }
-
-        def allTaskStatic
-        if (!project.hasProperty('jenkinsBuild')) {
-            allTaskStatic = createAllCombined([cppLibsZipStatic], 'opencv', zipBaseName, Zip, project, 'static')
-        }
-
-        def allTaskStaticDebug
-        if (!project.hasProperty('jenkinsBuild')) {
-            allTaskStaticDebug = createAllCombined([cppLibsZipStaticDebug], 'opencv', zipBaseName, Zip, project, 'staticdebug')
-        }
-
         publications {
             java(MavenPublication) {
                 artifact outputJar
@@ -447,11 +417,6 @@ model {
                 artifact jniJar
                 artifact jniJarDebug
 
-                if (!project.hasProperty('jenkinsBuild')) {
-                    artifact allJniTask
-                    artifact allJniTaskDebug
-                }
-
                 artifactId = "${baseArtifactId}-jni"
                 groupId artifactGroupId
                 version pubVersion
@@ -463,13 +428,6 @@ model {
                 artifact cppLibsZipDebug
                 artifact cppLibsZipStatic
                 artifact cppLibsZipStaticDebug
-
-                if (!project.hasProperty('jenkinsBuild')) {
-                    artifact allTask
-                    artifact allTaskDebug
-                    artifact allTaskStatic
-                    artifact allTaskStaticDebug
-                }
 
                 artifactId = "${baseArtifactId}-cpp"
                 groupId artifactGroupId

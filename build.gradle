@@ -62,7 +62,8 @@ ext {
             '-DCMAKE_BUILD_WITH_INSTALL_RPATH=TRUE',
             '-DBUILD_opencv_apps=OFF',
             '-DBUILD_TESTS=OFF',
-            '-DBUILD_PERF_TESTS=OFF'
+            '-DBUILD_PERF_TESTS=OFF',
+            '-DCMAKE_INSTALL_PREFIX=install'
     ]
 }
 
@@ -75,6 +76,8 @@ def getPlatform() {
         os_arch = 'x86_64'
     } else if (os_arch == 'i386') {
         os_arch = 'x86'
+    } else if (os_arch == 'aarch64') {
+        os_arch = 'arm64'
     }
 
     if (OperatingSystem.current().isWindows()) {
@@ -128,6 +131,8 @@ def getPlatformPath(platform) {
         return "osx/x86"
     } else if (platform == "osx-x86_64") {
         return "osx/x86-64"
+    } else if (platform == "osx-arm64") {
+        return "osx/arm64"
     } else if (platform == "windows-x86") {
         return "windows/x86"
     } else if (platform == "windows-x86_64") {
@@ -148,6 +153,15 @@ if (!project.hasProperty('platform')) {
     println "No 'platform' property specified; using the build system's platform"
     ext.platform = getPlatform()
 }
+
+if (project.hasProperty('forcealternatemacbuild')) {
+    if (project.platform == 'osx-arm64') {
+        ext.platform = 'osx-x86_64'
+    } else if (ext.platform == 'osx-x86_64') {
+        ext.platform = 'osx-arm64'
+    }
+}
+
 ext.platformPath = getPlatformPath(project.platform)
 
 if (!project.hasProperty('cmakePath')) {
@@ -159,11 +173,11 @@ println "Building for platform ${project.platform}"
 ext.platformClassifier = project.platform.replaceFirst('-', '').replace('_', '-')
 
 ext.rootPath = Paths.get(projectDir.canonicalPath).resolve('opencv')
-ext.cmakeBuildDirectory = Paths.get(projectDir.canonicalPath).resolve('build').resolve(project.platform)
-ext.cmakeBuildSharedDirectory = Paths.get(projectDir.canonicalPath).resolve('buildShared').resolve(project.platform)
+ext.cmakeBuildDirectory = Paths.get(projectDir.canonicalPath).resolve('build').resolve(project.platformPath).resolve('buildStatic').resolve(project.platform)
+ext.cmakeBuildSharedDirectory = Paths.get(projectDir.canonicalPath).resolve('build').resolve(project.platformPath).resolve('buildShared').resolve(project.platform)
 
-ext.cmakeBuildDebugDirectory = Paths.get(projectDir.canonicalPath).resolve('buildDebug').resolve(project.platform)
-ext.cmakeBuildSharedDebugDirectory = Paths.get(projectDir.canonicalPath).resolve('buildSharedDebug').resolve(project.platform)
+ext.cmakeBuildDebugDirectory = Paths.get(projectDir.canonicalPath).resolve('build').resolve(project.platformPath).resolve('buildStaticDebug').resolve(project.platform)
+ext.cmakeBuildSharedDebugDirectory = Paths.get(projectDir.canonicalPath).resolve('build').resolve(project.platformPath).resolve('buildSharedDebug').resolve(project.platform)
 
 ext.jarName = "opencv-${project.libVersion}.jar"
 ext.pathToOpenCVJar = ext.cmakeBuildDirectory.resolve("bin").resolve(ext.jarName)
@@ -248,6 +262,10 @@ if (project.platform == "linux-athena") {
                 return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
                     '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
                     "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
+            } else if (project.platform == "osx-arm64") {
+                return args + " -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=\"11.0\""
+            } else if (project.platform == "osx-x86_64") {
+                return args + " -DCMAKE_OSX_ARCHITECTURES=x86_64 -DCMAKE_OSX_DEPLOYMENT_TARGET=\"10.15\""
             }
             if (toolchain) {
                 println "Using toolchain '${toolchain}'"
@@ -266,6 +284,11 @@ if (project.platform == "linux-athena") {
         } else if (project.platform.startsWith("osx")) {
             executable project.cmakePath
             args = cmakeArgs() + ['-G', "Xcode", project.rootPath]
+            if (project.platform == "osx-arm64") {
+                environment "ARCHFLAGS", "-arch arm64"
+            } else if (project.platform == "osx-x86_64") {
+                environment "ARCHFLAGS", "-arch x86_64"
+            }
         } else {
             executable project.cmakePath
             args = cmakeArgs() + [project.rootPath]
