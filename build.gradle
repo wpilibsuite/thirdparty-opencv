@@ -90,30 +90,6 @@ def getPlatform() {
     return platform
 }
 
-def getOutputFormat(platform) {
-    if (platform == "linux-athena") {
-        return "elf32-littlearm"
-    } else if (platform == "linux-arm32") {
-        return "elf32-littlearm"
-    } else if (platform == "linux-arm64") {
-        return ""
-    } else if (platform == "linux-x86") {
-        return "elf32-i386"
-    } else if (platform == "linux-x86_64") {
-        return "elf64-x86-64"
-    } else if (platform == "osx-x86") {
-        return ""
-    } else if (platform == "osx-x86_64") {
-        return ""
-    } else if (platform == "windows-x86") {
-        return "pe-i386"
-    } else if (platform == "windows-x86_64") {
-        return "pe-x86-64"
-    } else {
-        return ""
-    }
-}
-
 def getPlatformPath(platform) {
     if (platform == "linux-athena") {
         return "linux/athena"
