@@ -16,11 +16,11 @@ jobs:
             artifact-name: Athena
             build-options: "-Pplatform=linux-athena"
           - container: wpilib/raspbian-cross-ubuntu:10-20.04
-            artifact-name: Raspbian
-            build-options: "-Pplatform=linux-raspbian"
+            artifact-name: Arm32
+            build-options: "-Pplatform=linux-arm32"
           - container: wpilib/aarch64-cross-ubuntu:bionic-20.04
-            artifact-name: Bionic
-            build-options: "-Pplatform=linux-aarch64bionic"
+            artifact-name: Arm64
+            build-options: "-Pplatform=linux-arm64"
           - container: wpilib/ubuntu-base:20.04
             artifact-name: Linux
             build-options: ""
