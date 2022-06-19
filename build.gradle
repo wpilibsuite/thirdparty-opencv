@@ -362,7 +362,7 @@ if (project.platform == "linux-athena") {
                     inputString += inFile
                 }
 
-                if (project.platform == "linux-athena" || project.platform == "linux-raspbian") {
+                if (project.platform == "linux-athena" || project.platform == "linux-arm32") {
                     inputString += "addlib ../3rdparty/lib/libtegra_hal.a\n"
                 } else if (project.platform == "linux-arm64") {
                     inputString += "addlib ../3rdparty/lib/libtegra_hal.a\n"
