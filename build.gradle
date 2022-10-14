@@ -174,14 +174,14 @@ def stripExe = 'strip'
 def objCopyExe = 'objcopy'
 
 if (project.platform == "linux-athena") {
-    stripExe = 'arm-frc2022-linux-gnueabi-strip'
-    objCopyExe = 'arm-frc2022-linux-gnueabi-objcopy'
+    stripExe = 'arm-frc2023-linux-gnueabi-strip'
+    objCopyExe = 'arm-frc2023-linux-gnueabi-objcopy'
 } else if (project.platform == "linux-arm32") {
-    stripExe = 'arm-raspbian10-linux-gnueabihf-strip'
-    objCopyExe = 'arm-raspbian10-linux-gnueabihf-objcopy'
+    stripExe = 'armv6-bullseye-linux-gnueabihf-strip'
+    objCopyExe = 'armv6-bullseye-linux-gnueabihf-objcopy'
 } else if (project.platform == "linux-arm64") {
-    stripExe = 'aarch64-bionic-linux-gnu-strip'
-    objCopyExe = 'aarch64-bionic-linux-gnu-objcopy'
+    stripExe = 'aarch64-bullseye-linux-gnu-strip'
+    objCopyExe = 'aarch64-bullseye-linux-gnu-objcopy'
 }
 
 ['': project.cmakeBuildDirectory,
@@ -231,7 +231,7 @@ if (project.platform == "linux-athena") {
                     '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
                     "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
             } else if (project.platform == "linux-arm64") {
-                toolchain = projectDir.canonicalPath + "/aarch64-bionic-gnu.toolchain.cmake"
+                toolchain = projectDir.canonicalPath + "/aarch64-bullseye-gnu.toolchain.cmake"
                 println "Using toolchain '${toolchain}'"
                 return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
                     '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
