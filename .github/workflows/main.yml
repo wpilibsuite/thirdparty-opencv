@@ -82,7 +82,7 @@ jobs:
 
   build-mac:
     name: "Build - macOS"
-    runs-on: macos-latest
+    runs-on: macOS-11
     steps:
       - uses: actions/checkout@v2
         with:
