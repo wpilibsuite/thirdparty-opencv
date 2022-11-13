@@ -19,6 +19,10 @@ task copyAllOutputs(type: Copy) {
     destinationDir outputsFolder
 }
 
+if (project.hasProperty('runmerge')) {
+    apply from: 'merge.gradle'
+}
+
 build.dependsOn copyAllOutputs
 
 ext.addTaskToCopyAllOutputs = { task ->
