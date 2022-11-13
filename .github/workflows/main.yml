@@ -111,40 +111,9 @@ jobs:
           name: macOS
           path: gradleDir/outputs/
 
-  build-mac-arm:
-    name: "Build - macOS (Arm)"
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-      - uses: actions/setup-java@v1
-        with:
-          java-version: 11
-      - run: ./gradlew build -PjenkinsBuild -Pforcealternatemacbuild
-        name: Build with Gradle
-      - name: Import Developer ID Certificate
-        uses: wpilibsuite/import-signing-certificate@v1
-        with:
-          certificate-data: ${{ secrets.APPLE_CERTIFICATE_DATA }}
-          certificate-passphrase: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          keychain-password: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
-        if: |
-          github.repository_owner == 'wpilibsuite' &&
-          (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
-      - run: ./gradlew build -PjenkinsBuild -PdeveloperID=${{ secrets.APPLE_DEVELOPER_ID }}
-        name: Sign Binaries with Developer ID
-        if: |
-          github.repository_owner == 'wpilibsuite' &&
-          (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
-      - uses: actions/upload-artifact@v2
-        with:
-          name: macOSArm
-          path: gradleDir/outputs/
-
   combine:
     name: Combine
-    needs: [build-docker, build-windows, build-mac, build-mac-arm]
+    needs: [build-docker, build-windows, build-mac]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

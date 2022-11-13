@@ -83,7 +83,7 @@ def getPlatform() {
     } else if (OperatingSystem.current().isLinux()) {
         platform = "linux-${os_arch}"
     } else if (OperatingSystem.current().isMacOsX()) {
-        platform = "osx-${os_arch}"
+        platform = "osx-universal"
     } else {
         platform = "${os_name}-${os_arch}"
     }
@@ -101,12 +101,8 @@ def getPlatformPath(platform) {
         return "linux/x86"
     } else if (platform == "linux-x86_64") {
         return "linux/x86-64"
-    } else if (platform == "osx-x86") {
-        return "osx/x86"
-    } else if (platform == "osx-x86_64") {
-        return "osx/x86-64"
-    } else if (platform == "osx-arm64") {
-        return "osx/arm64"
+    } else if (platform == "osx-universal") {
+        return "osx/universal"
     } else if (platform == "windows-x86") {
         return "windows/x86"
     } else if (platform == "windows-x86_64") {
@@ -126,14 +122,6 @@ if (!project.hasProperty('repo')) {
 if (!project.hasProperty('platform')) {
     println "No 'platform' property specified; using the build system's platform"
     ext.platform = getPlatform()
-}
-
-if (project.hasProperty('forcealternatemacbuild')) {
-    if (project.platform == 'osx-arm64') {
-        ext.platform = 'osx-x86_64'
-    } else if (ext.platform == 'osx-x86_64') {
-        ext.platform = 'osx-arm64'
-    }
 }
 
 ext.platformPath = getPlatformPath(project.platform)
@@ -236,10 +224,8 @@ if (project.platform == "linux-athena") {
                 return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
                     '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
                     "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
-            } else if (project.platform == "osx-arm64") {
-                return args + "-DCMAKE_OSX_ARCHITECTURES=arm64" + "-DCMAKE_OSX_DEPLOYMENT_TARGET:String=11.0"
-            } else if (project.platform == "osx-x86_64") {
-                return args + "-DCMAKE_OSX_ARCHITECTURES=x86_64" + "-DCMAKE_OSX_DEPLOYMENT_TARGET:String=10.15"
+            } else if (project.platform == "osx-universal") {
+                return args + "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64" + "-DCMAKE_OSX_DEPLOYMENT_TARGET:String=11.0"
             }
             if (toolchain) {
                 println "Using toolchain '${toolchain}'"
@@ -258,7 +244,7 @@ if (project.platform == "linux-athena") {
         } else if (project.platform.startsWith("osx")) {
             executable project.cmakePath
             args = ['-G', "Xcode", project.rootPath] + cmakeArgs()
-            environment "ARCHFLAGS", "-arch arm64", "-arch x86_64"
+            environment "ARCHFLAGS", "-arch arm64 -arch x86_64"
         } else {
             executable project.cmakePath
             args = cmakeArgs() + [project.rootPath]
