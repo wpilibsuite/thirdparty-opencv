@@ -258,11 +258,7 @@ if (project.platform == "linux-athena") {
         } else if (project.platform.startsWith("osx")) {
             executable project.cmakePath
             args = ['-G', "Xcode", project.rootPath] + cmakeArgs()
-            if (project.platform == "osx-arm64") {
-                environment "ARCHFLAGS", "-arch arm64"
-            } else if (project.platform == "osx-x86_64") {
-                environment "ARCHFLAGS", "-arch x86_64"
-            }
+            environment "ARCHFLAGS", "-arch arm64", "-arch x86_64"
         } else {
             executable project.cmakePath
             args = cmakeArgs() + [project.rootPath]
