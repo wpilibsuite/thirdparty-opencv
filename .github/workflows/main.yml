@@ -128,8 +128,6 @@ jobs:
         with:
           name: macOSArm
           path: build/downloads
-      - name: Flatten Artifacts
-        run: rsync -a --delete build/downloads/*/* build/downloads/
       - uses: actions/setup-java@v1
         with:
           java-version: 11
