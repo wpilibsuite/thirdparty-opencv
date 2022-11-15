@@ -108,6 +108,22 @@ mergePairs.each {
                         ]
                     }
                 }
+                if (it.name.endsWith('.dylib') && project.hasProperty("developerID")) {
+                    def universalFile = it.toString().replace('x86-64', 'universal')
+                    // Get path to binary.
+                    exec {
+                        workingDir rootDir
+                        def args = [
+                            "sh",
+                            "-c",
+                            "codesign --force --strict --deep " +
+                            "--timestamp --options=runtime " +
+                            "--verbose -s ${project.findProperty("developerID")} " +
+                            "$universalFile"
+                        ]
+                        commandLine args
+                    }
+                }
             }
             if (doHash != null) {
                 // Find dylib file
