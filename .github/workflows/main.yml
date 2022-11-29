@@ -70,7 +70,9 @@ jobs:
           java-version: 11
           architecture: ${{ matrix.architecture }}
       - name: Setup CMake
-        run: choco install cmake --version=3.24.3
+        uses: jwlawson/actions-setup-cmake@v1.13
+        with:
+          cmake-version: '3.24.3'
       - run: |
           @call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
           set PATH=%PATH%;%ANT_HOME%\bin
@@ -93,10 +95,9 @@ jobs:
         with:
           java-version: 11
       - name: Setup CMake
-        run: |
-          brew tap-new wpilib/local-cmake
-          brew extract --version=3.24.3 cmake wpilib/local-cmake
-          brew install cmake@3.24.3
+        uses: jwlawson/actions-setup-cmake@v1.13
+        with:
+          cmake-version: '3.24.3'
       - run: ./gradlew build -PjenkinsBuild
         name: Build with Gradle
       - uses: actions/upload-artifact@v2
@@ -115,10 +116,9 @@ jobs:
         with:
           java-version: 11
       - name: Setup CMake
-        run: |
-          brew tap-new wpilib/local-cmake
-          brew extract --version=3.24.3 cmake wpilib/local-cmake
-          brew reinstall cmake@3.24.3
+        uses: jwlawson/actions-setup-cmake@v1.13
+        with:
+          cmake-version: '3.24.3'
       - run: ./gradlew build -PjenkinsBuild -Pforcealternatemacbuild
         name: Build with Gradle
       - uses: actions/upload-artifact@v2
@@ -144,7 +144,9 @@ jobs:
         with:
           java-version: 11
       - name: Setup CMake
-        run: brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/c3499df416fa78fa4fbb84175277c4da6e355097/Formula/cmake.rb
+        uses: jwlawson/actions-setup-cmake@v1.13
+        with:
+          cmake-version: '3.24.3'
       - run: ./gradlew copyToUpload -Prunmerge
         name: Build with Gradle
         if: |
