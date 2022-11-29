@@ -69,6 +69,10 @@ jobs:
         with:
           java-version: 11
           architecture: ${{ matrix.architecture }}
+      - name: Setup CMake
+        uses: jwlawson/actions-setup-cmake@v1.13
+        with:
+          cmake-version: '3.24.3'
       - run: |
           @call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
           set PATH=%PATH%;%ANT_HOME%\bin
@@ -90,6 +94,10 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: 11
+      - name: Setup CMake
+        uses: jwlawson/actions-setup-cmake@v1.13
+        with:
+          cmake-version: '3.24.3'
       - run: ./gradlew build -PjenkinsBuild
         name: Build with Gradle
       - uses: actions/upload-artifact@v2
@@ -107,6 +115,10 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: 11
+      - name: Setup CMake
+        uses: jwlawson/actions-setup-cmake@v1.13
+        with:
+          cmake-version: '3.24.3'
       - run: ./gradlew build -PjenkinsBuild -Pforcealternatemacbuild
         name: Build with Gradle
       - uses: actions/upload-artifact@v2
@@ -131,6 +143,10 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: 11
+      - name: Setup CMake
+        uses: jwlawson/actions-setup-cmake@v1.13
+        with:
+          cmake-version: '3.24.3'
       - run: ./gradlew copyToUpload -Prunmerge
         name: Build with Gradle
         if: |
