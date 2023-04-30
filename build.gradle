@@ -164,7 +164,7 @@ ext.jarName = "opencv-${project.libVersion}.jar"
 ext.pathToOpenCVJar = ext.cmakeBuildDirectory.resolve("bin").resolve(ext.jarName)
 
 if (project.platform.startsWith('windows')) {
-    def gen = "Visual Studio 16 2019"
+    def gen = "Visual Studio 17 2022"
     ext.cmakeArch = 'Win32'
     if (project.platform == "windows-x86_64") {
         ext.cmakeArch = 'x64'
@@ -249,6 +249,8 @@ if (project.platform == "linux-athena") {
                 return args + "-DCMAKE_OSX_ARCHITECTURES=arm64" + "-DCMAKE_OSX_DEPLOYMENT_TARGET:String=11.0"
             } else if (project.platform == "osx-x86_64") {
                 return args + "-DCMAKE_OSX_ARCHITECTURES=x86_64" + "-DCMAKE_OSX_DEPLOYMENT_TARGET:String=10.15"
+            } else if (project.platform == "windows-arm64") {
+                return args + "-DOPENCV_SKIP_SYSTEM_PROCESSOR_DETECTION=TRUE" + "-DAARCH64=ON"
             }
             if (toolchain) {
                 println "Using toolchain '${toolchain}'"
