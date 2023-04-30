@@ -52,6 +52,9 @@ jobs:
           - artifact-name: Win32Release
             architecture: x86
             build-options: "-PskipDebug"
+          - artifact-name: WinArm64Release
+            architecture: x64
+            build-options: "-PskipDebug -Pplatform=windows-arm64"
           - artifact-name: Win64
             architecture: x64
             build-options: "-PskipRelease -PskipSources"
