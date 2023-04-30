@@ -394,7 +394,7 @@ if (project.platform == "linux-athena") {
         def stripOutputDir = file("$buildDir/strip${buildType}")
         project.tasks.create('copyLibs' + buildType, Copy) {
             dependsOn 'make' + buildType
-            destinationDirectory = stripCopyDir
+            destinationDir = stripCopyDir
 
             from(buildDirectory.resolve("lib").toFile()) {
                 include '*.so.*.*.*'
