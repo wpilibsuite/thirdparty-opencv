@@ -16,7 +16,7 @@ ext.licenseFile = file("$rootDir/opencv/LICENSE")
 def outputsFolder = file("$buildDir/allOutputs")
 
 task copyAllOutputs(type: Copy) {
-    destinationDir outputsFolder
+    destinationDir = outputsFolder
 }
 
 if (project.hasProperty('runmerge')) {
@@ -27,8 +27,8 @@ build.dependsOn copyAllOutputs
 
 ext.addTaskToCopyAllOutputs = { task ->
     copyAllOutputs.dependsOn task
-    copyAllOutputs.inputs.file task.archivePath
-    copyAllOutputs.from task.archivePath
+    copyAllOutputs.inputs.file task.archiveFile
+    copyAllOutputs.from task.archiveFile
 }
 
 ext {
@@ -79,7 +79,7 @@ def getPlatform() {
         os_arch = 'x86_64'
     } else if (os_arch == 'i386') {
         os_arch = 'x86'
-    } else if (os_arch == 'aarch64') {
+    } else if (os_arch == 'aarch64' || os_arch == 'arm64') {
         os_arch = 'arm64'
     }
 
@@ -116,6 +116,8 @@ def getPlatformPath(platform) {
         return "windows/x86"
     } else if (platform == "windows-x86_64") {
         return "windows/x86-64"
+    } else if (platform == "windows-arm64") {
+        return "windows/arm64"
     } else {
         return ""
     }
@@ -166,6 +168,8 @@ if (project.platform.startsWith('windows')) {
     ext.cmakeArch = 'Win32'
     if (project.platform == "windows-x86_64") {
         ext.cmakeArch = 'x64'
+    } else if (project.platform == "windows-arm64") {
+        ext.cmakeArch = 'arm64'
     }
     ext.cmakeGenerator = gen
 }
@@ -282,8 +286,15 @@ if (project.platform == "linux-athena") {
         def processors = Runtime.runtime.availableProcessors()
 
         if (project.platform.startsWith("windows")) {
+            def platformArg = "/p:Platform=x64"
+            if (project.platform == "windows-x86") {
+                platformArg = "/p:Platform=win32"
+            } else if (project.platform == "windows-arm64") {
+                platformArg = "/p:Platform=arm64"
+            }
+
             executable 'cmake'
-            args = ['--build', '.', '--parallel', "${processors}", '--', '/t:Build', "/p:Configuration=${buildTypeFolder}".toString(), '/v:m', project.platform == "windows-x86" ? '/p:Platform=win32' : '/p:Platform=x64']
+            args = ['--build', '.', '--parallel', "${processors}", '--', '/t:Build', "/p:Configuration=${buildTypeFolder}".toString(), '/v:m', platformArg]
         } else if (project.platform.startsWith("osx")) {
             executable 'sh'
             String incantation = "xcodebuild -alltargets -configuration ${buildTypeFolder} -jobs ${processors}"
@@ -383,7 +394,7 @@ if (project.platform == "linux-athena") {
         def stripOutputDir = file("$buildDir/strip${buildType}")
         project.tasks.create('copyLibs' + buildType, Copy) {
             dependsOn 'make' + buildType
-            destinationDir stripCopyDir
+            destinationDirectory = stripCopyDir
 
             from(buildDirectory.resolve("lib").toFile()) {
                 include '*.so.*.*.*'
@@ -455,3 +466,7 @@ if (!project.hasProperty('skipDebug')) {
 }
 
 apply from: 'publish.gradle'
+
+wrapper {
+    gradleVersion = '8.1'
+}
