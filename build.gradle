@@ -164,7 +164,7 @@ ext.jarName = "opencv-${project.libVersion}.jar"
 ext.pathToOpenCVJar = ext.cmakeBuildDirectory.resolve("bin").resolve(ext.jarName)
 
 if (project.platform.startsWith('windows')) {
-    def gen = "Visual Studio 17 2022"
+    def gen = "Visual Studio 16 2019"
     ext.cmakeArch = 'Win32'
     if (project.platform == "windows-x86_64") {
         ext.cmakeArch = 'x64'
