@@ -254,6 +254,7 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
 
     project.tasks.create('jniJar' + buildType, Jar) {
         dependsOn tasks.named('make' + buildType)
+        dependsOn tasks.named('nativeLibLinks' + buildType)
         destinationDirectory = outputsFolder
         archiveClassifier = outputClassifier
         archiveBaseName = jniBaseName
