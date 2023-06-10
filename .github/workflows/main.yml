@@ -52,12 +52,18 @@ jobs:
           - artifact-name: Win32Release
             architecture: x86
             build-options: "-PskipDebug"
+          - artifact-name: WinArm64Release
+            architecture: x64
+            build-options: "-PskipDebug -Pplatform=windows-arm64"
           - artifact-name: Win64
             architecture: x64
             build-options: "-PskipRelease -PskipSources"
           - artifact-name: Win32
             architecture: x86
             build-options: "-PskipRelease -PskipSources"
+          - artifact-name: WinArm64
+            architecture: x64
+            build-options: "-PskipRelease -PskipSources -Pplatform=windows-arm64"
 
     name: "Build - ${{ matrix.artifact-name }}"
     runs-on: windows-2019

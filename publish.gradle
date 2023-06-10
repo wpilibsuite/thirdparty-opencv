@@ -13,7 +13,7 @@ publishing {
     }
 }
 
-def pubVersion = "${project.ext.version}-4"
+def pubVersion = "${project.ext.version}-5"
 
 def outputsFolder = file("$project.buildDir/outputs")
 
@@ -46,9 +46,9 @@ copyAllOutputs.inputs.file versionFile
 copyAllOutputs.from versionFile
 
 task cppSourcesZip(type: Zip, dependsOn: make) {
-    destinationDir = outputsFolder
-    baseName = zipBaseName
-    classifier = "sources"
+    destinationDirectory = outputsFolder
+    archiveBaseName = zipBaseName
+    archiveClassifier = "sources"
 
     from(licenseFile) {
         into '/'
@@ -73,9 +73,9 @@ task cppSourcesZip(type: Zip, dependsOn: make) {
 }
 
 task cppHeadersZip(type: Zip, dependsOn: make) {
-    destinationDir = outputsFolder
-    baseName = zipBaseName
-    classifier = "headers"
+    destinationDirectory = outputsFolder
+    archiveBaseName = zipBaseName
+    archiveClassifier = "headers"
 
     from(licenseFile) {
         into '/'
@@ -117,9 +117,9 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
 
     project.tasks.create('cppLibsZip' + buildType, Zip) {
         dependsOn tasks.named('makeShared' + buildType)
-        destinationDir = outputsFolder
-        classifier = outputClassifier
-        baseName = zipBaseName
+        destinationDirectory = outputsFolder
+        archiveClassifier = outputClassifier
+        archiveBaseName = zipBaseName
         duplicatesStrategy = 'exclude'
 
         manifest {
@@ -129,7 +129,7 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
                     "Implementation-Version": pubVersion,
                     "Implementation-Vendor": "Itseez",
 
-                    "Bundle-Name": "${baseName}",
+                    "Bundle-Name": "${archiveBaseName.get()}",
                     "Bundle-Version": pubVersion,
                     "Bundle-License": "https://opensource.org/licenses/BSD-3-Clause",
                     "Bundle-Vendor": "WPILib")
@@ -206,9 +206,9 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
 
     project.tasks.create('cppLibsZipStatic' + buildType, Zip) {
         dependsOn tasks.named('nativeLibLinks' + buildType)
-        destinationDir = outputsFolder
-        classifier = outputClassifierStatic
-        baseName = zipBaseName
+        destinationDirectory = outputsFolder
+        archiveClassifier = outputClassifierStatic
+        archiveBaseName = zipBaseName
         duplicatesStrategy = 'exclude'
 
         manifest {
@@ -218,7 +218,7 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
                     "Implementation-Version": pubVersion,
                     "Implementation-Vendor": "Itseez",
 
-                    "Bundle-Name": "${baseName}",
+                    "Bundle-Name": "${archiveBaseName.get()}",
                     "Bundle-Version": pubVersion,
                     "Bundle-License": "https://opensource.org/licenses/BSD-3-Clause",
                     "Bundle-Vendor": "WPILib")
@@ -254,9 +254,10 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
 
     project.tasks.create('jniJar' + buildType, Jar) {
         dependsOn tasks.named('make' + buildType)
-        destinationDir = outputsFolder
-        classifier = outputClassifier
-        baseName = jniBaseName
+        dependsOn tasks.named('nativeLibLinks' + buildType)
+        destinationDirectory = outputsFolder
+        archiveClassifier = outputClassifier
+        archiveBaseName = jniBaseName
         duplicatesStrategy = 'exclude'
 
         manifest {
@@ -266,7 +267,7 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
                     "Implementation-Version": pubVersion,
                     "Implementation-Vendor": "Itseez",
 
-                    "Bundle-Name": "${baseName}",
+                    "Bundle-Name": "${archiveBaseName.get()}",
                     "Bundle-Version": pubVersion,
                     "Bundle-License": "https://opensource.org/licenses/BSD-3-Clause",
                     "Bundle-Vendor": "WPILib")
@@ -311,8 +312,8 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
 }
 
 task outputJar(type: Jar, dependsOn: make) {
-    baseName = javaBaseName
-    destinationDir = outputsFolder
+    archiveBaseName = javaBaseName
+    destinationDirectory = outputsFolder
     manifest {
         attributes(
                 "Created-By": "WPILib Gradle Build Script",
@@ -334,9 +335,9 @@ task outputJar(type: Jar, dependsOn: make) {
 }
 
 task sourcesJar(type: Jar, dependsOn: make) {
-    baseName = javaBaseName
-    destinationDir = outputsFolder
-    classifier = 'sources'
+    archiveBaseName = javaBaseName
+    destinationDirectory = outputsFolder
+    archiveClassifier = 'sources'
     manifest {
         attributes(
                 "Created-By": "WPILib Gradle Build Script",
