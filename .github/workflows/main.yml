@@ -78,7 +78,7 @@ jobs:
           architecture: ${{ matrix.architecture }}
       - name: Set Java Heap Size
         run: sed -i 's/-Xmx2g/-Xmx1g/g' gradle.properties
-        if: matrix.artifact-name == 'Win32'
+        if: matrix.architecture == 'x86'
       - run: |
           @call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
           set PATH=%PATH%;%ANT_HOME%\bin
