@@ -34,6 +34,9 @@ jobs:
           submodules: 'true'
       - run: sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/* && sudo rm -f /bin/ant && sudo ln -s /usr/share/ant/bin/ant /bin/ant
         name: Install Ant
+      - run: ln -s /usr/local/arm-linux-gnueabihf/sysroot/usr/lib/arm-linux-gnueabihf/libatomic.so.1 /usr/local/arm-linux-gnueabihf/sysroot/usr/lib/libatomic.so
+        name: Add libatomic symlink
+        if: matrix.artifact-name == 'Arm32'
       - run: ./gradlew build -PjenkinsBuild ${{ matrix.build-options }}
         name: Build with Gradle
       - uses: actions/upload-artifact@v3
