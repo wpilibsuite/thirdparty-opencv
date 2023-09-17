@@ -238,7 +238,8 @@ if (project.platform == "linux-athena") {
                     '-DENABLE_NEON=ON' +
                     '-DENABLE_VFPV3=ON' +
                     '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
-                    "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
+                    "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules" +
+                    '-DOPENCV_FORCE_LIBATOMIC_COMPILER_CHECK=ON'
             } else if (project.platform == "linux-arm64") {
                 toolchain = projectDir.canonicalPath + "/aarch64-bullseye-gnu.toolchain.cmake"
                 println "Using toolchain '${toolchain}'"
