@@ -60,6 +60,7 @@ ext {
             '-DOPENCV_JAVA_SOURCE_VERSION=1.8',
             '-DOPENCV_JAVA_TARGET_VERSION=1.8',
             '-DWITH_MSMF_DXVA=OFF',
+            '-DCMAKE_SKIP_RPATH=FALSE',
             '-DCMAKE_BUILD_RPATH_USE_ORIGIN=TRUE',
             '-DBUILD_opencv_apps=OFF',
             '-DBUILD_TESTS=OFF',
