@@ -95,7 +95,7 @@ jobs:
 
   build-mac:
     name: "Build - macOS"
-    runs-on: macOS-11
+    runs-on: macOS-14
     steps:
       - uses: actions/checkout@v3
         with:
@@ -113,7 +113,7 @@ jobs:
 
   build-mac-arm:
     name: "Build - macOS (Arm)"
-    runs-on: macos-11
+    runs-on: macOS-14
     steps:
       - uses: actions/checkout@v3
         with:
