@@ -251,9 +251,9 @@ if (project.platform == "linux-athena") {
                     '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
                     "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
             } else if (project.platform == "osx-arm64") {
-                return args + "-DCMAKE_OSX_ARCHITECTURES=arm64" + "-DCMAKE_OSX_DEPLOYMENT_TARGET:String=11.0"
+                return args + "-DCMAKE_OSX_ARCHITECTURES=arm64" + "-DCMAKE_OSX_DEPLOYMENT_TARGET:String=13.0" + "-DCMAKE_BUILD_RPATH=@loader_path"
             } else if (project.platform == "osx-x86_64") {
-                return args + "-DCMAKE_OSX_ARCHITECTURES=x86_64" + "-DCMAKE_OSX_DEPLOYMENT_TARGET:String=10.15"
+                return args + "-DCMAKE_OSX_ARCHITECTURES=x86_64" + "-DCMAKE_OSX_DEPLOYMENT_TARGET:String=13.0" + "-DCMAKE_BUILD_RPATH=@loader_path"
             } else if (project.platform == "windows-arm64") {
                 return args + "-DOPENCV_SKIP_SYSTEM_PROCESSOR_DETECTION=TRUE" + "-DAARCH64=ON"
             }
