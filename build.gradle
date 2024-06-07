@@ -212,7 +212,7 @@ if (project.platform == "linux-athena") {
                 args = args + '-DBUILD_SHARED_LIBS=ON' + '-DOPENCV_DEBUG_POSTFIX=d'
 
                 if (project.platform.contains('windows')) {
-                    args = args + '-DCMAKE_SHARED_LINKER_FLAGS=/DEPENDENTLOADFLAG:0x1100'
+                    args = args + '-DCMAKE_SHARED_LINKER_FLAGS=/DEPENDENTLOADFLAG:0x1100' + '-DCMAKE_MODULE_LINKER_FLAGS=/DEPENDENTLOADFLAG:0x1100'
                 }
             } else {
                 args = args + '-DBUILD_SHARED_LIBS=OFF'
