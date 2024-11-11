@@ -13,7 +13,7 @@ publishing {
     }
 }
 
-def pubVersion = "${project.ext.version}-5"
+def pubVersion = "${project.ext.version}-6"
 
 def outputsFolder = file("$project.buildDir/outputs")
 
@@ -86,8 +86,8 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
         exclude '**/CMakeLists.txt'
     }
 
-    from ('opencv_contrib/modules/aruco') {
-        into '/opencv2/contrib/aruco'
+    from ('opencv_contrib/modules/aruco/include') {
+        into '/'
     }
 
     from (project.cmakeBuildDirectory.resolve('opencv2').toFile()) {
