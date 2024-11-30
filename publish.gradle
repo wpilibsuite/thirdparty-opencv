@@ -13,15 +13,15 @@ publishing {
     }
 }
 
-def pubVersion = "${project.ext.version}-7"
+def pubVersion = "${project.ext.version}-1"
 
 def outputsFolder = file("$project.buildDir/outputs")
 
 def baseArtifactId = 'opencv'
-def artifactGroupId = 'edu.wpi.first.thirdparty.frc2024.opencv'
-def zipBaseName = '_GROUP_edu_wpi_first_thirdparty_frc2024_opencv_ID_opencv-cpp_CLS'
-def jniBaseName = "_GROUP_edu_wpi_first_thirdparty_frc2024_opencv_ID_opencv-jni_CLS"
-def javaBaseName = "_GROUP_edu_wpi_first_thirdparty_frc2024_opencv_ID_opencv-java_CLS"
+def artifactGroupId = 'edu.wpi.first.thirdparty.frc2025.opencv'
+def zipBaseName = '_GROUP_edu_wpi_first_thirdparty_frc2025_opencv_ID_opencv-cpp_CLS'
+def jniBaseName = "_GROUP_edu_wpi_first_thirdparty_frc2025_opencv_ID_opencv-jni_CLS"
+def javaBaseName = "_GROUP_edu_wpi_first_thirdparty_frc2025_opencv_ID_opencv-java_CLS"
 
 def versionFile = file("$outputsFolder/version.txt")
 
