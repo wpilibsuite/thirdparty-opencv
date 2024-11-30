@@ -98,6 +98,8 @@ def getPlatform() {
 def getPlatformPath(platform) {
     if (platform == "linux-athena") {
         return "linux/athena"
+    } else if (platform == "linux-systemcore") {
+        return "linux/systemcore"
     } else if (platform == "linux-arm32") {
         return "linux/arm32"
     } else if (platform == "linux-arm64") {
@@ -183,14 +185,17 @@ def stripExe = 'strip'
 def objCopyExe = 'objcopy'
 
 if (project.platform == "linux-athena") {
-    stripExe = 'arm-frc2024-linux-gnueabi-strip'
-    objCopyExe = 'arm-frc2024-linux-gnueabi-objcopy'
+    stripExe = 'arm-frc2025-linux-gnueabi-strip'
+    objCopyExe = 'arm-frc2025-linux-gnueabi-objcopy'
 } else if (project.platform == "linux-arm32") {
     stripExe = 'armv6-bullseye-linux-gnueabihf-strip'
     objCopyExe = 'armv6-bullseye-linux-gnueabihf-objcopy'
 } else if (project.platform == "linux-arm64") {
     stripExe = 'aarch64-bullseye-linux-gnu-strip'
     objCopyExe = 'aarch64-bullseye-linux-gnu-objcopy'
+} else if (project.platform == "linux-systemcore") {
+    stripExe = 'aarch64-bookworm-linux-gnu-strip'
+    objCopyExe = 'aarch64-bookworm-linux-gnu-objcopy'
 }
 
 ['': project.cmakeBuildDirectory,
@@ -233,6 +238,12 @@ if (project.platform == "linux-athena") {
                 return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
                     '-DENABLE_NEON=ON' +
                     '-DENABLE_VFPV3=ON' +
+                    '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
+                    "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
+            } else if (project.platform == "linux-systemcore") {
+                toolchain = projectDir.canonicalPath + "/aarch64-bookworm-gnu.toolchain.cmake"
+                println "Using toolchain '${toolchain}'"
+                return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
                     '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
                     "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
             } else if (project.platform == "linux-arm32") {
@@ -387,7 +398,7 @@ if (project.platform == "linux-athena") {
 
                 if (project.platform == "linux-athena" || project.platform == "linux-arm32") {
                     inputString += "addlib ../3rdparty/lib/libtegra_hal.a\n"
-                } else if (project.platform == "linux-arm64") {
+                } else if (project.platform == "linux-arm64" || project.platform == 'linux-systemcore') {
                     inputString += "addlib ../3rdparty/lib/libtegra_hal.a\n"
                 }
 
