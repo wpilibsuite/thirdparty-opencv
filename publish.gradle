@@ -328,7 +328,8 @@ task outputJar(type: Jar, dependsOn: make) {
                 "Bundle-Name": project.name,
                 "Bundle-Version": pubVersion,
                 "Bundle-License": "https://opensource.org/licenses/BSD-3-Clause",
-                "Bundle-Vendor": "WPILib")
+                "Bundle-Vendor": "WPILib",
+                "Automatic-Module-Name": "wpilib.opencv")
     }
 
     from { zipTree(project.pathToOpenCVJar.toFile()) } {
