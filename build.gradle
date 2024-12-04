@@ -7,8 +7,8 @@ apply plugin: 'java'
 
 def date = new Date()
 def formattedDate = date.format('yyMMdd')
-ext.version = "4.8.0"
-ext.soVersion = "4.8"
+ext.version = "4.10.0"
+ext.soVersion = "4.10"
 ext.libVersion = "${ext.version.replace(".", "")}"
 
 ext.licenseFile = file("$rootDir/opencv/LICENSE")
