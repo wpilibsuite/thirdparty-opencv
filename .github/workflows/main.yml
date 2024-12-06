@@ -97,7 +97,7 @@ jobs:
           path: gradleDir/outputs/
 
   build-mac:
-    name: "Build - macOS"
+    name: "Build - macOS (Arm)"
     runs-on: macOS-14
     steps:
       - uses: actions/checkout@v4
@@ -111,11 +111,11 @@ jobs:
         name: Build with Gradle
       - uses: actions/upload-artifact@v4
         with:
-          name: macOS
+          name: macOSArm
           path: gradleDir/outputs/
 
   build-mac-arm:
-    name: "Build - macOS (Arm)"
+    name: "Build - macOS"
     runs-on: macOS-14
     steps:
       - uses: actions/checkout@v4
@@ -129,7 +129,7 @@ jobs:
         name: Build with Gradle
       - uses: actions/upload-artifact@v4
         with:
-          name: macOSArm
+          name: macOS
           path: gradleDir/outputs/
 
   make_universal:
