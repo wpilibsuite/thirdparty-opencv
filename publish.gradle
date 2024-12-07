@@ -13,7 +13,7 @@ publishing {
     }
 }
 
-def pubVersion = "${project.ext.version}-2"
+def pubVersion = "${project.ext.version}-3"
 
 def outputsFolder = file("$project.buildDir/outputs")
 
