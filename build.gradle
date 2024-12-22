@@ -114,8 +114,6 @@ def getPlatformPath(platform) {
         return "osx/x86-64"
     } else if (platform == "osx-arm64") {
         return "osx/arm64"
-    } else if (platform == "windows-x86") {
-        return "windows/x86"
     } else if (platform == "windows-x86_64") {
         return "windows/x86-64"
     } else if (platform == "windows-arm64") {
@@ -305,9 +303,7 @@ if (project.platform == "linux-athena") {
 
         if (project.platform.startsWith("windows")) {
             def platformArg = "/p:Platform=x64"
-            if (project.platform == "windows-x86") {
-                platformArg = "/p:Platform=win32"
-            } else if (project.platform == "windows-arm64") {
+            if (project.platform == "windows-arm64") {
                 platformArg = "/p:Platform=arm64"
             }
 
