@@ -86,10 +86,6 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
         exclude '**/CMakeLists.txt'
     }
 
-    from ('opencv_contrib/modules/aruco/include') {
-        into '/'
-    }
-
     from (project.cmakeBuildDirectory.resolve('opencv2').toFile()) {
         into '/opencv2/'
     }
