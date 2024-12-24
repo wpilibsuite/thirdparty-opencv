@@ -122,19 +122,6 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
         archiveBaseName = zipBaseName
         duplicatesStrategy = 'exclude'
 
-        manifest {
-            attributes(
-                    "Created-By": "WPILib Gradle Build Script",
-                    "Implementation-Title": "OpenCV Native Libraries, ${project.ext.platformClassifier}",
-                    "Implementation-Version": pubVersion,
-                    "Implementation-Vendor": "Itseez",
-
-                    "Bundle-Name": "${archiveBaseName.get()}",
-                    "Bundle-Version": pubVersion,
-                    "Bundle-License": "https://opensource.org/licenses/BSD-3-Clause",
-                    "Bundle-Vendor": "WPILib")
-        }
-
         from(licenseFile) {
             into '/'
         }
@@ -210,19 +197,6 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
         archiveClassifier = outputClassifierStatic
         archiveBaseName = zipBaseName
         duplicatesStrategy = 'exclude'
-
-        manifest {
-            attributes(
-                    "Created-By": "WPILib Gradle Build Script",
-                    "Implementation-Title": "OpenCV Native Libraries, ${project.ext.platformClassifier}",
-                    "Implementation-Version": pubVersion,
-                    "Implementation-Vendor": "Itseez",
-
-                    "Bundle-Name": "${archiveBaseName.get()}",
-                    "Bundle-Version": pubVersion,
-                    "Bundle-License": "https://opensource.org/licenses/BSD-3-Clause",
-                    "Bundle-Vendor": "WPILib")
-        }
 
         from(licenseFile) {
             into '/'
