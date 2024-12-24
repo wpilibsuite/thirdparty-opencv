@@ -186,11 +186,11 @@ if (project.platform == "linux-athena") {
     stripExe = 'arm-frc2025-linux-gnueabi-strip'
     objCopyExe = 'arm-frc2025-linux-gnueabi-objcopy'
 } else if (project.platform == "linux-arm32") {
-    stripExe = 'armv6-bullseye-linux-gnueabihf-strip'
-    objCopyExe = 'armv6-bullseye-linux-gnueabihf-objcopy'
+    stripExe = 'armv6-bookworm-linux-gnueabihf-strip'
+    objCopyExe = 'armv6-bookworm-linux-gnueabihf-objcopy'
 } else if (project.platform == "linux-arm64") {
-    stripExe = 'aarch64-bullseye-linux-gnu-strip'
-    objCopyExe = 'aarch64-bullseye-linux-gnu-objcopy'
+    stripExe = 'aarch64-bookworm-linux-gnu-strip'
+    objCopyExe = 'aarch64-bookworm-linux-gnu-objcopy'
 } else if (project.platform == "linux-systemcore") {
     stripExe = 'aarch64-bookworm-linux-gnu-strip'
     objCopyExe = 'aarch64-bookworm-linux-gnu-objcopy'
@@ -254,7 +254,7 @@ if (project.platform == "linux-athena") {
                     "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules" +
                     '-DOPENCV_FORCE_LIBATOMIC_COMPILER_CHECK=ON'
             } else if (project.platform == "linux-arm64") {
-                toolchain = projectDir.canonicalPath + "/aarch64-bullseye-gnu.toolchain.cmake"
+                toolchain = projectDir.canonicalPath + "/aarch64-bookworm-gnu.toolchain.cmake"
                 println "Using toolchain '${toolchain}'"
                 return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
                     '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
