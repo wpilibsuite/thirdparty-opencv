@@ -51,7 +51,7 @@ ext {
             '-DWITH_WEBP=OFF',
             '-DBUILD_JAVA=ON',
             '-DBUILD_WITH_STATIC_CRT=OFF',
-            '-DWITH_PROTOBUF=OFF',
+            '-DWITH_PROTOBUF=ON',
             '-DWITH_DIRECTX=OFF',
             '-DENABLE_CXX11=ON',
             '-DOPENCV_JAVA_SOURCE_VERSION=1.8',
