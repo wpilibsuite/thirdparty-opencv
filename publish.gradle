@@ -20,7 +20,6 @@ def outputsFolder = file("$project.buildDir/outputs")
 def baseArtifactId = 'opencv'
 def artifactGroupId = 'edu.wpi.first.thirdparty.frc2025.opencv'
 def zipBaseName = '_GROUP_edu_wpi_first_thirdparty_frc2025_opencv_ID_opencv-cpp_CLS'
-def jniBaseName = "_GROUP_edu_wpi_first_thirdparty_frc2025_opencv_ID_opencv-jni_CLS"
 def javaBaseName = "_GROUP_edu_wpi_first_thirdparty_frc2025_opencv_ID_opencv-java_CLS"
 
 def versionFile = file("$outputsFolder/version.txt")
@@ -225,64 +224,6 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
             }
         }
     }
-
-    project.tasks.create('jniJar' + buildType, Jar) {
-        dependsOn tasks.named('make' + buildType)
-        dependsOn tasks.named('nativeLibLinks' + buildType)
-        destinationDirectory = outputsFolder
-        archiveClassifier = outputClassifier
-        archiveBaseName = jniBaseName
-        duplicatesStrategy = 'exclude'
-
-        manifest {
-            attributes(
-                    "Created-By": "WPILib Gradle Build Script",
-                    "Implementation-Title": "OpenCV JNI Library, ${project.ext.platformClassifier}",
-                    "Implementation-Version": pubVersion,
-                    "Implementation-Vendor": "Itseez",
-
-                    "Bundle-Name": "${archiveBaseName.get()}",
-                    "Bundle-Version": pubVersion,
-                    "Bundle-License": "https://opensource.org/licenses/BSD-3-Clause",
-                    "Bundle-Vendor": "WPILib")
-        }
-
-        from(licenseFile) {
-            into '/'
-        }
-
-        def directory
-        def jniFileName
-        def jniFile
-
-        if (project.platform.startsWith("linux")) {
-            directory = staticBuildDir.resolve("lib").toFile()
-            jniFileName = "libopencv_java${libVersion}.so"
-            jniFile = new File(directory.absolutePath, "${jniFileName}")
-        } else if (project.platform.startsWith("osx")) {
-            directory = staticBuildDir.resolve("lib").resolve(buildTypeFolder).toFile()
-            System.out.println(directory.absolutePath)
-            jniFileName = "libopencv_java${libVersion}.dylib"
-            jniFile = new File(directory.absolutePath, "${jniFileName}")
-        } else {
-            directory = staticBuildDir.resolve("lib").resolve(buildTypeFolder).toFile()
-            jniFileName = "opencv_java${libVersion}.dll"
-            jniFile = new File(directory.absolutePath, "${jniFileName}")
-        }
-
-        def hashFile = new File(directory.absolutePath, "opencv_java${libVersion}.hash")
-        it.outputs.file(hashFile)
-        it.from(hashFile) {
-            into project.platformPath
-        }
-        it.doFirst {
-            hashFile.text = MessageDigest.getInstance("MD5").digest(jniFile.bytes).encodeHex().toString()
-        }
-        it.from(jniFile) {
-            into project.platformPath
-        }
-    }
-
 }
 
 task outputJar(type: Jar, dependsOn: make) {
@@ -332,21 +273,17 @@ task sourcesJar(type: Jar, dependsOn: make) {
 
 
 if (!project.hasProperty('skipRelease')) {
-    build.dependsOn jniJar
     build.dependsOn cppLibsZip
     build.dependsOn cppLibsZipStatic
     addTaskToCopyAllOutputs(cppLibsZip)
-    addTaskToCopyAllOutputs(jniJar)
     addTaskToCopyAllOutputs(cppLibsZipStatic)
 }
 
 if (!project.hasProperty('skipDebug')) {
     build.dependsOn cppLibsZipDebug
     build.dependsOn cppLibsZipStaticDebug
-    build.dependsOn jniJarDebug
 
     addTaskToCopyAllOutputs(cppLibsZipDebug)
-    addTaskToCopyAllOutputs(jniJarDebug)
     addTaskToCopyAllOutputs(cppLibsZipStaticDebug)
 }
 
@@ -366,11 +303,9 @@ if (!project.hasProperty('jenkinsBuild')) {
         archives cppHeadersZip
         archives cppSourcesZip
         archives cppLibsZip
-        archives jniJar
         archives cppLibsZipDebug
         archives cppLibsZipStatic
         archives cppLibsZipStaticDebug
-        archives jniJarDebug
         archives outputJar
         archives sourcesJar
     }
@@ -385,14 +320,6 @@ model {
                 }
 
                 artifactId = "${baseArtifactId}-java"
-                groupId artifactGroupId
-                version pubVersion
-            }
-            jni(MavenPublication) {
-                artifact jniJar
-                artifact jniJarDebug
-
-                artifactId = "${baseArtifactId}-jni"
                 groupId artifactGroupId
                 version pubVersion
             }
