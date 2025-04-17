@@ -1,5 +1,5 @@
 set(GCC_COMPILER_VERSION "" CACHE STRING "GCC Compiler version")
-set(GNU_MACHINE "armv6-bullseye-linux-gnueabi" CACHE STRING "GNU compiler triple")
+set(GNU_MACHINE "armv6-bookworm-linux-gnueabi" CACHE STRING "GNU compiler triple")
 set(ARM_LINUX_SYSROOT /usr/local/arm-linux-gnueabihf/sysroot)
 
 if(COMMAND toolchain_save_config)

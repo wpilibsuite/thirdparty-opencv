@@ -5,8 +5,6 @@ import java.nio.file.Paths;
 
 apply plugin: 'java'
 
-def date = new Date()
-def formattedDate = date.format('yyMMdd')
 ext.version = "4.10.0"
 ext.soVersion = "4.10"
 ext.libVersion = "${ext.version.replace(".", "")}"
@@ -50,7 +48,6 @@ ext {
             '-DBUILD_PNG=ON',
             '-DBUILD_ZLIB=ON',
             '-DBUILD_TESTS=OFF',
-            '-DPython_ADDITIONAL_VERSIONS=3.5',
             '-DWITH_WEBP=OFF',
             '-DBUILD_JAVA=ON',
             '-DBUILD_WITH_STATIC_CRT=OFF',
@@ -65,7 +62,6 @@ ext {
             '-DBUILD_opencv_apps=OFF',
             '-DBUILD_TESTS=OFF',
             '-DBUILD_PERF_TESTS=OFF',
-            "-DOPENCV_EXTRA_MODULES_PATH=$rootDir/opencv_contrib/modules/aruco",
             '-DCMAKE_INSTALL_PREFIX=install'
     ]
 }
@@ -114,8 +110,6 @@ def getPlatformPath(platform) {
         return "osx/x86-64"
     } else if (platform == "osx-arm64") {
         return "osx/arm64"
-    } else if (platform == "windows-x86") {
-        return "windows/x86"
     } else if (platform == "windows-x86_64") {
         return "windows/x86-64"
     } else if (platform == "windows-arm64") {
@@ -188,11 +182,11 @@ if (project.platform == "linux-athena") {
     stripExe = 'arm-frc2025-linux-gnueabi-strip'
     objCopyExe = 'arm-frc2025-linux-gnueabi-objcopy'
 } else if (project.platform == "linux-arm32") {
-    stripExe = 'armv6-bullseye-linux-gnueabihf-strip'
-    objCopyExe = 'armv6-bullseye-linux-gnueabihf-objcopy'
+    stripExe = 'armv6-bookworm-linux-gnueabihf-strip'
+    objCopyExe = 'armv6-bookworm-linux-gnueabihf-objcopy'
 } else if (project.platform == "linux-arm64") {
-    stripExe = 'aarch64-bullseye-linux-gnu-strip'
-    objCopyExe = 'aarch64-bullseye-linux-gnu-objcopy'
+    stripExe = 'aarch64-bookworm-linux-gnu-strip'
+    objCopyExe = 'aarch64-bookworm-linux-gnu-objcopy'
 } else if (project.platform == "linux-systemcore") {
     stripExe = 'aarch64-bookworm-linux-gnu-strip'
     objCopyExe = 'aarch64-bookworm-linux-gnu-objcopy'
@@ -256,7 +250,7 @@ if (project.platform == "linux-athena") {
                     "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules" +
                     '-DOPENCV_FORCE_LIBATOMIC_COMPILER_CHECK=ON'
             } else if (project.platform == "linux-arm64") {
-                toolchain = projectDir.canonicalPath + "/aarch64-bullseye-gnu.toolchain.cmake"
+                toolchain = projectDir.canonicalPath + "/aarch64-bookworm-gnu.toolchain.cmake"
                 println "Using toolchain '${toolchain}'"
                 return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
                     '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
@@ -305,9 +299,7 @@ if (project.platform == "linux-athena") {
 
         if (project.platform.startsWith("windows")) {
             def platformArg = "/p:Platform=x64"
-            if (project.platform == "windows-x86") {
-                platformArg = "/p:Platform=win32"
-            } else if (project.platform == "windows-arm64") {
+            if (project.platform == "windows-arm64") {
                 platformArg = "/p:Platform=arm64"
             }
 
@@ -333,7 +325,7 @@ if (project.platform == "linux-athena") {
                 dependsOn 'make' + buildType
                 workingDir buildDirectory.resolve("lib").resolve(buildTypeFolder).toString()
                 executable 'lib'
-                def inputFiles = ["opencv_calib3d${project.libVersion}", "opencv_features2d${project.libVersion}", "opencv_flann${project.libVersion}", "opencv_gapi${project.libVersion}", "opencv_highgui${project.libVersion}", "opencv_imgcodecs${project.libVersion}", "opencv_imgproc${project.libVersion}", "opencv_ml${project.libVersion}", "opencv_objdetect${project.libVersion}", "opencv_photo${project.libVersion}", "opencv_stitching${project.libVersion}", "opencv_videoio${project.libVersion}", "opencv_video${project.libVersion}", "opencv_core${project.libVersion}", "opencv_aruco${project.libVersion}", "../../3rdparty/lib/${buildTypeFolder}/ade", "../../3rdparty/lib/${buildTypeFolder}/libjpeg-turbo", "../../3rdparty/lib/${buildTypeFolder}/libopenjp2", "../../3rdparty/lib/${buildTypeFolder}/libpng", "../../3rdparty/lib/${buildTypeFolder}/zlib"]
+                def inputFiles = ["opencv_calib3d${project.libVersion}", "opencv_features2d${project.libVersion}", "opencv_flann${project.libVersion}", "opencv_gapi${project.libVersion}", "opencv_highgui${project.libVersion}", "opencv_imgcodecs${project.libVersion}", "opencv_imgproc${project.libVersion}", "opencv_ml${project.libVersion}", "opencv_objdetect${project.libVersion}", "opencv_photo${project.libVersion}", "opencv_stitching${project.libVersion}", "opencv_videoio${project.libVersion}", "opencv_video${project.libVersion}", "opencv_core${project.libVersion}", "../../3rdparty/lib/${buildTypeFolder}/ade", "../../3rdparty/lib/${buildTypeFolder}/libjpeg-turbo", "../../3rdparty/lib/${buildTypeFolder}/libopenjp2", "../../3rdparty/lib/${buildTypeFolder}/libpng", "../../3rdparty/lib/${buildTypeFolder}/zlib"]
                 def setArgs = ["/OUT:opencv${project.libVersion}.lib"]
                 inputFiles.each {
                     def inFile = it
@@ -383,7 +375,7 @@ if (project.platform == "linux-athena") {
                 workingDir buildDirectory.resolve("lib").toString()
                 executable 'ar'
                 args = ['-M']
-                def inputFiles = ["libopencv_calib3d", "libopencv_features2d", "libopencv_flann", "libopencv_gapi", "libopencv_highgui", "libopencv_imgcodecs", "libopencv_imgproc", "libopencv_ml",  "libopencv_objdetect", "libopencv_photo", "libopencv_stitching", "libopencv_videoio", "libopencv_video", "libopencv_core", "libopencv_aruco", "../3rdparty/lib/libade", "../3rdparty/lib/liblibjpeg-turbo", "../3rdparty/lib/liblibopenjp2", "../3rdparty/lib/liblibpng", "../3rdparty/lib/libzlib"]
+                def inputFiles = ["libopencv_calib3d", "libopencv_features2d", "libopencv_flann", "libopencv_gapi", "libopencv_highgui", "libopencv_imgcodecs", "libopencv_imgproc", "libopencv_ml",  "libopencv_objdetect", "libopencv_photo", "libopencv_stitching", "libopencv_videoio", "libopencv_video", "libopencv_core", "../3rdparty/lib/libade", "../3rdparty/lib/liblibjpeg-turbo", "../3rdparty/lib/liblibopenjp2", "../3rdparty/lib/liblibpng", "../3rdparty/lib/libzlib"]
 
                 def inputString = "create libopencv${project.libVersion}.a\n"
                 inputFiles.each {
