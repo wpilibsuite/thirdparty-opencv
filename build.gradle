@@ -5,8 +5,7 @@ import java.nio.file.Paths;
 
 apply plugin: 'java'
 
-ext.version = "4.10.0"
-ext.soVersion = "4.10"
+ext.version = "4.13.0"
 ext.libVersion = "${ext.version.replace(".", "")}"
 
 ext.licenseFile = file("$rootDir/opencv/LICENSE")
@@ -59,6 +58,7 @@ ext {
             '-DWITH_MSMF_DXVA=OFF',
             '-DCMAKE_SKIP_RPATH=FALSE',
             '-DCMAKE_BUILD_RPATH_USE_ORIGIN=TRUE',
+            '-DOPENCV_DEBUG_POSTFIX=d',
             '-DBUILD_opencv_apps=OFF',
             '-DBUILD_TESTS=OFF',
             '-DBUILD_PERF_TESTS=OFF',
@@ -73,8 +73,6 @@ def getPlatform() {
 
     if (os_arch == 'amd64') {
         os_arch = 'x86_64'
-    } else if (os_arch == 'i386') {
-        os_arch = 'x86'
     } else if (os_arch == 'aarch64' || os_arch == 'arm64') {
         os_arch = 'arm64'
     }
@@ -92,20 +90,12 @@ def getPlatform() {
 }
 
 def getPlatformPath(platform) {
-    if (platform == "linux-athena") {
-        return "linux/athena"
-    } else if (platform == "linux-systemcore") {
+    if (platform == "linux-systemcore") {
         return "linux/systemcore"
-    } else if (platform == "linux-arm32") {
-        return "linux/arm32"
     } else if (platform == "linux-arm64") {
         return "linux/arm64"
-    } else if (platform == "linux-x86") {
-        return "linux/x86"
     } else if (platform == "linux-x86_64") {
         return "linux/x86-64"
-    } else if (platform == "osx-x86") {
-        return "osx/x86"
     } else if (platform == "osx-x86_64") {
         return "osx/x86-64"
     } else if (platform == "osx-arm64") {
@@ -160,8 +150,7 @@ ext.jarName = "opencv-${project.libVersion}.jar"
 ext.pathToOpenCVJar = ext.cmakeBuildDirectory.resolve("bin").resolve(ext.jarName)
 
 if (project.platform.startsWith('windows')) {
-    def gen = "Visual Studio 16 2019"
-    ext.cmakeArch = 'Win32'
+    def gen = "Visual Studio 17 2022"
     if (project.platform == "windows-x86_64") {
         ext.cmakeArch = 'x64'
     } else if (project.platform == "windows-arm64") {
@@ -178,13 +167,7 @@ repositories {
 def stripExe = 'strip'
 def objCopyExe = 'objcopy'
 
-if (project.platform == "linux-athena") {
-    stripExe = 'arm-frc2025-linux-gnueabi-strip'
-    objCopyExe = 'arm-frc2025-linux-gnueabi-objcopy'
-} else if (project.platform == "linux-arm32") {
-    stripExe = 'armv6-bookworm-linux-gnueabihf-strip'
-    objCopyExe = 'armv6-bookworm-linux-gnueabihf-objcopy'
-} else if (project.platform == "linux-arm64") {
+if (project.platform == "linux-arm64") {
     stripExe = 'aarch64-bookworm-linux-gnu-strip'
     objCopyExe = 'aarch64-bookworm-linux-gnu-objcopy'
 } else if (project.platform == "linux-systemcore") {
@@ -208,7 +191,7 @@ if (project.platform == "linux-athena") {
             def toolchain = null
             def args = defaultCmakeArgs
             if (buildType.contains("Shared")) {
-                args = args + '-DBUILD_SHARED_LIBS=ON' + '-DOPENCV_DEBUG_POSTFIX=d'
+                args = args + '-DBUILD_SHARED_LIBS=ON'
 
                 if (project.platform.contains('windows')) {
                     args = args + '-DCMAKE_SHARED_LINKER_FLAGS=/DEPENDENTLOADFLAG:0x1100' + '-DCMAKE_MODULE_LINKER_FLAGS=/DEPENDENTLOADFLAG:0x1100'
@@ -226,29 +209,12 @@ if (project.platform == "linux-athena") {
             if (hasProperty('toolchain')) {
                 toolchain = project.toolchain
             }
-            if (project.platform == "linux-athena") {
-                toolchain = projectDir.canonicalPath + "/arm-frc-gnueabi.toolchain.cmake"
-                println "Using toolchain '${toolchain}'"
-                return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
-                    '-DENABLE_NEON=ON' +
-                    '-DENABLE_VFPV3=ON' +
-                    '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
-                    "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
-            } else if (project.platform == "linux-systemcore") {
+            if (project.platform == "linux-systemcore") {
                 toolchain = projectDir.canonicalPath + "/aarch64-bookworm-gnu.toolchain.cmake"
                 println "Using toolchain '${toolchain}'"
                 return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
                     '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
                     "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
-            } else if (project.platform == "linux-arm32") {
-                toolchain = projectDir.canonicalPath + "/arm-pi-gnueabihf.toolchain.cmake"
-                println "Using toolchain '${toolchain}'"
-                return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
-                    '-DENABLE_NEON=ON' +
-                    '-DENABLE_VFPV3=ON' +
-                    '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
-                    "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules" +
-                    '-DOPENCV_FORCE_LIBATOMIC_COMPILER_CHECK=ON'
             } else if (project.platform == "linux-arm64") {
                 toolchain = projectDir.canonicalPath + "/aarch64-bookworm-gnu.toolchain.cmake"
                 println "Using toolchain '${toolchain}'"
@@ -258,7 +224,7 @@ if (project.platform == "linux-athena") {
             } else if (project.platform == "osx-arm64") {
                 return args + "-DCMAKE_OSX_ARCHITECTURES=arm64" + "-DCMAKE_OSX_DEPLOYMENT_TARGET:String=13.0" + "-DCMAKE_BUILD_RPATH=@loader_path"
             } else if (project.platform == "osx-x86_64") {
-                return args + "-DCMAKE_OSX_ARCHITECTURES=x86_64" + "-DCMAKE_OSX_DEPLOYMENT_TARGET:String=13.0" + "-DCMAKE_BUILD_RPATH=@loader_path"
+                return args + "-DCMAKE_OSX_ARCHITECTURES=x86_64" + "-DCMAKE_OSX_DEPLOYMENT_TARGET:String=13.0" + "-DCMAKE_BUILD_RPATH=@loader_path" + "-DWITH_KLEIDICV=OFF"
             } else if (project.platform == "windows-arm64") {
                 return args + "-DOPENCV_SKIP_SYSTEM_PROCESSOR_DETECTION=TRUE" + "-DAARCH64=ON"
             }
@@ -388,9 +354,7 @@ if (project.platform == "linux-athena") {
                     inputString += inFile
                 }
 
-                if (project.platform == "linux-athena" || project.platform == "linux-arm32") {
-                    inputString += "addlib ../3rdparty/lib/libtegra_hal.a\n"
-                } else if (project.platform == "linux-arm64" || project.platform == 'linux-systemcore') {
+                if (project.platform == "linux-arm64" || project.platform == 'linux-systemcore') {
                     inputString += "addlib ../3rdparty/lib/libtegra_hal.a\n"
                 }
 
@@ -408,17 +372,6 @@ if (project.platform == "linux-athena") {
 
             from(buildDirectory.resolve("lib").toFile()) {
                 include '*.so.*.*.*'
-                exclude 'cv2.so'
-                exclude '**/*dephelp*'
-                eachFile { f->
-                    f.name = f.name.replace("${project.ext.version}", "${project.ext.soVersion}")
-                }
-            }
-            from(buildDirectory.resolve("lib").toFile()) {
-                include "*.${project.ext.version}.dylib".toString()
-                eachFile { f->
-                    f.name = f.name.replace("${project.ext.version}", "${project.ext.soVersion}")
-                }
                 exclude 'cv2.so'
                 exclude '**/*dephelp*'
             }
@@ -449,15 +402,15 @@ if (project.platform == "linux-athena") {
                         from (file)
                     }
 
-                    project.exec { ExecSpec ex ->
+                    providers.exec { ExecSpec ex ->
                         ex.commandLine objCopyExe, '--only-keep-debug', mainFileStr, debugFile
-                    }
-                    project.exec { ExecSpec ex ->
+                    }.result.get()
+                    providers.exec { ExecSpec ex ->
                         ex.commandLine stripExe, '-g', mainFileStr
-                    }
-                    project.exec { ExecSpec ex ->
+                    }.result.get()
+                    providers.exec { ExecSpec ex ->
                         ex.commandLine objCopyExe, "--add-gnu-debuglink=$debugFile", mainFileStr
-                    }
+                    }.result.get()
                 }
             }
         }
@@ -478,5 +431,5 @@ if (!project.hasProperty('skipDebug')) {
 apply from: 'publish.gradle'
 
 wrapper {
-    gradleVersion = '8.1'
+    gradleVersion = '9.4.1'
 }
