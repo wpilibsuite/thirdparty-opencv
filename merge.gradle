@@ -97,7 +97,7 @@ mergePairs.each {
                     def armFile = it.toString().replace('x86-64', 'arm64')
                     def universalFile = it.toString().replace('x86-64', 'universal')
                     project.file(universalFile).parentFile.mkdirs()
-                    exec {
+                    providers.exec {
                         executable 'lipo'
                         args = [
                             '-create',
@@ -106,12 +106,12 @@ mergePairs.each {
                             '-output',
                             universalFile
                         ]
-                    }
+                    }.result.get()
                 }
                 if (it.name.endsWith('.dylib') && project.hasProperty("developerID")) {
                     def universalFile = it.toString().replace('x86-64', 'universal')
                     // Get path to binary.
-                    exec {
+                    providers.exec {
                         workingDir rootDir
                         def args = [
                             "sh",
@@ -122,7 +122,7 @@ mergePairs.each {
                             "$universalFile"
                         ]
                         commandLine args
-                    }
+                    }.result.get()
                 }
             }
             if (doHash != null) {

@@ -13,15 +13,15 @@ publishing {
     }
 }
 
-def pubVersion = "${project.ext.version}-3"
+def pubVersion = "2027-${project.ext.version}-1"
 
 def outputsFolder = file("$project.buildDir/outputs")
 
 def baseArtifactId = 'opencv'
-def artifactGroupId = 'edu.wpi.first.thirdparty.frc2025.opencv'
-def zipBaseName = '_GROUP_edu_wpi_first_thirdparty_frc2025_opencv_ID_opencv-cpp_CLS'
-def jniBaseName = "_GROUP_edu_wpi_first_thirdparty_frc2025_opencv_ID_opencv-jni_CLS"
-def javaBaseName = "_GROUP_edu_wpi_first_thirdparty_frc2025_opencv_ID_opencv-java_CLS"
+def artifactGroupId = 'org.wpilib.thirdparty.opencv'
+def zipBaseName = '_GROUP_org_wpilib_thirdparty_opencv_ID_opencv-cpp_CLS'
+def jniBaseName = "_GROUP_org_wpilib_thirdparty_opencv_ID_opencv-jni_CLS"
+def javaBaseName = "_GROUP_org_wpilib_thirdparty_opencv_ID_opencv-java_CLS"
 
 def versionFile = file("$outputsFolder/version.txt")
 
@@ -142,16 +142,10 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
                     include '*.so.*.*.*'
                     exclude 'cv2.so'
                     exclude '**/*dephelp*'
-                    eachFile { f->
-                        f.name = f.name.replace("${project.ext.version}", "${project.ext.soVersion}")
-                    }
                 }
                 from(resolvedDir.toFile()) {
                     into project.platformPath + '/shared'
                     include "*.${project.ext.version}.dylib".toString()
-                    eachFile { f->
-                        f.name = f.name.replace("${project.ext.version}", "${project.ext.soVersion}")
-                    }
                     exclude 'cv2.so'
                     exclude '**/*dephelp*'
                 }
