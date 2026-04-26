@@ -302,6 +302,9 @@ if (project.platform == "linux-arm64") {
                     }
                     setArgs << inFile
                 }
+                if (project.platform == "windows-arm64") {
+                    setArgs += "../../3rdparty/lib/${buildTypeFolder}/tegra_hal.lib"
+                }
                 args = setArgs
             }
         } else if (project.platform.startsWith('osx')) {
@@ -356,6 +359,9 @@ if (project.platform == "linux-arm64") {
 
                 if (project.platform == "linux-arm64" || project.platform == 'linux-systemcore') {
                     inputString += "addlib ../3rdparty/lib/libtegra_hal.a\n"
+                    inputString += "addlib ../3rdparty/lib/libkleidicv.a\n"
+                    inputString += "addlib ../3rdparty/lib/libkleidicv_thread.a\n"
+                    inputString += "addlib ../3rdparty/lib/libkleidicv_hal.a\n"
                 }
 
                 inputString += "save\nend\n"
@@ -371,7 +377,7 @@ if (project.platform == "linux-arm64") {
             destinationDir = stripCopyDir
 
             from(buildDirectory.resolve("lib").toFile()) {
-                include '*.so.*.*.*'
+                include '*.so.*'
                 exclude 'cv2.so'
                 exclude '**/*dephelp*'
             }
