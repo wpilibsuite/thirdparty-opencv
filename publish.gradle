@@ -13,7 +13,7 @@ publishing {
     }
 }
 
-def pubVersion = "2027-${project.ext.version}-2"
+def pubVersion = "2027-${project.ext.version}-3"
 
 def outputsFolder = file("$project.buildDir/outputs")
 
@@ -139,13 +139,17 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
                 }
                 from(resolvedDir.toFile()) {
                     into project.platformPath + '/shared'
+                    // Include libopencv<...>.so.SOVERSION, but not libopencv<...>.so.MAJOR.MINOR.PATCH
                     include '*.so.*'
+                    exclude "*.so.${project.ext.version}".toString()
                     exclude 'cv2.so'
                     exclude '**/*dephelp*'
                 }
                 from(resolvedDir.toFile()) {
                     into project.platformPath + '/shared'
-                    include "*.${project.ext.version}.dylib".toString()
+                    // Include libopencv<...>.SOVERSION.dylib, but not libopencv<...>.MAJOR.MINOR.PATCH.dylib
+                    include '*.*.dylib'
+                    exclude "*.${project.ext.version}.dylib".toString()
                     exclude 'cv2.so'
                     exclude '**/*dephelp*'
                 }
