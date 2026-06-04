@@ -12,12 +12,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - container: wpilib/systemcore-cross-ubuntu:2027-24.04
+          - container: wpilib/systemcore-cross-debian:trixie
             artifact-name: SystemCore
-            build-options: "-Pplatform=linux-systemcore"
-          - container: wpilib/aarch64-cross-ubuntu:2027-bookworm-24.04
+            build-options: "-Pplatform=linux-systemcore -Ptoolchain=/usr/local/toolchain-config.cmake"
+          - container: wpilib/aarch64-cross-debian:trixie
             artifact-name: Arm64
-            build-options: "-Pplatform=linux-arm64"
+            build-options: "-Pplatform=linux-arm64 -Ptoolchain=/usr/local/toolchain-config.cmake"
           - container: wpilib/ubuntu-base:24.04
             artifact-name: Linux
             build-options: ""
@@ -93,7 +93,7 @@ jobs:
 
   build-mac-arm:
     name: "Build - macOS"
-    runs-on: macOS-14
+    runs-on: macOS-15
     steps:
       - uses: actions/checkout@v6
         with:
@@ -112,7 +112,7 @@ jobs:
   make_universal:
     name: Make Universal
     needs: [build-mac, build-mac-arm]
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v6
       - uses: actions/download-artifact@v8
