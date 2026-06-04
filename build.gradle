@@ -168,11 +168,11 @@ def stripExe = 'strip'
 def objCopyExe = 'objcopy'
 
 if (project.platform == "linux-arm64") {
-    stripExe = 'aarch64-bookworm-linux-gnu-strip'
-    objCopyExe = 'aarch64-bookworm-linux-gnu-objcopy'
+    stripExe = 'aarch64-trixie-linux-gnu-strip'
+    objCopyExe = 'aarch64-trixie-linux-gnu-objcopy'
 } else if (project.platform == "linux-systemcore") {
-    stripExe = 'aarch64-bookworm-linux-gnu-strip'
-    objCopyExe = 'aarch64-bookworm-linux-gnu-objcopy'
+    stripExe = 'aarch64-systemcore2027-linux-gnu-strip'
+    objCopyExe = 'aarch64-systemcore2027-linux-gnu-objcopy'
 }
 
 ['': project.cmakeBuildDirectory,
