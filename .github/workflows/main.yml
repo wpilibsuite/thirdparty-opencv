@@ -12,19 +12,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - container: wpilib/roborio-cross-ubuntu:2025-22.04
-            artifact-name: Athena
-            build-options: "-Pplatform=linux-athena"
-          - container: wpilib/systemcore-cross-ubuntu:2025-22.04
+          - container: wpilib/systemcore-cross-ubuntu:2027-24.04
             artifact-name: SystemCore
             build-options: "-Pplatform=linux-systemcore"
-          - container: wpilib/raspbian-cross-ubuntu:bullseye-22.04
-            artifact-name: Arm32
-            build-options: "-Pplatform=linux-arm32"
-          - container: wpilib/aarch64-cross-ubuntu:bullseye-22.04
+          - container: wpilib/aarch64-cross-ubuntu:2027-bookworm-24.04
             artifact-name: Arm64
             build-options: "-Pplatform=linux-arm64"
-          - container: wpilib/ubuntu-base:22.04
+          - container: wpilib/ubuntu-base:24.04
             artifact-name: Linux
             build-options: ""
 
@@ -32,17 +26,14 @@ jobs:
     runs-on: ubuntu-latest
     container: ${{ matrix.container }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: 'true'
       - run: sudo apt-get update && sudo apt-get install ant -y && sudo rm -rf /var/lib/apt/lists/* && sudo rm -f /bin/ant && sudo ln -s /usr/share/ant/bin/ant /bin/ant
         name: Install Ant
-      - run: rm -rf /usr/local/arm-linux-gnueabihf && curl -SL https://github.com/wpilibsuite/opensdk/releases/download/v2023-9/armhf-raspi-bullseye-2023-x86_64-linux-gnu-Toolchain-10.2.0.tgz | sh -c 'mkdir -p /usr/local && cd /usr/local && tar xzf - --strip-components=2'
-        name: Replace arm32 compiler
-        if: matrix.artifact-name == 'Arm32'
       - run: ./gradlew build -PjenkinsBuild ${{ matrix.build-options }}
         name: Build with Gradle
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact-name }}
           path: gradleDir/outputs/
@@ -53,83 +44,69 @@ jobs:
       matrix:
         include:
           - artifact-name: Win64Release
-            architecture: x64
-            build-options: "-PskipDebug"
-          - artifact-name: Win32Release
-            architecture: x86
             build-options: "-PskipDebug"
           - artifact-name: WinArm64Release
-            architecture: x64
             build-options: "-PskipDebug -Pplatform=windows-arm64"
           - artifact-name: Win64
-            architecture: x64
-            build-options: "-PskipRelease -PskipSources"
-          - artifact-name: Win32
-            architecture: x86
             build-options: "-PskipRelease -PskipSources"
           - artifact-name: WinArm64
-            architecture: x64
             build-options: "-PskipRelease -PskipSources -Pplatform=windows-arm64"
 
     name: "Build - ${{ matrix.artifact-name }}"
-    runs-on: windows-2019
+    runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: 'true'
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
-          java-version: 11
-          distribution: 'zulu'
-          architecture: ${{ matrix.architecture }}
-      - name: Set Java Heap Size
-        run: sed -i 's/-Xmx2g/-Xmx1g/g' gradle.properties
-        if: matrix.architecture == 'x86'
+          java-version: 25
+          distribution: 'temurin'
+      - uses: ilammy/msvc-dev-cmd@v1.13.0
       - run: |
-          @call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"
           set PATH=%PATH%;%ANT_HOME%\bin
           gradlew build -PjenkinsBuild ${{ matrix.build-options }}
         shell: cmd
         name: Build with Gradle
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact-name }}
           path: gradleDir/outputs/
 
   build-mac:
-    name: "Build - macOS"
-    runs-on: macOS-14
+    name: "Build - macOS (Arm)"
+    runs-on: macOS-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: 'true'
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
-          java-version: 11
-          distribution: 'zulu'
+          java-version: 25
+          distribution: 'temurin'
       - run: ./gradlew build -PjenkinsBuild
         name: Build with Gradle
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
-          name: macOS
+          name: macOSArm
           path: gradleDir/outputs/
 
   build-mac-arm:
-    name: "Build - macOS (Arm)"
+    name: "Build - macOS"
     runs-on: macOS-14
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: 'true'
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
-          java-version: 11
-          distribution: 'zulu'
+          java-version: 25
+          distribution: 'temurin'
       - run: ./gradlew build -PjenkinsBuild -Pforcealternatemacbuild
         name: Build with Gradle
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
-          name: macOSArm
+          name: macOS
           path: gradleDir/outputs/
 
   make_universal:
@@ -137,19 +114,19 @@ jobs:
     needs: [build-mac, build-mac-arm]
     runs-on: macos-14
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v8
         with:
           name: macOS
           path: build/downloads
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: macOSArm
           path: build/downloads
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
-          java-version: 11
-          distribution: 'zulu'
+          java-version: 25
+          distribution: 'temurin'
       - run: ./gradlew copyToUpload -Prunmerge
         name: Build with Gradle
         if: |
@@ -169,7 +146,7 @@ jobs:
         if: |
           github.repository_owner == 'wpilibsuite' &&
           (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: macOSUniversal
           path: build/toUpload/
@@ -179,10 +156,10 @@ jobs:
     needs: [build-docker, build-windows, make_universal]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           repository: wpilibsuite/build-tools
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: combiner/products/build/allOutputs
       - name: Flatten Artifacts
@@ -203,7 +180,7 @@ jobs:
           RUN_AZURE_ARTIFACTORY_RELEASE: 'TRUE'
           ARTIFACTORY_PUBLISH_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
           ARTIFACTORY_PUBLISH_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: Maven
           path: ~/releases

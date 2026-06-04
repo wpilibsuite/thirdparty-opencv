@@ -5,10 +5,7 @@ import java.nio.file.Paths;
 
 apply plugin: 'java'
 
-def date = new Date()
-def formattedDate = date.format('yyMMdd')
-ext.version = "4.8.0"
-ext.soVersion = "4.8"
+ext.version = "4.13.0"
 ext.libVersion = "${ext.version.replace(".", "")}"
 
 ext.licenseFile = file("$rootDir/opencv/LICENSE")
@@ -50,7 +47,6 @@ ext {
             '-DBUILD_PNG=ON',
             '-DBUILD_ZLIB=ON',
             '-DBUILD_TESTS=OFF',
-            '-DPython_ADDITIONAL_VERSIONS=3.5',
             '-DWITH_WEBP=OFF',
             '-DBUILD_JAVA=ON',
             '-DBUILD_WITH_STATIC_CRT=OFF',
@@ -62,10 +58,10 @@ ext {
             '-DWITH_MSMF_DXVA=OFF',
             '-DCMAKE_SKIP_RPATH=FALSE',
             '-DCMAKE_BUILD_RPATH_USE_ORIGIN=TRUE',
+            '-DOPENCV_DEBUG_POSTFIX=d',
             '-DBUILD_opencv_apps=OFF',
             '-DBUILD_TESTS=OFF',
             '-DBUILD_PERF_TESTS=OFF',
-            "-DOPENCV_EXTRA_MODULES_PATH=$rootDir/opencv_contrib/modules/aruco",
             '-DCMAKE_INSTALL_PREFIX=install'
     ]
 }
@@ -77,8 +73,6 @@ def getPlatform() {
 
     if (os_arch == 'amd64') {
         os_arch = 'x86_64'
-    } else if (os_arch == 'i386') {
-        os_arch = 'x86'
     } else if (os_arch == 'aarch64' || os_arch == 'arm64') {
         os_arch = 'arm64'
     }
@@ -96,26 +90,16 @@ def getPlatform() {
 }
 
 def getPlatformPath(platform) {
-    if (platform == "linux-athena") {
-        return "linux/athena"
-    } else if (platform == "linux-systemcore") {
+    if (platform == "linux-systemcore") {
         return "linux/systemcore"
-    } else if (platform == "linux-arm32") {
-        return "linux/arm32"
     } else if (platform == "linux-arm64") {
         return "linux/arm64"
-    } else if (platform == "linux-x86") {
-        return "linux/x86"
     } else if (platform == "linux-x86_64") {
         return "linux/x86-64"
-    } else if (platform == "osx-x86") {
-        return "osx/x86"
     } else if (platform == "osx-x86_64") {
         return "osx/x86-64"
     } else if (platform == "osx-arm64") {
         return "osx/arm64"
-    } else if (platform == "windows-x86") {
-        return "windows/x86"
     } else if (platform == "windows-x86_64") {
         return "windows/x86-64"
     } else if (platform == "windows-arm64") {
@@ -166,8 +150,7 @@ ext.jarName = "opencv-${project.libVersion}.jar"
 ext.pathToOpenCVJar = ext.cmakeBuildDirectory.resolve("bin").resolve(ext.jarName)
 
 if (project.platform.startsWith('windows')) {
-    def gen = "Visual Studio 16 2019"
-    ext.cmakeArch = 'Win32'
+    def gen = "Visual Studio 17 2022"
     if (project.platform == "windows-x86_64") {
         ext.cmakeArch = 'x64'
     } else if (project.platform == "windows-arm64") {
@@ -184,15 +167,9 @@ repositories {
 def stripExe = 'strip'
 def objCopyExe = 'objcopy'
 
-if (project.platform == "linux-athena") {
-    stripExe = 'arm-frc2025-linux-gnueabi-strip'
-    objCopyExe = 'arm-frc2025-linux-gnueabi-objcopy'
-} else if (project.platform == "linux-arm32") {
-    stripExe = 'armv6-bullseye-linux-gnueabihf-strip'
-    objCopyExe = 'armv6-bullseye-linux-gnueabihf-objcopy'
-} else if (project.platform == "linux-arm64") {
-    stripExe = 'aarch64-bullseye-linux-gnu-strip'
-    objCopyExe = 'aarch64-bullseye-linux-gnu-objcopy'
+if (project.platform == "linux-arm64") {
+    stripExe = 'aarch64-bookworm-linux-gnu-strip'
+    objCopyExe = 'aarch64-bookworm-linux-gnu-objcopy'
 } else if (project.platform == "linux-systemcore") {
     stripExe = 'aarch64-bookworm-linux-gnu-strip'
     objCopyExe = 'aarch64-bookworm-linux-gnu-objcopy'
@@ -214,7 +191,7 @@ if (project.platform == "linux-athena") {
             def toolchain = null
             def args = defaultCmakeArgs
             if (buildType.contains("Shared")) {
-                args = args + '-DBUILD_SHARED_LIBS=ON' + '-DOPENCV_DEBUG_POSTFIX=d'
+                args = args + '-DBUILD_SHARED_LIBS=ON'
 
                 if (project.platform.contains('windows')) {
                     args = args + '-DCMAKE_SHARED_LINKER_FLAGS=/DEPENDENTLOADFLAG:0x1100' + '-DCMAKE_MODULE_LINKER_FLAGS=/DEPENDENTLOADFLAG:0x1100'
@@ -232,31 +209,14 @@ if (project.platform == "linux-athena") {
             if (hasProperty('toolchain')) {
                 toolchain = project.toolchain
             }
-            if (project.platform == "linux-athena") {
-                toolchain = projectDir.canonicalPath + "/arm-frc-gnueabi.toolchain.cmake"
-                println "Using toolchain '${toolchain}'"
-                return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
-                    '-DENABLE_NEON=ON' +
-                    '-DENABLE_VFPV3=ON' +
-                    '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
-                    "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
-            } else if (project.platform == "linux-systemcore") {
+            if (project.platform == "linux-systemcore") {
                 toolchain = projectDir.canonicalPath + "/aarch64-bookworm-gnu.toolchain.cmake"
                 println "Using toolchain '${toolchain}'"
                 return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
                     '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
                     "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
-            } else if (project.platform == "linux-arm32") {
-                toolchain = projectDir.canonicalPath + "/arm-pi-gnueabihf.toolchain.cmake"
-                println "Using toolchain '${toolchain}'"
-                return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
-                    '-DENABLE_NEON=ON' +
-                    '-DENABLE_VFPV3=ON' +
-                    '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
-                    "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules" +
-                    '-DOPENCV_FORCE_LIBATOMIC_COMPILER_CHECK=ON'
             } else if (project.platform == "linux-arm64") {
-                toolchain = projectDir.canonicalPath + "/aarch64-bullseye-gnu.toolchain.cmake"
+                toolchain = projectDir.canonicalPath + "/aarch64-bookworm-gnu.toolchain.cmake"
                 println "Using toolchain '${toolchain}'"
                 return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
                     '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
@@ -264,7 +224,7 @@ if (project.platform == "linux-athena") {
             } else if (project.platform == "osx-arm64") {
                 return args + "-DCMAKE_OSX_ARCHITECTURES=arm64" + "-DCMAKE_OSX_DEPLOYMENT_TARGET:String=13.0" + "-DCMAKE_BUILD_RPATH=@loader_path"
             } else if (project.platform == "osx-x86_64") {
-                return args + "-DCMAKE_OSX_ARCHITECTURES=x86_64" + "-DCMAKE_OSX_DEPLOYMENT_TARGET:String=13.0" + "-DCMAKE_BUILD_RPATH=@loader_path"
+                return args + "-DCMAKE_OSX_ARCHITECTURES=x86_64" + "-DCMAKE_OSX_DEPLOYMENT_TARGET:String=13.0" + "-DCMAKE_BUILD_RPATH=@loader_path" + "-DWITH_KLEIDICV=OFF"
             } else if (project.platform == "windows-arm64") {
                 return args + "-DOPENCV_SKIP_SYSTEM_PROCESSOR_DETECTION=TRUE" + "-DAARCH64=ON"
             }
@@ -305,9 +265,7 @@ if (project.platform == "linux-athena") {
 
         if (project.platform.startsWith("windows")) {
             def platformArg = "/p:Platform=x64"
-            if (project.platform == "windows-x86") {
-                platformArg = "/p:Platform=win32"
-            } else if (project.platform == "windows-arm64") {
+            if (project.platform == "windows-arm64") {
                 platformArg = "/p:Platform=arm64"
             }
 
@@ -333,7 +291,7 @@ if (project.platform == "linux-athena") {
                 dependsOn 'make' + buildType
                 workingDir buildDirectory.resolve("lib").resolve(buildTypeFolder).toString()
                 executable 'lib'
-                def inputFiles = ["opencv_calib3d${project.libVersion}", "opencv_features2d${project.libVersion}", "opencv_flann${project.libVersion}", "opencv_gapi${project.libVersion}", "opencv_highgui${project.libVersion}", "opencv_imgcodecs${project.libVersion}", "opencv_imgproc${project.libVersion}", "opencv_ml${project.libVersion}", "opencv_objdetect${project.libVersion}", "opencv_photo${project.libVersion}", "opencv_stitching${project.libVersion}", "opencv_videoio${project.libVersion}", "opencv_video${project.libVersion}", "opencv_core${project.libVersion}", "opencv_aruco${project.libVersion}", "../../3rdparty/lib/${buildTypeFolder}/ade", "../../3rdparty/lib/${buildTypeFolder}/libjpeg-turbo", "../../3rdparty/lib/${buildTypeFolder}/libopenjp2", "../../3rdparty/lib/${buildTypeFolder}/libpng", "../../3rdparty/lib/${buildTypeFolder}/zlib"]
+                def inputFiles = ["opencv_calib3d${project.libVersion}", "opencv_features2d${project.libVersion}", "opencv_flann${project.libVersion}", "opencv_gapi${project.libVersion}", "opencv_highgui${project.libVersion}", "opencv_imgcodecs${project.libVersion}", "opencv_imgproc${project.libVersion}", "opencv_ml${project.libVersion}", "opencv_objdetect${project.libVersion}", "opencv_photo${project.libVersion}", "opencv_stitching${project.libVersion}", "opencv_videoio${project.libVersion}", "opencv_video${project.libVersion}", "opencv_core${project.libVersion}", "../../3rdparty/lib/${buildTypeFolder}/ade", "../../3rdparty/lib/${buildTypeFolder}/libjpeg-turbo", "../../3rdparty/lib/${buildTypeFolder}/libopenjp2", "../../3rdparty/lib/${buildTypeFolder}/libpng", "../../3rdparty/lib/${buildTypeFolder}/zlib"]
                 def setArgs = ["/OUT:opencv${project.libVersion}.lib"]
                 inputFiles.each {
                     def inFile = it
@@ -343,6 +301,9 @@ if (project.platform == "linux-athena") {
                         inFile = inFile + '.lib'
                     }
                     setArgs << inFile
+                }
+                if (project.platform == "windows-arm64") {
+                    setArgs += "../../3rdparty/lib/${buildTypeFolder}/tegra_hal.lib"
                 }
                 args = setArgs
             }
@@ -383,7 +344,7 @@ if (project.platform == "linux-athena") {
                 workingDir buildDirectory.resolve("lib").toString()
                 executable 'ar'
                 args = ['-M']
-                def inputFiles = ["libopencv_calib3d", "libopencv_features2d", "libopencv_flann", "libopencv_gapi", "libopencv_highgui", "libopencv_imgcodecs", "libopencv_imgproc", "libopencv_ml",  "libopencv_objdetect", "libopencv_photo", "libopencv_stitching", "libopencv_videoio", "libopencv_video", "libopencv_core", "libopencv_aruco", "../3rdparty/lib/libade", "../3rdparty/lib/liblibjpeg-turbo", "../3rdparty/lib/liblibopenjp2", "../3rdparty/lib/liblibpng", "../3rdparty/lib/libzlib"]
+                def inputFiles = ["libopencv_calib3d", "libopencv_features2d", "libopencv_flann", "libopencv_gapi", "libopencv_highgui", "libopencv_imgcodecs", "libopencv_imgproc", "libopencv_ml",  "libopencv_objdetect", "libopencv_photo", "libopencv_stitching", "libopencv_videoio", "libopencv_video", "libopencv_core", "../3rdparty/lib/libade", "../3rdparty/lib/liblibjpeg-turbo", "../3rdparty/lib/liblibopenjp2", "../3rdparty/lib/liblibpng", "../3rdparty/lib/libzlib"]
 
                 def inputString = "create libopencv${project.libVersion}.a\n"
                 inputFiles.each {
@@ -396,10 +357,11 @@ if (project.platform == "linux-athena") {
                     inputString += inFile
                 }
 
-                if (project.platform == "linux-athena" || project.platform == "linux-arm32") {
+                if (project.platform == "linux-arm64" || project.platform == 'linux-systemcore') {
                     inputString += "addlib ../3rdparty/lib/libtegra_hal.a\n"
-                } else if (project.platform == "linux-arm64" || project.platform == 'linux-systemcore') {
-                    inputString += "addlib ../3rdparty/lib/libtegra_hal.a\n"
+                    inputString += "addlib ../3rdparty/lib/libkleidicv.a\n"
+                    inputString += "addlib ../3rdparty/lib/libkleidicv_thread.a\n"
+                    inputString += "addlib ../3rdparty/lib/libkleidicv_hal.a\n"
                 }
 
                 inputString += "save\nend\n"
@@ -415,18 +377,9 @@ if (project.platform == "linux-athena") {
             destinationDir = stripCopyDir
 
             from(buildDirectory.resolve("lib").toFile()) {
-                include '*.so.*.*.*'
-                exclude 'cv2.so'
-                exclude '**/*dephelp*'
-                eachFile { f->
-                    f.name = f.name.replace("${project.ext.version}", "${project.ext.soVersion}")
-                }
-            }
-            from(buildDirectory.resolve("lib").toFile()) {
-                include "*.${project.ext.version}.dylib".toString()
-                eachFile { f->
-                    f.name = f.name.replace("${project.ext.version}", "${project.ext.soVersion}")
-                }
+                // Include libopencv<...>.so.SOVERSION, but not libopencv<...>.so.MAJOR.MINOR.PATCH
+                include '*.so.*'
+                exclude "*.so.${project.ext.version}".toString()
                 exclude 'cv2.so'
                 exclude '**/*dephelp*'
             }
@@ -457,15 +410,15 @@ if (project.platform == "linux-athena") {
                         from (file)
                     }
 
-                    project.exec { ExecSpec ex ->
+                    providers.exec { ExecSpec ex ->
                         ex.commandLine objCopyExe, '--only-keep-debug', mainFileStr, debugFile
-                    }
-                    project.exec { ExecSpec ex ->
+                    }.result.get()
+                    providers.exec { ExecSpec ex ->
                         ex.commandLine stripExe, '-g', mainFileStr
-                    }
-                    project.exec { ExecSpec ex ->
+                    }.result.get()
+                    providers.exec { ExecSpec ex ->
                         ex.commandLine objCopyExe, "--add-gnu-debuglink=$debugFile", mainFileStr
-                    }
+                    }.result.get()
                 }
             }
         }
@@ -486,5 +439,5 @@ if (!project.hasProperty('skipDebug')) {
 apply from: 'publish.gradle'
 
 wrapper {
-    gradleVersion = '8.1'
+    gradleVersion = '9.4.1'
 }
