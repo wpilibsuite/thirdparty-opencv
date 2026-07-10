@@ -150,7 +150,7 @@ ext.jarName = "opencv-${project.libVersion}.jar"
 ext.pathToOpenCVJar = ext.cmakeBuildDirectory.resolve("bin").resolve(ext.jarName)
 
 if (project.platform.startsWith('windows')) {
-    def gen = "Visual Studio 17 2022"
+    def gen = "Visual Studio 18 2026"
     if (project.platform == "windows-x86_64") {
         ext.cmakeArch = 'x64'
     } else if (project.platform == "windows-arm64") {
@@ -168,11 +168,11 @@ def stripExe = 'strip'
 def objCopyExe = 'objcopy'
 
 if (project.platform == "linux-arm64") {
-    stripExe = 'aarch64-bookworm-linux-gnu-strip'
-    objCopyExe = 'aarch64-bookworm-linux-gnu-objcopy'
+    stripExe = 'aarch64-trixie-linux-gnu-strip'
+    objCopyExe = 'aarch64-trixie-linux-gnu-objcopy'
 } else if (project.platform == "linux-systemcore") {
-    stripExe = 'aarch64-bookworm-linux-gnu-strip'
-    objCopyExe = 'aarch64-bookworm-linux-gnu-objcopy'
+    stripExe = 'aarch64-systemcore2027-linux-gnu-strip'
+    objCopyExe = 'aarch64-systemcore2027-linux-gnu-objcopy'
 }
 
 ['': project.cmakeBuildDirectory,
@@ -206,21 +206,17 @@ if (project.platform == "linux-arm64") {
                 args = args + '-DCMAKE_BUILD_TYPE=Release'
             }
 
-            if (hasProperty('toolchain')) {
-                toolchain = project.toolchain
+            if (project.hasProperty('toolchain')) {
+                println "Using toolchain '${project.toolchain}'"
+                args = args + "-DCMAKE_TOOLCHAIN_FILE=${project.toolchain}"
+            } else {
+                println "No toolchain specified"
             }
+
             if (project.platform == "linux-systemcore") {
-                toolchain = projectDir.canonicalPath + "/aarch64-bookworm-gnu.toolchain.cmake"
-                println "Using toolchain '${toolchain}'"
-                return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
-                    '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
-                    "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
+                return args + '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' + "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
             } else if (project.platform == "linux-arm64") {
-                toolchain = projectDir.canonicalPath + "/aarch64-bookworm-gnu.toolchain.cmake"
-                println "Using toolchain '${toolchain}'"
-                return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}" +
-                    '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' +
-                    "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
+                return args + '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' + "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
             } else if (project.platform == "osx-arm64") {
                 return args + "-DCMAKE_OSX_ARCHITECTURES=arm64" + "-DCMAKE_OSX_DEPLOYMENT_TARGET:String=13.0" + "-DCMAKE_BUILD_RPATH=@loader_path"
             } else if (project.platform == "osx-x86_64") {
@@ -228,13 +224,7 @@ if (project.platform == "linux-arm64") {
             } else if (project.platform == "windows-arm64") {
                 return args + "-DOPENCV_SKIP_SYSTEM_PROCESSOR_DETECTION=TRUE" + "-DAARCH64=ON"
             }
-            if (toolchain) {
-                println "Using toolchain '${toolchain}'"
-                return args + "-DCMAKE_TOOLCHAIN_FILE=${toolchain}"
-            } else {
-                println "No toolchain specified"
-                return args
-            }
+            return args
         }
 
         workingDir buildDirectory.toString()
