@@ -163,7 +163,9 @@ jobs:
         with:
           path: combiner/products/build/allOutputs
       - name: Flatten Artifacts
-        run: rsync -a --delete combiner/products/build/allOutputs/*/* combiner/products/build/allOutputs/
+        run: |
+          rm -r combiner/products/build/allOutputs/macOS combiner/products/build/allOutputs/macOSArm
+          rsync -a --delete combiner/products/build/allOutputs/*/* combiner/products/build/allOutputs/
       - name: Combine
         if: |
           !startsWith(github.ref, 'refs/tags/v')
