@@ -200,7 +200,7 @@ if (project.platform == "linux-arm64") {
                     args = args + '-DCMAKE_SHARED_LINKER_FLAGS=/DEPENDENTLOADFLAG:0x1100' + '-DCMAKE_MODULE_LINKER_FLAGS=/DEPENDENTLOADFLAG:0x1100'
                 }
             } else {
-                args = args + '-DBUILD_SHARED_LIBS=OFF'
+                args = args + '-DBUILD_SHARED_LIBS=OFF' + '-DBUILD_opencv_java=OFF'
             }
 
             if (buildType.contains('Debug')) {
