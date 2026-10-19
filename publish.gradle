@@ -215,6 +215,7 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
                 into project.platformPath + '/static'
                 include 'opencv*.lib'
                 include '*.pdb'
+                exclude 'opencv_java*.pdb'
                 exclude 'opencv_*.lib'
             }
             from(sharedBuildDir.resolve("3rdparty").resolve("lib").toFile()) {
@@ -269,6 +270,7 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
         }
 
         def hashFile = new File(directory.absolutePath, "opencv_java${libVersion}.hash")
+        def pdbFile = new File(directory.absolutePath, "opencv_java${libVersion}.pdb")
         it.outputs.file(hashFile)
         it.from(hashFile) {
             into project.platformPath
@@ -277,6 +279,9 @@ task cppHeadersZip(type: Zip, dependsOn: make) {
             hashFile.text = MessageDigest.getInstance("MD5").digest(jniFile.bytes).encodeHex().toString()
         }
         it.from(jniFile) {
+            into project.platformPath
+        }
+        it.from(pdbFile) {
             into project.platformPath
         }
     }
