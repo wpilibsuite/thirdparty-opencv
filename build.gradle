@@ -220,6 +220,8 @@ if (project.platform == "linux-arm64") {
                 return args + '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' + "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
             } else if (project.platform == "linux-arm64") {
                 return args + '-DOPENCV_EXTRA_FLAGS_DEBUG=-Og' + "-DCMAKE_MODULE_PATH=$rootDir/arm-frc-modules"
+            } else if (project.platform == "linux-x86_64") {
+                return args + "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,--compress-debug-sections=zstd:19 -Wl,--pack-dyn-relocs=relr -Wl,--icf=all"
             } else if (project.platform == "osx-arm64") {
                 return args + "-DCMAKE_OSX_ARCHITECTURES=arm64" + "-DCMAKE_OSX_DEPLOYMENT_TARGET:String=13.0" + "-DCMAKE_BUILD_RPATH=@loader_path"
             } else if (project.platform == "osx-x86_64") {
