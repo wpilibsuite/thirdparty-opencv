@@ -5,7 +5,7 @@ import java.nio.file.Paths;
 
 apply plugin: 'java'
 
-ext.version = "4.13.0"
+ext.version = "5.1.0"
 ext.libVersion = "${ext.version.replace(".", "")}"
 
 ext.licenseFile = file("$rootDir/opencv/LICENSE")
@@ -235,6 +235,7 @@ if (project.platform == "linux-arm64") {
         if (project.platform.startsWith("windows")) {
             executable project.cmakePath
             args = cmakeArgs() + ['-G', '"' + project.cmakeGenerator + '"', '-A', project.cmakeArch, project.rootPath]
+            environment "ASM", "nasm.exe"
         } else if (project.platform.startsWith("osx")) {
             executable project.cmakePath
             args = ['-G', "Xcode", project.rootPath] + cmakeArgs()
@@ -284,7 +285,7 @@ if (project.platform == "linux-arm64") {
                 dependsOn 'make' + buildType
                 workingDir buildDirectory.resolve("lib").resolve(buildTypeFolder).toString()
                 executable 'lib'
-                def inputFiles = ["opencv_calib3d${project.libVersion}", "opencv_features2d${project.libVersion}", "opencv_flann${project.libVersion}", "opencv_gapi${project.libVersion}", "opencv_highgui${project.libVersion}", "opencv_imgcodecs${project.libVersion}", "opencv_imgproc${project.libVersion}", "opencv_ml${project.libVersion}", "opencv_objdetect${project.libVersion}", "opencv_photo${project.libVersion}", "opencv_stitching${project.libVersion}", "opencv_videoio${project.libVersion}", "opencv_video${project.libVersion}", "opencv_core${project.libVersion}", "../../3rdparty/lib/${buildTypeFolder}/ade", "../../3rdparty/lib/${buildTypeFolder}/libjpeg-turbo", "../../3rdparty/lib/${buildTypeFolder}/libopenjp2", "../../3rdparty/lib/${buildTypeFolder}/libpng", "../../3rdparty/lib/${buildTypeFolder}/zlib"]
+                def inputFiles = ["opencv_calib${project.libVersion}", "opencv_dnn${project.libVersion}", "opencv_features${project.libVersion}", "opencv_flann${project.libVersion}", "opencv_geometry${project.libVersion}", "opencv_highgui${project.libVersion}", "opencv_imgcodecs${project.libVersion}", "opencv_imgproc${project.libVersion}", "opencv_objdetect${project.libVersion}", "opencv_photo${project.libVersion}", "opencv_ptcloud${project.libVersion}", "opencv_stereo${project.libVersion}", "opencv_stitching${project.libVersion}", "opencv_videoio${project.libVersion}", "opencv_video${project.libVersion}", "opencv_core${project.libVersion}", "../../3rdparty/lib/${buildTypeFolder}/libjpeg-turbo", "../../3rdparty/lib/${buildTypeFolder}/libopenjp2", "../../3rdparty/lib/${buildTypeFolder}/libpng", "../../3rdparty/lib/${buildTypeFolder}/zlib"]
                 def setArgs = ["/OUT:opencv${project.libVersion}.lib"]
                 inputFiles.each {
                     def inFile = it
@@ -337,7 +338,7 @@ if (project.platform == "linux-arm64") {
                 workingDir buildDirectory.resolve("lib").toString()
                 executable 'ar'
                 args = ['-M']
-                def inputFiles = ["libopencv_calib3d", "libopencv_features2d", "libopencv_flann", "libopencv_gapi", "libopencv_highgui", "libopencv_imgcodecs", "libopencv_imgproc", "libopencv_ml",  "libopencv_objdetect", "libopencv_photo", "libopencv_stitching", "libopencv_videoio", "libopencv_video", "libopencv_core", "../3rdparty/lib/libade", "../3rdparty/lib/liblibjpeg-turbo", "../3rdparty/lib/liblibopenjp2", "../3rdparty/lib/liblibpng", "../3rdparty/lib/libzlib"]
+                def inputFiles = ["libopencv_calib", "libopencv_dnn", "libopencv_features", "libopencv_flann", "libopencv_geometry", "libopencv_highgui", "libopencv_imgcodecs", "libopencv_imgproc", "libopencv_objdetect", "libopencv_photo", "libopencv_ptcloud", "libopencv_stereo", "libopencv_stitching", "libopencv_videoio", "libopencv_video", "libopencv_core", "../3rdparty/lib/liblibjpeg-turbo", "../3rdparty/lib/liblibopenjp2", "../3rdparty/lib/liblibpng", "../3rdparty/lib/libzlib"]
 
                 def inputString = "create libopencv${project.libVersion}.a\n"
                 inputFiles.each {
